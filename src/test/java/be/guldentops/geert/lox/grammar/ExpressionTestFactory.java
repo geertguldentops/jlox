@@ -41,6 +41,10 @@ public class ExpressionTestFactory {
     }
 
     public static Expression.Call call(String functionName, Expression... arguments) {
-        return new Expression.Call(variable(functionName), rightParen(), List.of(arguments));
+        return call(variable(functionName), arguments);
+    }
+
+    public static Expression.Call call(Expression.Variable callee, Expression... arguments) {
+        return new Expression.Call(callee, rightParen(), List.of(arguments));
     }
 }

@@ -5,6 +5,7 @@ import be.guldentops.geert.lox.error.RuntimeError;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.semantic.analysis.Resolver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -892,6 +893,25 @@ class PostOrderTraversalInterpreterTest {
 
             assertThat(outContent.toString()).isEqualTo("1\n2\n");
         }
+
+        @Test
+        void functionClosesOverFreeVariablesStatically() {
+            interpret(
+                    variableDeclaration("a", literal("foo")),
+                    blockStatement(
+                            function("printA", emptyList(),
+                                    List.of(
+                                            print(variable("a"))
+                                    )
+                            ),
+                            expressionStatement(call("printA")),
+                            variableDeclaration("a", literal("bar")),
+                            expressionStatement(call("printA"))
+                    )
+            );
+
+            assertThat(outContent.toString()).isEqualTo("foo\nfoo\n");
+        }
     }
 
     @Nested
@@ -974,7 +994,14 @@ class PostOrderTraversalInterpreterTest {
     }
 
     private void interpret(Statement... statements) {
-        interpreter.interpret(List.of(statements));
+        var stmts = List.of(statements);
+
+        // Use a real resolver here since resolver and interpreter are tightly coupled anyway.
+        // Resolver is also tested on its own separately!
+        var resolver = Resolver.createDefault(interpreter);
+        resolver.resolve(stmts);
+
+        interpreter.interpret(stmts);
     }
 
 }

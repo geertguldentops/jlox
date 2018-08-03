@@ -3,10 +3,11 @@ package be.guldentops.geert.lox.interpreter;
 import be.guldentops.geert.lox.error.CanReportErrors;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
+import be.guldentops.geert.lox.semantic.analysis.ResolutionAnalyzer;
 
 import java.util.List;
 
-public interface Interpreter extends CanReportErrors {
+public interface Interpreter extends ResolutionAnalyzer, CanReportErrors {
 
     static Interpreter createDefault() {
         var globals = Environment.createGlobal();

@@ -4,6 +4,7 @@ import be.guldentops.geert.lox.error.ErrorReporter;
 import be.guldentops.geert.lox.interpreter.Interpreter;
 import be.guldentops.geert.lox.lexer.Scanner;
 import be.guldentops.geert.lox.parser.Parser;
+import be.guldentops.geert.lox.semantic.analysis.Resolver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,7 +50,14 @@ class Lox {
         parser.addErrorReporter(errorReporter);
         var statements = parser.parse();
 
-        // Stop if there was a syntax error.
+        // Stop if the parser found a syntax error.
+        if (errorReporter.receivedError()) return;
+
+        var resolver = Resolver.createDefault(interpreter);
+        resolver.addErrorReporter(errorReporter);
+        resolver.resolve(statements);
+
+        // Stop if the resolver found a syntax error.
         if (errorReporter.receivedError()) return;
 
         interpreter.interpret(statements);

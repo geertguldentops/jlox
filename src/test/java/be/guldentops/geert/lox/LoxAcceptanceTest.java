@@ -200,6 +200,13 @@ class LoxAcceptanceTest {
 
             assertThat(outContent.toString()).isEqualTo("1\n2\n");
         }
+
+        @Test
+        void canRunFunctionsCloseOverFreeVariablesCorrectlyScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/functions/FunctionsCloseOverFreeVariablesCorrectly.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("global\nglobal\n");
+        }
     }
 
     @Nested

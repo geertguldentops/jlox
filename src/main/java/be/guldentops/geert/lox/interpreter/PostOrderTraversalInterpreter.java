@@ -7,18 +7,23 @@ import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.Token;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static be.guldentops.geert.lox.lexer.Token.Type.OR;
 import static java.util.stream.Collectors.toList;
 
 class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<Object>, Statement.Visitor<Void> {
 
+    private final Environment globals;
+    private final Map<Expression, Integer> locals = new HashMap<>();
     private Environment environment;
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
     PostOrderTraversalInterpreter(Environment globals) {
+        this.globals = globals;
         this.environment = globals;
     }
 
@@ -76,6 +81,11 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         } finally {
             this.environment = previous;
         }
+    }
+
+    @Override
+    public void resolve(Expression expression, int depth) {
+        locals.put(expression, depth);
     }
 
     @Override
@@ -156,7 +166,13 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     public Object visitAssignExpression(Expression.Assign expression) {
         Object value = evaluate(expression.value);
 
-        environment.assign(expression.name, value);
+        Integer distance = locals.get(expression);
+        if (distance != null) {
+            environment.assignAt(distance, expression.name, value);
+        } else {
+            globals.assign(expression.name, value);
+        }
+
         return value;
     }
 
@@ -271,7 +287,17 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Object visitVariableExpression(Expression.Variable expression) {
-        return environment.get(expression.name);
+        return lookUpVariable(expression.name, expression);
+    }
+
+    private Object lookUpVariable(Token name, Expression expression) {
+        Integer distance = locals.get(expression);
+
+        if (distance != null) {
+            return environment.getAt(distance, name.lexeme);
+        } else {
+            return globals.get(name);
+        }
     }
 
     private Object evaluate(Expression expression) {
