@@ -104,6 +104,34 @@ class LoxAcceptanceTest {
                     "global c\n"
             );
         }
+
+        @Test
+        void canRunIfOperatorScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/logical/operators/IfOperator.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("if true\nif else true\n");
+        }
+
+        @Test
+        void canRunLogicalOperatorsScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/logical/operators/LogicalOperators.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("hi\nyes\n");
+        }
+
+        @Test
+        void canRunWhileLoopScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/loops/WhileLoop.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("3\n2\n1\n0\n");
+        }
+
+        @Test
+        void canRunForLoopScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/loops/ForLoop.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n");
+        }
     }
 
     @Nested

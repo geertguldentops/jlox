@@ -11,6 +11,8 @@ import be.guldentops.geert.lox.lexer.api.Token;
 import java.util.ArrayList;
 import java.util.List;
 
+import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
+
 public class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<Object>, Statement.Visitor<Void> {
 
     private Environment environment;
@@ -83,6 +85,17 @@ public class PostOrderTraversalInterpreter implements Interpreter, Expression.Vi
     }
 
     @Override
+    public Void visitIfStatement(Statement.If statement) {
+        if (isTruthy(evaluate(statement.condition))) {
+            execute(statement.thenBranch);
+        } else if (statement.elseBranch != null) {
+            execute(statement.elseBranch);
+        }
+
+        return null;
+    }
+
+    @Override
     public Void visitPrintStatement(Statement.Print statement) {
         var value = evaluate(statement.expression);
         System.out.println(stringify(value));
@@ -97,6 +110,15 @@ public class PostOrderTraversalInterpreter implements Interpreter, Expression.Vi
         }
 
         environment.define(statement.name, value);
+        return null;
+    }
+
+    @Override
+    public Void visitWhileStatement(Statement.While statement) {
+        while (isTruthy(evaluate(statement.condition))) {
+            execute(statement.body);
+        }
+
         return null;
     }
 
@@ -178,6 +200,19 @@ public class PostOrderTraversalInterpreter implements Interpreter, Expression.Vi
     @Override
     public Object visitLiteralExpression(Expression.Literal expression) {
         return expression.value;
+    }
+
+    @Override
+    public Object visitLogicalExpression(Expression.Logical expression) {
+        var left = evaluate(expression.left);
+
+        if (expression.operator.type == OR) {
+            if (isTruthy(left)) return left;
+        } else {
+            if (!isTruthy(left)) return left;
+        }
+
+        return evaluate(expression.right);
     }
 
     @Override

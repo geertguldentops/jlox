@@ -30,4 +30,8 @@ public class ExpressionTestFactory {
     public static Expression.Assign assign(Token name, Expression value) {
         return new Expression.Assign(name, value);
     }
+
+    public static Expression.Logical logical(Expression left, Token operator, Expression right) {
+        return new Expression.Logical(left, operator, right);
+    }
 }

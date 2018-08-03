@@ -17,6 +17,10 @@ public class StatementTestFactory {
         return new Statement.Expression(expression);
     }
 
+    public static Statement.If _if(Expression condition, Statement thenBranch, Statement elseBranch) {
+        return new Statement.If(condition, thenBranch, elseBranch);
+    }
+
     public static Statement.Print print(Expression expression) {
         return new Statement.Print(expression);
     }
@@ -27,5 +31,9 @@ public class StatementTestFactory {
 
     public static Statement.Variable variableDeclaration(Token name, Expression initializer) {
         return new Statement.Variable(name, initializer);
+    }
+
+    public static Statement.While _while(Expression condition, Statement body) {
+        return new Statement.While(condition, body);
     }
 }

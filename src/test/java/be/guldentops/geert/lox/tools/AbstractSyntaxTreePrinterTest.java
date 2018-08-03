@@ -8,13 +8,17 @@ import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.grouping;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.literal;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.logical;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.unary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.variable;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory._if;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory._while;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.blockStatement;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.expressionStatement;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.print;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.uninitializedVariableDeclaration;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.variableDeclaration;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.and;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.identifier;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.minus;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.plus;
@@ -96,6 +100,11 @@ class AbstractSyntaxTreePrinterTest {
         void printAssignExpression() {
             assertThat(astPrinter.print(assign(identifier("a"), literal(1.0)))).isEqualTo("( = a 1.0)");
         }
+
+        @Test
+        void printLogicalExpression() {
+            assertThat(astPrinter.print(logical(literal(true), and(), literal(false)))).isEqualTo("(and true false)");
+        }
     }
 
     @Nested
@@ -112,6 +121,16 @@ class AbstractSyntaxTreePrinterTest {
         }
 
         @Test
+        void printIfStatement() {
+            assertThat(astPrinter.print(_if(literal(true), print(literal(1.0)), null))).isEqualTo("if true (print 1.0)");
+        }
+
+        @Test
+        void printIfElseStatement() {
+            assertThat(astPrinter.print(_if(literal(true), print(literal(1.0)), print(literal(2.0))))).isEqualTo("if-else true (print 1.0) (print 2.0)");
+        }
+
+        @Test
         void printPrintStatement() {
             assertThat(astPrinter.print(print(literal(1.0)))).isEqualTo("(print 1.0)");
         }
@@ -124,6 +143,11 @@ class AbstractSyntaxTreePrinterTest {
         @Test
         void printInitializedVariableStatement() {
             assertThat(astPrinter.print(variableDeclaration(identifier("a"), literal(1.0)))).isEqualTo("(var a = 1.0)");
+        }
+
+        @Test
+        void printWhile() {
+            assertThat(astPrinter.print(_while(literal(true), print(literal(1.0))))).isEqualTo("while true (print 1.0)");
         }
     }
 }

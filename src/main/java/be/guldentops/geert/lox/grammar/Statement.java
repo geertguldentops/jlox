@@ -14,9 +14,13 @@ public interface Statement {
 
         R visitExpressionStatement(Expression statement);
 
+        R visitIfStatement(If statement);
+
         R visitPrintStatement(Print statement);
 
         R visitVariableStatement(Variable statement);
+
+        R visitWhileStatement(While statement);
     }
 
     class Block implements Statement {
@@ -45,6 +49,23 @@ public interface Statement {
         }
     }
 
+    class If implements Statement {
+
+        public final be.guldentops.geert.lox.grammar.Expression condition;
+        public final Statement thenBranch;
+        public final Statement elseBranch;
+
+        public If(be.guldentops.geert.lox.grammar.Expression condition, Statement thenBranch, Statement elseBranch) {
+            this.condition = condition;
+            this.thenBranch = thenBranch;
+            this.elseBranch = elseBranch;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitIfStatement(this);
+        }
+    }
+
     class Print implements Statement {
 
         public final be.guldentops.geert.lox.grammar.Expression expression;
@@ -70,6 +91,21 @@ public interface Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitVariableStatement(this);
+        }
+    }
+
+    class While implements Statement {
+
+        public final be.guldentops.geert.lox.grammar.Expression condition;
+        public final Statement body;
+
+        public While(be.guldentops.geert.lox.grammar.Expression condition, Statement body) {
+            this.condition = condition;
+            this.body = body;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitWhileStatement(this);
         }
     }
 }

@@ -35,6 +35,11 @@ public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, St
     }
 
     @Override
+    public String visitLogicalExpression(Expression.Logical expression) {
+        return parenthesize(expression.operator.lexeme, expression.left, expression.right);
+    }
+
+    @Override
     public String visitUnaryExpression(Expression.Unary expression) {
         return parenthesize(expression.operator.lexeme, expression.right);
     }
@@ -63,6 +68,15 @@ public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, St
     }
 
     @Override
+    public String visitIfStatement(Statement.If statement) {
+        if (statement.elseBranch == null) {
+            return "if " + print(statement.condition) + " " + print(statement.thenBranch);
+        } else {
+            return "if-else " + print(statement.condition) + " " + print(statement.thenBranch) + " " + print(statement.elseBranch);
+        }
+    }
+
+    @Override
     public String visitPrintStatement(Statement.Print statement) {
         return parenthesize("print", statement.expression);
     }
@@ -72,6 +86,11 @@ public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, St
         if (statement.initializer == null) return parenthesize("var " + statement.name.lexeme);
 
         return parenthesize("var " + statement.name.lexeme + " =", statement.initializer);
+    }
+
+    @Override
+    public String visitWhileStatement(Statement.While statement) {
+        return "while " + print(statement.condition) + " " + print(statement.body);
     }
 
     private String parenthesize(String name, Expression... expressions) {

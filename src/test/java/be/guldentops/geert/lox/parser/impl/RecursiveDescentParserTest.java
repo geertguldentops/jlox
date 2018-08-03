@@ -12,8 +12,13 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static be.guldentops.geert.lox.lexer.api.Token.Type.STRING;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._else;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._false;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._for;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._if;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._true;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._while;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.and;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bang;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bangEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.eof;
@@ -22,6 +27,7 @@ import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.equalEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.greater;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.greaterEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.identifier;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.integer;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.leftBrace;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.leftParen;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.less;
@@ -29,6 +35,7 @@ import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.lessEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.minus;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.nil;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.one;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.or;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.pi;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.plus;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.print;
@@ -61,7 +68,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).isEmpty();
-
             assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
 
@@ -72,7 +78,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).isEmpty();
-
             assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
     }
@@ -144,8 +149,7 @@ class RecursiveDescentParserTest {
 
             var expression = extractOnlyExpressionFrom(parser.parse());
 
-            assertThat(expression).isInstanceOf(Expression.Grouping.class);
-            var groupingExpression = (Expression.Grouping) expression;
+            var groupingExpression = castTo(expression, Expression.Grouping.class);
 
             assertThat(groupingExpression.expression).isNotNull();
             assertLiteralExpression(groupingExpression.expression, 1.0);
@@ -174,8 +178,7 @@ class RecursiveDescentParserTest {
 
             var expression = extractOnlyExpressionFrom(parser.parse());
 
-            assertThat(expression).isInstanceOf(Expression.Unary.class);
-            var unaryExpression = (Expression.Unary) expression;
+            var unaryExpression = castTo(expression, Expression.Unary.class);
 
             assertThat(unaryExpression.operator).isEqualToComparingFieldByField(bang());
             assertLiteralExpression(unaryExpression.right, false);
@@ -187,8 +190,7 @@ class RecursiveDescentParserTest {
 
             var expression = extractOnlyExpressionFrom(parser.parse());
 
-            assertThat(expression).isInstanceOf(Expression.Unary.class);
-            var unaryExpression = (Expression.Unary) expression;
+            var unaryExpression = castTo(expression, Expression.Unary.class);
 
             assertThat(unaryExpression.operator).isEqualToComparingFieldByField(minus());
             assertLiteralExpression(unaryExpression.right, 1.0);
@@ -200,17 +202,13 @@ class RecursiveDescentParserTest {
 
             var expression = extractOnlyExpressionFrom(parser.parse());
 
-            assertThat(expression).isInstanceOf(Expression.Unary.class);
-            var farLeftUnaryExpression = (Expression.Unary) expression;
+            var farLeftUnaryExpression = castTo(expression, Expression.Unary.class);
             assertThat(farLeftUnaryExpression.operator).isEqualToComparingFieldByField(bang());
 
-            assertThat(farLeftUnaryExpression.right).isInstanceOf(Expression.Unary.class);
-            var leftUnaryExpression = (Expression.Unary) farLeftUnaryExpression.right;
+            var leftUnaryExpression = castTo(farLeftUnaryExpression.right, Expression.Unary.class);
             assertThat(leftUnaryExpression.operator).isEqualToComparingFieldByField(bang());
 
-            assertThat(leftUnaryExpression).isInstanceOf(Expression.Unary.class);
-            var unaryExpression = (Expression.Unary) leftUnaryExpression.right;
-
+            var unaryExpression = castTo(leftUnaryExpression.right, Expression.Unary.class);
             assertThat(unaryExpression.operator).isEqualToComparingFieldByField(bang());
             assertLiteralExpression(unaryExpression.right, false);
         }
@@ -313,20 +311,38 @@ class RecursiveDescentParserTest {
         void multipleBinaryOperand() {
             var parser = createParser(one(), star(), two(), plus(), pi(), semicolon(), eof());
 
-            var expression = extractOnlyExpressionFrom(parser.parse());
+            var statements = parser.parse();
 
-            assertThat(expression).isInstanceOf(Expression.Binary.class);
-            var firstBinaryExpression = (Expression.Binary) expression;
+            var firstBinaryExpression = castTo(extractOnlyExpressionFrom(statements), Expression.Binary.class);
+            assertThat(firstBinaryExpression.operator).isEqualToComparingFieldByField(plus());
+            assertLiteralExpression(firstBinaryExpression.right, 3.14);
 
-            assertThat(firstBinaryExpression.left).isInstanceOf(Expression.Binary.class);
-            var secondBinaryExpression = (Expression.Binary) firstBinaryExpression.left;
-
+            var secondBinaryExpression = castTo(firstBinaryExpression.left, Expression.Binary.class);
             assertLiteralExpression(secondBinaryExpression.left, 1.0);
             assertThat(secondBinaryExpression.operator).isEqualToComparingFieldByField(star());
             assertLiteralExpression(secondBinaryExpression.right, 2.0);
+        }
+    }
 
-            assertThat(firstBinaryExpression.operator).isEqualToComparingFieldByField(plus());
-            assertLiteralExpression(firstBinaryExpression.right, 3.14);
+    @Nested
+    class LogicalExpressions {
+
+        @Test
+        void orOperatorWithBothOperands() {
+            var parser = createParser(_true(), or(), _false(), semicolon(), eof());
+
+            var expression = extractOnlyExpressionFrom(parser.parse());
+
+            assertLogicalExpression(expression, true, or(), false);
+        }
+
+        @Test
+        void andOperatorWithBothOperands() {
+            var parser = createParser(_true(), and(), _false(), semicolon(), eof());
+
+            var expression = extractOnlyExpressionFrom(parser.parse());
+
+            assertLogicalExpression(expression, true, and(), false);
         }
     }
 
@@ -378,16 +394,9 @@ class RecursiveDescentParserTest {
         void variableWithInitializer() {
             var parser = createParser(var(), identifier("a"), equal(), one(), semicolon(), eof());
 
-            var variableStatement = extractOnlyStatementFrom(parser.parse());
+            var statements = parser.parse();
 
-            assertVariableStatement(variableStatement, identifier("a"), 1.0);
-        }
-
-        private void assertUninitializedVariable(Statement statement, Token name) {
-            assertThat(statement).isInstanceOf(Statement.Variable.class);
-            var variableDeclaration = (Statement.Variable) statement;
-            assertThat(variableDeclaration.name).isEqualToComparingFieldByField(name);
-            assertThat(variableDeclaration.initializer).isNull();
+            assertVariableStatement(extractOnlyStatementFrom(statements), identifier("a"), 1.0);
         }
     }
 
@@ -425,10 +434,7 @@ class RecursiveDescentParserTest {
         }
 
         private void assertAssignedWithValue(Statement statement, Token name, Object expected) {
-            var expression = extractExpressionFrom(statement);
-
-            assertThat(expression).isInstanceOf(Expression.Assign.class);
-            var assignExpression = (Expression.Assign) expression;
+            var assignExpression = castTo(extractExpressionFrom(statement), Expression.Assign.class);
 
             assertThat(assignExpression.name).isEqualToComparingFieldByField(name);
             assertLiteralExpression(assignExpression.value, expected);
@@ -447,7 +453,10 @@ class RecursiveDescentParserTest {
                     eof()
             );
 
-            var block = extractOnlyBlockStatementFrom(parser.parse());
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1);
+            var block = castTo(statements.get(0), Statement.Block.class);
             var innerBlockStatement = extractOnlyStatementFrom(block.statements);
 
             assertVariableStatement(innerBlockStatement, identifier("a"), 1.0);
@@ -463,10 +472,208 @@ class RecursiveDescentParserTest {
                     eof()
             );
 
-            var block = extractOnlyBlockStatementFrom(parser.parse());
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1);
+            var block = castTo(statements.get(0), Statement.Block.class);
             assertThat(block.statements).hasSize(2);
             assertVariableStatement(block.statements.get(0), identifier("a"), 1.0);
             assertPrintStatement(block.statements.get(1), 1.0);
+        }
+    }
+
+    @Nested
+    class IfStatement {
+
+        @Test
+        void ifOnly() {
+            var parser = createParser(
+                    _if(), leftParen(), _true(), rightParen(),
+                    print(), one(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+            assertIfStatementPrints(statements.get(0), true, 1.0);
+        }
+
+        @Test
+        void ifElse() {
+            var parser = createParser(
+                    _if(), leftParen(), _true(), rightParen(),
+                    print(), one(), semicolon(),
+                    _else(),
+                    print(), two(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+            assertIfElseStatementPrints(statements.get(0), true, 1.0, 2.0);
+        }
+
+        @Test
+        void danglingElseProblem() {
+            var parser = createParser(
+                    _if(), leftParen(), _true(), rightParen(),
+                    _if(), leftParen(), _true(), rightParen(),
+                    print(), one(), semicolon(),
+                    _else(), // Does this else belong to the first or second else?! --> it should belong to the nearest if.
+                    print(), two(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+            var ifStatement = castTo(statements.get(0), Statement.If.class);
+
+            assertLiteralExpression(ifStatement.condition, true);
+            assertIfElseStatementPrints(ifStatement.thenBranch, true, 1.0, 2.0);
+            assertThat(ifStatement.elseBranch).isNull();
+        }
+    }
+
+    @Nested
+    class WhileStatement {
+
+        @Test
+        void whileLoop() {
+            var parser = createParser(
+                    _while(), leftParen(), _true(), rightParen(),
+                    print(), one(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+            assertWhileStatementPrints(statements.get(0), true, 1.0);
+        }
+    }
+
+    @Nested
+    class ForStatement {
+
+        @Test
+        void fullForLoop() {
+            // for (var i = 0; i < 10; i = i + 1) print 1;
+            var parser = createParser(
+                    _for(), leftParen(),
+                    var(), identifier("i"), equal(), integer("0"), semicolon(),
+                    identifier("i"), less(), integer("10"), semicolon(),
+                    identifier("i"), equal(), identifier("i"), plus(), one(),
+                    rightParen(),
+                    print(), one(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            //  {
+            //      var i = 0;
+            //      while (i < 10) {
+            //          print 1;
+            //          i = i + 1;
+            //      }
+            //  }
+            assertForLoop(statements);
+        }
+
+        @Test
+        void forLoopWithExpressionStatement() {
+            // var i; for (i = 0; ; ) print 1;
+            var parser = createParser(
+                    var(), identifier("i"), semicolon(),
+                    _for(), leftParen(), identifier("i"), equal(), integer("0"), semicolon(), semicolon(), rightParen(),
+                    print(), one(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            //  var i;
+            //  {
+            //      i = 0;
+            //      while (true) {
+            //          print 1;
+            //      }
+            //  }
+            assertThat(statements).hasSize(2).doesNotContainNull();
+
+            assertUninitializedVariable(statements.get(0), identifier("i"));
+
+            var block = castTo(statements.get(1), Statement.Block.class);
+
+            assertThat(block.statements).hasSize(2).doesNotContainNull();
+
+            var expression = extractExpressionFrom(block.statements.get(0));
+            var assignment = castTo(expression, Expression.Assign.class);
+            assertThat(assignment.name).isEqualToComparingFieldByField(identifier("i"));
+            assertLiteralExpression(assignment.value, 0.0);
+
+            assertWhileStatementPrints(block.statements.get(1), true, 1.0);
+        }
+
+        @Test
+        void infiniteForLoop() {
+            // for (; ;) print 1;
+            var parser = createParser(
+                    _for(), leftParen(), semicolon(), semicolon(), rightParen(),
+                    print(), one(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            //  while (true) {
+            //      print 1;
+            //  }
+            assertThat(statements).hasSize(1).doesNotContainNull();
+            assertWhileStatementPrints(statements.get(0), true, 1.0);
+        }
+
+        private void assertForLoop(List<Statement> statements) {
+            assertThat(statements).hasSize(1).doesNotContainNull();
+
+            var block = castTo(statements.get(0), Statement.Block.class);
+
+            assertThat(block.statements).hasSize(2).doesNotContainNull();
+
+            assertVariableStatement(block.statements.get(0), identifier("i"), 0.0);
+
+            var whileStatement = castTo(block.statements.get(1), Statement.While.class);
+            assertWhileCondition(whileStatement.condition, identifier("i"), less(), 10.0);
+            assertWhileBody(whileStatement.body);
+        }
+
+        private void assertWhileCondition(Expression condition, Token left, Token operator, double right) {
+            var binaryCondition = castTo(condition, Expression.Binary.class);
+
+            assertVariableExpression(binaryCondition.left, left);
+            assertThat(binaryCondition.operator).isEqualToComparingFieldByField(operator);
+            assertLiteralExpression(binaryCondition.right, right);
+        }
+
+        private void assertWhileBody(Statement body) {
+            var block = castTo(body, Statement.Block.class);
+
+            assertThat(block.statements).hasSize(2);
+            assertPrintStatement(block.statements.get(0), 1.0);
+            assertAssignmentStatement(block.statements.get(1), "i");
+        }
+
+        private void assertAssignmentStatement(Statement statement, String variableName) {
+            var assignment = castTo(extractExpressionFrom(statement), Expression.Assign.class);
+            assertThat(assignment.name).isEqualToComparingFieldByField(identifier(variableName));
+
+            var binaryExpression = castTo(assignment.value, Expression.Binary.class);
+            assertVariableExpression(binaryExpression.left, identifier(variableName));
+            assertThat(binaryExpression.operator).isEqualToComparingFieldByField(plus());
+            assertLiteralExpression(binaryExpression.right, 1.0);
         }
     }
 
@@ -480,7 +687,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -491,7 +697,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme("!=");
         }
 
@@ -502,7 +707,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme("==");
         }
 
@@ -513,7 +717,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -524,7 +727,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertRightParenMissing();
         }
 
@@ -535,7 +737,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme(")");
         }
 
@@ -546,7 +747,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme(")");
         }
 
@@ -557,7 +757,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme(")");
         }
 
@@ -568,7 +767,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -579,7 +777,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -590,7 +787,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme("/");
         }
 
@@ -601,7 +797,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -612,7 +807,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme("*");
         }
 
@@ -623,7 +817,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -634,7 +827,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme("+");
         }
 
@@ -645,7 +837,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -656,7 +847,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme(">");
         }
 
@@ -667,7 +857,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -678,7 +867,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme(">=");
         }
 
@@ -689,7 +877,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -700,7 +887,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme("<");
         }
 
@@ -711,7 +897,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -722,7 +907,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme("<=");
         }
 
@@ -733,7 +917,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -744,7 +927,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme("!=");
         }
 
@@ -755,7 +937,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtSemicolon();
         }
 
@@ -766,7 +947,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtLexeme("==");
         }
 
@@ -777,7 +957,46 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
+            assertErrorAtSemicolon();
+        }
 
+        @Test
+        void orTokenWithoutLeftOperand() {
+            var parser = createParser(or(), one(), semicolon(), eof());
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).containsOnlyNulls();
+            assertErrorAtLexeme("or");
+        }
+
+        @Test
+        void orTokenWithoutRightOperand() {
+            var parser = createParser(one(), or(), semicolon(), eof());
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).containsOnlyNulls();
+            assertErrorAtSemicolon();
+        }
+
+        @Test
+        void andTokenWithoutLeftOperand() {
+            var parser = createParser(and(), one(), semicolon(), eof());
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).containsOnlyNulls();
+            assertErrorAtLexeme("and");
+        }
+
+        @Test
+        void andTokenWithoutRightOperand() {
+            var parser = createParser(one(), and(), semicolon(), eof());
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).containsOnlyNulls();
             assertErrorAtSemicolon();
         }
 
@@ -788,12 +1007,11 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-
             assertErrorAtEOF();
         }
 
         @Test
-        void invalidAssignmentTarget() {
+        void assignmentTokenWithInvalidTarget() {
             var parser = createParser(
                     var(), identifier("a"), semicolon(),
                     var(), identifier("b"), semicolon(),
@@ -806,12 +1024,9 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(3);
             // Ignore the first 2 statements.
 
-            Statement statement = statements.get(2);
-            assertThat(statement).isInstanceOf(Statement.Expression.class);
-            var statementExpression = (Statement.Expression) statement;
-
-            assertThat(statementExpression.expression).isInstanceOf(Expression.Binary.class);
-            var binaryExpression = (Expression.Binary) statementExpression.expression;
+            var assignmentStatement = statements.get(2);
+            var statementExpression = castTo(assignmentStatement, Statement.Expression.class);
+            var binaryExpression = castTo(statementExpression.expression, Expression.Binary.class);
 
             assertVariableExpression(binaryExpression.left, identifier("a"));
             assertThat(binaryExpression.operator).isEqualToComparingFieldByField(plus());
@@ -849,6 +1064,217 @@ class RecursiveDescentParserTest {
             assertPrintStatement(statements.get(0), 1.0);
             assertThat(statements.get(1)).isNull();
             assertErrorAtLexeme("}");
+        }
+
+        @Nested
+        class IfCases {
+
+            @Test
+            void ifWithoutRightParen() {
+                var parser = createParser(
+                        _if(), leftParen(), _true(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'print'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ')' after if condition.");
+            }
+
+            @Test
+            void ifWithoutCondition() {
+                var parser = createParser(
+                        _if(), leftParen(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+                assertThat(statements.get(0)).isNull();
+                assertErrorAtLexeme(")");
+
+                assertPrintStatement(statements.get(1), 1.0);
+            }
+
+            @Test
+            void ifWithoutLeftParen() {
+                var parser = createParser(
+                        _if(), _true(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+                assertThat(statements.get(0)).isNull();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'true'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '(' after 'if'.");
+
+                assertPrintStatement(statements.get(1), 1.0);
+            }
+
+            @Test
+            void ifElseWithoutElseBranch() {
+                var parser = createParser(
+                        _if(), leftParen(), _true(), rightParen(),
+                        print(), one(), semicolon(),
+                        _else(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertErrorAtEOF();
+            }
+        }
+
+        @Nested
+        class WhileCases {
+
+            @Test
+            void whileWithoutRightParen() {
+                var parser = createParser(
+                        _while(), leftParen(), _true(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'print'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ')' after while condition.");
+            }
+
+            @Test
+            void whileWithoutCondition() {
+                var parser = createParser(
+                        _while(), leftParen(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+                assertThat(statements.get(0)).isNull();
+                assertErrorAtLexeme(")");
+
+                assertPrintStatement(statements.get(1), 1.0);
+            }
+
+            @Test
+            void whileWithoutLeftParen() {
+                var parser = createParser(
+                        _while(), _true(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+                assertThat(statements.get(0)).isNull();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'true'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '(' after 'while'.");
+
+                assertPrintStatement(statements.get(1), 1.0);
+            }
+        }
+
+        @Nested
+        class ForCases {
+
+            @Test
+            void forWithoutRightParen() {
+                var parser = createParser(
+                        _for(), leftParen(), semicolon(), semicolon(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'print'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void forWithoutLeftParen() {
+                var parser = createParser(
+                        _for(), semicolon(), semicolon(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(4);
+                assertThat(statements.get(0)).isNull();
+                assertThat(statements.get(1)).isNull();
+                assertThat(statements.get(2)).isNull();
+                assertThat(statements.get(3)).isInstanceOf(Statement.Print.class); // Recover to the print statement, this test does not care!
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ')'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void forWithOneMissingSemiColon() {
+                var parser = createParser(
+                        _for(), leftParen(), var(), identifier("i"), equal(), one(), semicolon(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+                assertThat(statements.get(0)).isNull();
+                assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Recover to the print statement, this test does not care!
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ')'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void forWithTwoMissingSemiColons() {
+                var parser = createParser(
+                        _for(), leftParen(), var(), identifier("i"), equal(), one(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+                assertThat(statements.get(0)).isNull();
+                assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Recover to the print statement, this test does not care!
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ')'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ';' after variable declaration.");
+            }
         }
 
         @Nested
@@ -907,6 +1333,64 @@ class RecursiveDescentParserTest {
 
                 assertPrintStatement(statements.get(1), 1.0);
             }
+
+            @Test
+            void afterErrorRecoversToNextIfDeclarationEvenWhenSemiColonIsMissing() {
+                var parser = createParser(
+                        bangEqual(), two(), // Error: bangEqual without left operand
+                        _if(), leftParen(), _true(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+
+                assertThat(statements.get(0)).isNull();
+                assertErrorAtLexeme("!=");
+
+                assertIfStatementPrints(statements.get(1), true, 1.0);
+            }
+
+            @Test
+            void afterErrorRecoversToNextWhileDeclarationEvenWhenSemiColonIsMissing() {
+                var parser = createParser(
+                        bangEqual(), two(), // Error: bangEqual without left operand
+                        _while(), leftParen(), _true(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+
+                assertThat(statements.get(0)).isNull();
+                assertErrorAtLexeme("!=");
+
+                assertWhileStatementPrints(statements.get(1), true, 1.0);
+            }
+
+            @Test
+            void afterErrorRecoversToNextForDeclarationEvenWhenSemiColonIsMissing() {
+                var parser = createParser(
+                        bangEqual(), two(), // Error: bangEqual without left operand
+                        _for(), leftParen(), semicolon(), semicolon(), rightParen(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+
+                assertThat(statements.get(0)).isNull();
+                assertErrorAtLexeme("!=");
+
+                // "for (;;)" is the same as "while(true)"
+                assertWhileStatementPrints(statements.get(1), true, 1.0);
+            }
         }
 
         private void assertErrorIsInvalidAssignmentTarget(String lexeme) {
@@ -924,6 +1408,12 @@ class RecursiveDescentParserTest {
         }
     }
 
+    private <T> T castTo(Object o, Class<T> clazz) {
+        assertThat(o).isInstanceOf(clazz);
+
+        return clazz.cast(o);
+    }
+
     private Parser createParser(Token... tokens) {
         return createParser(List.of(tokens));
     }
@@ -939,11 +1429,8 @@ class RecursiveDescentParserTest {
         return extractExpressionFrom(extractOnlyStatementFrom(statements));
     }
 
-    private Statement.Block extractOnlyBlockStatementFrom(List<Statement> statements) {
-        var statement = extractOnlyStatementFrom(statements);
-
-        assertThat(statement).isInstanceOf(Statement.Block.class);
-        return (Statement.Block) statements.get(0);
+    private Expression extractExpressionFrom(Statement statement) {
+        return castTo(statement, Statement.Expression.class).expression;
     }
 
     private Statement extractOnlyStatementFrom(List<Statement> statements) {
@@ -952,16 +1439,8 @@ class RecursiveDescentParserTest {
         return statements.get(0);
     }
 
-    private Expression extractExpressionFrom(Statement statement) {
-        assertThat(statement).isInstanceOf(Statement.Expression.class);
-
-        return ((Statement.Expression) statement).expression;
-    }
-
     private void assertLiteralExpression(Expression expression, Object expected) {
-        assertThat(expression).isInstanceOf(Expression.Literal.class);
-
-        assertThat(((Expression.Literal) expression).value).isEqualTo(expected);
+        assertThat(castTo(expression, Expression.Literal.class).value).isEqualTo(expected);
     }
 
     private void assertErrorAtLexeme(String lexeme) {
@@ -993,31 +1472,63 @@ class RecursiveDescentParserTest {
     }
 
     private void assertBinaryExpression(Expression expression, Object left, Token operator, Object right) {
-        assertThat(expression).isInstanceOf(Expression.Binary.class);
-        var binaryExpression = (Expression.Binary) expression;
+        var binaryExpression = castTo(expression, Expression.Binary.class);
 
         assertLiteralExpression(binaryExpression.left, left);
         assertThat(binaryExpression.operator).isEqualToComparingFieldByField(operator);
         assertLiteralExpression(binaryExpression.right, right);
     }
 
-    private void assertVariableExpression(Expression expression, Token expected) {
-        assertThat(expression).isInstanceOf(Expression.Variable.class);
+    private void assertLogicalExpression(Expression expression, Object left, Token operator, Object right) {
+        var logicalExpression = castTo(expression, Expression.Logical.class);
 
-        assertThat(((Expression.Variable) expression).name).isEqualToComparingFieldByField(expected);
+        assertLiteralExpression(logicalExpression.left, left);
+        assertThat(logicalExpression.operator).isEqualToComparingFieldByField(operator);
+        assertLiteralExpression(logicalExpression.right, right);
+    }
+
+    private void assertVariableExpression(Expression expression, Token expected) {
+        assertThat(castTo(expression, Expression.Variable.class).name).isEqualToComparingFieldByField(expected);
+    }
+
+    private void assertUninitializedVariable(Statement statement, Token name) {
+        var variableDeclaration = castTo(statement, Statement.Variable.class);
+
+        assertThat(variableDeclaration.name).isEqualToComparingFieldByField(name);
+        assertThat(variableDeclaration.initializer).isNull();
     }
 
     private void assertVariableStatement(Statement statement, Token name, Object expected) {
-        assertThat(statement).isInstanceOf(Statement.Variable.class);
-        var variableDeclaration = (Statement.Variable) statement;
+        var variableDeclaration = castTo(statement, Statement.Variable.class);
 
         assertThat(variableDeclaration.name).isEqualToComparingFieldByField(name);
         assertLiteralExpression(variableDeclaration.initializer, expected);
     }
 
     private void assertPrintStatement(Statement statement, Object expected) {
-        assertThat(statement).isInstanceOf(Statement.Print.class);
+        assertLiteralExpression(castTo(statement, Statement.Print.class).expression, expected);
+    }
 
-        assertLiteralExpression(((Statement.Print) statement).expression, expected);
+    private void assertIfStatementPrints(Statement statement, boolean condition, Object thenPrints) {
+        var ifStatement = castTo(statement, Statement.If.class);
+
+        assertLiteralExpression(ifStatement.condition, condition);
+        assertPrintStatement(ifStatement.thenBranch, thenPrints);
+        assertThat(ifStatement.elseBranch).isNull();
+    }
+
+    private void assertIfElseStatementPrints(Statement statement, boolean condition, Object thenPrints, Object elsePrints) {
+        var ifStatement = castTo(statement, Statement.If.class);
+
+        assertLiteralExpression(ifStatement.condition, condition);
+        assertPrintStatement(ifStatement.thenBranch, thenPrints);
+        assertPrintStatement(ifStatement.elseBranch, elsePrints);
+    }
+
+    private void assertWhileStatementPrints(Statement statement, boolean condition, Object prints) {
+        var whileStatement = castTo(statement, Statement.While.class);
+
+        assertLiteralExpression(whileStatement.condition, condition);
+        assertPrintStatement(whileStatement.body, prints);
     }
 }

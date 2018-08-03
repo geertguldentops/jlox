@@ -20,13 +20,17 @@ import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.grouping;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.literal;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.logical;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.unary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.variable;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory._if;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory._while;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.blockStatement;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.expressionStatement;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.print;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.uninitializedVariableDeclaration;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.variableDeclaration;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.and;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bang;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bangEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.equalEqual;
@@ -37,6 +41,7 @@ import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.less;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.lessEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.minus;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.nil;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.or;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.plus;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.slash;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.star;
@@ -206,6 +211,47 @@ class PostOrderTraversalInterpreterTest {
             assertThat(interpreter.interpret(assign(identifier("a"), literal(3.0)))).isEqualTo(3.0);
 
             assertThat(environment.get(identifier("a"))).isEqualTo(3.0);
+        }
+
+        @Test
+        void orLogicalExpression() {
+            assertThat(interpreter.interpret(logical(literal(true), or(), literal(false)))).isEqualTo(true);
+            assertThat(interpreter.interpret(logical(literal(false), or(), literal(true)))).isEqualTo(true);
+            assertThat(interpreter.interpret(logical(literal(true), or(), literal(true)))).isEqualTo(true);
+            assertThat(interpreter.interpret(logical(literal(false), or(), literal(false)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(1.0), or(), literal(false)))).isEqualTo(1.0);
+            assertThat(interpreter.interpret(logical(literal(3.14), or(), literal(false)))).isEqualTo(3.14);
+            assertThat(interpreter.interpret(logical(literal("a"), or(), literal(false)))).isEqualTo("a");
+            assertThat(interpreter.interpret(logical(literal(null), or(), literal(false)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(false), or(), literal(1.0)))).isEqualTo(1.0);
+            assertThat(interpreter.interpret(logical(literal(false), or(), literal(3.14)))).isEqualTo(3.14);
+            assertThat(interpreter.interpret(logical(literal(false), or(), literal("a")))).isEqualTo("a");
+            assertThat(interpreter.interpret(logical(literal(false), or(), literal(null)))).isNull();
+            assertThat(interpreter.interpret(logical(literal(1.0), or(), literal(3.14)))).isEqualTo(1.0);
+            assertThat(interpreter.interpret(logical(literal(3.14), or(), literal("a")))).isEqualTo(3.14);
+            assertThat(interpreter.interpret(logical(literal("a"), or(), literal(null)))).isEqualTo("a");
+            assertThat(interpreter.interpret(logical(literal(null), or(), literal(null)))).isNull();
+        }
+
+        @Test
+        void andLogicalExpression() {
+            assertThat(interpreter.interpret(logical(literal(true), and(), literal(false)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(false), and(), literal(true)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(true), and(), literal(true)))).isEqualTo(true);
+            assertThat(interpreter.interpret(logical(literal(false), and(), literal(false)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(1.0), and(), literal(false)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(3.14), and(), literal(false)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal("a"), and(), literal(false)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(null), and(), literal(false)))).isNull();
+            assertThat(interpreter.interpret(logical(literal(false), and(), literal(1.0)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(false), and(), literal(3.14)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(false), and(), literal("a")))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(false), and(), literal(null)))).isEqualTo(false);
+            assertThat(interpreter.interpret(logical(literal(true), and(), literal(1.0)))).isEqualTo(1.0);
+            assertThat(interpreter.interpret(logical(literal(1.0), and(), literal(3.14)))).isEqualTo(3.14);
+            assertThat(interpreter.interpret(logical(literal(3.14), and(), literal("a")))).isEqualTo("a");
+            assertThat(interpreter.interpret(logical(literal("a"), and(), literal(null)))).isNull();
+            assertThat(interpreter.interpret(logical(literal(null), and(), literal(null)))).isNull();
         }
     }
 
@@ -613,6 +659,94 @@ class PostOrderTraversalInterpreterTest {
             interpret(variableDeclaration(identifier("a"), literal(1.0)));
 
             assertThat(environment.get(identifier("a"))).isEqualTo(1.0);
+        }
+    }
+
+    @Nested
+    class IfStatementCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void ifTruthyThenExecuteThenBranch() {
+            interpret(_if(literal(true), print(literal(1.0)), null));
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void ifFalseyThenDoNothing() {
+            interpret(_if(literal(false), print(literal(1.0)), null));
+
+            assertThat(outContent.toString()).isBlank();
+        }
+
+        @Test
+        void ifElseTruthyThenExecuteThenBranch() {
+            interpret(_if(literal(true), print(literal(1.0)), print(literal(2.0))));
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void ifElseFalseyThenExecuteElseBranch() {
+            interpret(_if(literal(false), print(literal(1.0)), print(literal(2.0))));
+
+            assertThat(outContent.toString()).isEqualTo("2\n");
+        }
+    }
+
+    @Nested
+    class WhileStatementCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void whileTruthyThenExecuteBody() {
+            interpret(
+                    variableDeclaration(identifier("a"), literal(1.0)),
+                    _while(binary(variable(identifier("a")), equalEqual(), literal(1.0)),
+                            blockStatement(
+                                    print(variable(identifier("a"))),
+                                    expressionStatement(assign(identifier("a"), literal(2.0)))
+                            )
+                    )
+            );
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void whileFalseyThenDoNothing() {
+            interpret(_while(literal(false), print(literal(1.0))));
+
+            assertThat(outContent.toString()).isBlank();
         }
     }
 

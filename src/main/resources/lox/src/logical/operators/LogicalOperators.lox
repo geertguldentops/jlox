@@ -1,0 +1,2 @@
+print "hi" or 2; // expect "hi".
+print nil or "yes"; // expect "yes".

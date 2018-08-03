@@ -1,14 +1,18 @@
 package be.guldentops.geert.lox.lexer.api;
 
+import static be.guldentops.geert.lox.lexer.api.Token.Type.AND;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.ELSE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FOR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.IF;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_BRACE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_PAREN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS;
@@ -16,6 +20,7 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.MINUS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.NIL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
@@ -25,6 +30,7 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.SLASH;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.STAR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.TRUE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.VAR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.WHILE;
 
 public class TokenObjectMother {
 
@@ -49,6 +55,30 @@ public class TokenObjectMother {
 
     public static Token identifier(String lexeme) {
         return new Token(IDENTIFIER, lexeme, null, 1);
+    }
+
+    public static Token _if() {
+        return new Token(IF, "if", null, 1);
+    }
+
+    public static Token _else() {
+        return new Token(ELSE, "else", null, 1);
+    }
+
+    public static Token _while() {
+        return new Token(WHILE, "while", null, 1);
+    }
+
+    public static Token _for() {
+        return new Token(FOR, "for", null, 1);
+    }
+
+    public static Token or() {
+        return new Token(OR, "or", null, 1);
+    }
+
+    public static Token and() {
+        return new Token(AND, "and", null, 1);
     }
 
     public static Token greater() {
@@ -125,6 +155,10 @@ public class TokenObjectMother {
 
     public static Token two() {
         return new Token(NUMBER, "2", 2.0, 1);
+    }
+
+    public static Token integer(String integer) {
+        return new Token(NUMBER, integer, Double.valueOf(integer), 1);
     }
 
     public static Token pi() {

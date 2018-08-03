@@ -13,15 +13,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static be.guldentops.geert.lox.lexer.api.Token.Type.AND;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.ELSE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FOR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.IF;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_BRACE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_PAREN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS;
@@ -29,6 +33,7 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.MINUS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.NIL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
@@ -39,6 +44,7 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.STAR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.STRING;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.TRUE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.VAR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.WHILE;
 
 public class RecursiveDescentParser implements Parser {
 
@@ -99,10 +105,81 @@ public class RecursiveDescentParser implements Parser {
     }
 
     private Statement statement() {
+        if (match(FOR)) return forStatement();
+        if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
+        if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Statement.Block(block());
 
         return expressionStatement();
+    }
+
+    private Statement forStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'for'.");
+
+        Statement initializer;
+        if (match(SEMICOLON)) {
+            initializer = null;
+        } else if (match(VAR)) {
+            initializer = variableDeclaration();
+        } else {
+            initializer = expressionStatement();
+        }
+
+        Expression condition = null;
+        if (!check(SEMICOLON)) {
+            condition = expression();
+        }
+        consume(SEMICOLON, "Expect ';' after loop condition.");
+
+        Expression increment = null;
+        if (!check(RIGHT_PAREN)) {
+            increment = expression();
+        }
+        consume(RIGHT_PAREN, "Expect ')' after 'for increment'.");
+
+        Statement body = statement();
+
+        if (increment != null) {
+            body = new Statement.Block(List.of(body, new Statement.Expression(increment)));
+        }
+
+        body = new Statement.While(condition != null ? condition : new Expression.Literal(true), body);
+
+        if (initializer != null) {
+            body = new Statement.Block(List.of(initializer, body));
+        }
+
+        return body;
+    }
+
+    private Statement ifStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        Expression condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+        Statement thenBranch = statement();
+        Statement elseBranch = null;
+        if (match(ELSE)) {
+            elseBranch = statement();
+        }
+
+        return new Statement.If(condition, thenBranch, elseBranch);
+    }
+
+    private Statement printStatement() {
+        var expression = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+        return new Statement.Print(expression);
+    }
+
+    private Statement whileStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'while'.");
+        Expression condition = expression();
+        consume(RIGHT_PAREN, "Expect ')' after while condition.");
+        Statement body = statement();
+
+        return new Statement.While(condition, body);
     }
 
     private List<Statement> block() {
@@ -122,32 +199,50 @@ public class RecursiveDescentParser implements Parser {
         return new Statement.Expression(expression);
     }
 
-    private Statement printStatement() {
-        var expression = expression();
-        consume(SEMICOLON, "Expect ';' after value.");
-        return new Statement.Print(expression);
-    }
-
     private Expression expression() {
         return assignment();
     }
 
     private Expression assignment() {
-        Expression expr = equality();
+        var expression = or();
 
         if (match(EQUAL)) {
             Token equals = previous();
             Expression value = assignment();
 
-            if (expr instanceof Expression.Variable) {
-                Token name = ((Expression.Variable) expr).name;
+            if (expression instanceof Expression.Variable) {
+                Token name = ((Expression.Variable) expression).name;
                 return new Expression.Assign(name, value);
             }
 
             reportError(equals, "Invalid assignment target.");
         }
 
-        return expr;
+        return expression;
+    }
+
+    private Expression or() {
+        var expression = and();
+
+        while (match(OR)) {
+            Token operator = previous();
+            Expression right = and();
+            expression = new Expression.Logical(expression, operator, right);
+        }
+
+        return expression;
+    }
+
+    private Expression and() {
+        var expression = equality();
+
+        while (match(AND)) {
+            Token operator = previous();
+            Expression right = equality();
+            expression = new Expression.Logical(expression, operator, right);
+        }
+
+        return expression;
     }
 
     private Expression equality() {

@@ -20,6 +20,7 @@ public class GenerateAbstractSyntaxTree {
                 "Binary   : Expression left, Token operator, Expression right",
                 "Grouping : Expression expression",
                 "Literal  : Object value",
+                "Logical  : Expression left, Token operator, Expression right",
                 "Unary    : Token operator, Expression right",
                 "Variable : Token name"
         ));
@@ -27,8 +28,10 @@ public class GenerateAbstractSyntaxTree {
         defineAbstractSyntaxTree(outputDir, "Statement", Arrays.asList(
                 "Block      : List<Statement> statements",
                 "Expression : be.guldentops.geert.lox.grammar.Expression expression",
+                "If         : be.guldentops.geert.lox.grammar.Expression condition, Statement thenBranch, Statement elseBranch",
                 "Print      : be.guldentops.geert.lox.grammar.Expression expression",
-                "Variable   : Token name, be.guldentops.geert.lox.grammar.Expression initializer"
+                "Variable   : Token name, be.guldentops.geert.lox.grammar.Expression initializer",
+                "While      : be.guldentops.geert.lox.grammar.Expression condition, Statement body"
         ));
     }
 
