@@ -1,0 +1,4 @@
+var a = "before";
+print a; // expect "before".
+a = "after";
+print a; // expect "after".

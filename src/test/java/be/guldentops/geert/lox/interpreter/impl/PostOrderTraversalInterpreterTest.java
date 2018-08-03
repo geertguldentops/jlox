@@ -1,19 +1,38 @@
 package be.guldentops.geert.lox.interpreter.impl;
 
+import be.guldentops.geert.lox.environment.Environment;
 import be.guldentops.geert.lox.error.api.RuntimeError;
 import be.guldentops.geert.lox.error.impl.FakeErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
+import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.interpreter.api.Interpreter;
 import be.guldentops.geert.lox.lexer.api.Token;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.List;
+
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.grouping;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.literal;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.unary;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.variable;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory.blockStatement;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory.expressionStatement;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory.print;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory.uninitializedVariableDeclaration;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory.variableDeclaration;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bang;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bangEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.equalEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.greater;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.greaterEqual;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.identifier;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.less;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.lessEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.minus;
@@ -22,30 +41,21 @@ import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.plus;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.slash;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.star;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PostOrderTraversalInterpreterTest {
 
-    private Interpreter interpreter;
+    private Environment environment;
     private FakeErrorReporter fakeErrorReporter;
+
+    private Interpreter interpreter;
 
     @BeforeEach
     void setUp() {
+        environment = Environment.createGlobal();
         fakeErrorReporter = new FakeErrorReporter();
 
-        interpreter = new PostOrderTraversalInterpreter();
+        interpreter = new PostOrderTraversalInterpreter(environment);
         interpreter.addErrorReporter(fakeErrorReporter);
-    }
-
-    @Nested
-    class DegenerateCases {
-
-        @Test
-        void nullExpression() {
-            assertThatThrownBy(() -> interpreter.interpret(null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("Expression should never be null!");
-        }
     }
 
     @Nested
@@ -165,6 +175,38 @@ class PostOrderTraversalInterpreterTest {
             assertThat(interpreter.interpret(binary(literal(null), bangEqual(), literal(true)))).isEqualTo(true);
             assertThat(interpreter.interpret(binary(literal(null), bangEqual(), literal(false)))).isEqualTo(true);
         }
+
+        @Test
+        void nonInitializedVariableExpression() {
+            environment.define(identifier("a"), null);
+
+            assertThat(interpreter.interpret(variable(identifier("a")))).isNull();
+        }
+
+        @Test
+        void initializedVariableExpression() {
+            environment.define(identifier("a"), "2.1");
+
+            assertThat(interpreter.interpret(variable(identifier("a")))).isEqualTo("2.1");
+        }
+
+        @Test
+        void assignmentExpression() {
+            environment.define(identifier("a"), null);
+
+            assertThat(interpreter.interpret(assign(identifier("a"), literal(1.0)))).isEqualTo(1.0);
+
+            assertThat(environment.get(identifier("a"))).isEqualTo(1.0);
+        }
+
+        @Test
+        void reassignExpression() {
+            environment.define(identifier("a"), 2.0);
+
+            assertThat(interpreter.interpret(assign(identifier("a"), literal(3.0)))).isEqualTo(3.0);
+
+            assertThat(environment.get(identifier("a"))).isEqualTo(3.0);
+        }
     }
 
     @Nested
@@ -281,6 +323,65 @@ class PostOrderTraversalInterpreterTest {
                     .hasMessage("Can not divide by zero!");
         }
 
+        @Test
+        void runtimeErrorWhenPrinting() {
+            interpret(print(binary(literal(5.0), slash(), literal(0.0))));
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Can not divide by zero!");
+
+        }
+
+        @Test
+        void variableExpressionWithoutVariableDefined() {
+            assertThat(interpreter.interpret(variable(identifier("a")))).isNull();
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Undefined variable 'a'.");
+        }
+
+        @Test
+        void variableStatementWithVariableAlreadyDefined() {
+            environment.define(identifier("a"), 1.0);
+
+            interpret(variableDeclaration(identifier("a"), literal(2.0)));
+
+            assertThat(environment.get(identifier("a"))).isEqualTo(1.0);
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Variable 'a' is already defined.");
+        }
+
+        @Test
+        void assignmentExpressionWithoutVariableDefined() {
+            assertThat(interpreter.interpret(assign(identifier("a"), literal(1.0)))).isNull();
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Undefined variable 'a'.");
+        }
+
+        @Test
+        void canAssignVariableFromOuterScope() {
+            interpret(
+                    blockStatement(
+                            expressionStatement(assign(identifier("a"), literal(1.0)))
+                    )
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Undefined variable 'a'.");
+        }
+
         private void assertBinaryExpressionCanOnlyOperateOnNumbersOrStrings(Expression expression1, Token operator, Expression expression2) {
             assertBinaryExpressionThrowsRuntimeErrorWithMessage(expression1, operator, expression2, "Operands must be two numbers or two strings.");
         }
@@ -306,19 +407,217 @@ class PostOrderTraversalInterpreterTest {
         }
     }
 
-    private Expression.Literal literal(Object value) {
-        return new Expression.Literal(value);
+    /**
+     * To test block statements we would need to get hold of the block statement's local scope. By observing it correctly
+     * manipulates this scope and its outer scopes during variable look-up we can verify that it behaves correctly.
+     * <p>
+     * However, by definition, local scope is local to the block and is not observable from outside!
+     * <p>
+     * The work-around used here is to print variables at strategic times so we can <strong>infer</strong> that the correct scope rules were followed!
+     */
+    @Nested
+    class BlockStatementCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void resolveVariableInLocalScope() {
+            interpret(
+                    blockStatement(
+                            variableDeclaration(identifier("a"), literal(1.0)),
+                            print(variable(identifier("a")))
+                    )
+            );
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void canAssignVariableFromGlobalScope() {
+            interpret(
+                    uninitializedVariableDeclaration(identifier("a")),
+                    blockStatement(
+                            expressionStatement(assign(identifier("a"), literal(1.0))),
+                            print(variable(identifier("a")))
+                    )
+            );
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void canAssignVariableFromOuterScope() {
+            interpret(
+                    blockStatement(
+                            uninitializedVariableDeclaration(identifier("a")),
+                            blockStatement(
+                                    expressionStatement(assign(identifier("a"), literal(1.0))),
+                                    print(variable(identifier("a")))
+                            )
+                    )
+            );
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void resolveVariableInGlobalScope() {
+            interpret(
+                    variableDeclaration(identifier("a"), literal(1.0)),
+                    blockStatement(
+                            print(variable(identifier("a")))
+                    )
+            );
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void resolveVariableInOuterBlockScope() {
+            interpret(
+                    blockStatement(
+                            variableDeclaration(identifier("a"), literal(1.0)),
+                            blockStatement(
+                                    print(variable(identifier("a")))
+                            )
+                    )
+            );
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void localVariableShadowsOuterVariable() {
+            interpret(
+                    variableDeclaration(identifier("a"), literal(2.0)),
+                    blockStatement(
+                            variableDeclaration(identifier("a"), literal(1.0)),
+                            print(variable(identifier("a")))
+                    )
+            );
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void ignoreVariableFromOutOfScopeBlock() {
+            interpret(
+                    variableDeclaration(identifier("a"), literal(2.0)),
+                    blockStatement(
+                            variableDeclaration(identifier("a"), literal(1.0))
+                    ),
+                    print(variable(identifier("a")))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("2\n");
+        }
     }
 
-    private Expression.Grouping grouping(Expression expression) {
-        return new Expression.Grouping(expression);
+    @Nested
+    class PrintStatementCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void printInteger() {
+            interpret(print(literal(1.0)));
+
+            assertThat(outContent.toString()).isEqualTo("1\n");
+        }
+
+        @Test
+        void printFloatingPointNumber() {
+            interpret(print(literal(3.14)));
+
+            assertThat(outContent.toString()).isEqualTo("3.14\n");
+        }
+
+        @Test
+        void printString() {
+            interpret(print(literal("Hello, world!")));
+
+            assertThat(outContent.toString()).isEqualTo("Hello, world!\n");
+        }
+
+        @Test
+        void printTrue() {
+            interpret(print(literal(true)));
+
+            assertThat(outContent.toString()).isEqualTo("true\n");
+        }
+
+        @Test
+        void printFalse() {
+            interpret(print(literal(false)));
+
+            assertThat(outContent.toString()).isEqualTo("false\n");
+        }
+
+        @Test
+        void printNil() {
+            interpret(print(literal(null)));
+
+            assertThat(outContent.toString()).isEqualTo("nil\n");
+        }
+
+        @Test
+        void printSmallProgram() {
+            interpret(
+                    print(literal(1.0)),
+                    print(grouping(binary(literal(2.0), plus(), literal(3.0)))),
+                    print(unary(minus(), literal(3.14)))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("1\n5\n-3.14\n");
+        }
     }
 
-    private Expression.Unary unary(Token operator, Expression right) {
-        return new Expression.Unary(operator, right);
+    @Nested
+    class VariableStatementCases {
+
+        @Test
+        void defineVariableWithoutInitializer() {
+            interpret(uninitializedVariableDeclaration(identifier("a")));
+
+            assertThat(environment.get(identifier("a"))).isNull();
+        }
+
+        @Test
+        void defineVariableWithInitializer() {
+            interpret(variableDeclaration(identifier("a"), literal(1.0)));
+
+            assertThat(environment.get(identifier("a"))).isEqualTo(1.0);
+        }
     }
 
-    private Expression.Binary binary(Expression left, Token operator, Expression right) {
-        return new Expression.Binary(left, operator, right);
+    private void interpret(Statement... statements) {
+        interpreter.interpret(List.of(statements));
     }
+
 }

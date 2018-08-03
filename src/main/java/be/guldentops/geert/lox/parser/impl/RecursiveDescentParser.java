@@ -3,21 +3,26 @@ package be.guldentops.geert.lox.parser.impl;
 import be.guldentops.geert.lox.error.api.Error;
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
+import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.api.Token;
 import be.guldentops.geert.lox.lexer.api.Token.Type;
 import be.guldentops.geert.lox.parser.api.Parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_BRACE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_PAREN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS_EQUAL;
@@ -25,14 +30,17 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.MINUS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.NIL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_PAREN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.SEMICOLON;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.SLASH;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.STAR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.STRING;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.TRUE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.VAR;
 
-public class RecursiveDecentParser implements Parser {
+public class RecursiveDescentParser implements Parser {
 
     private static class ParseError extends RuntimeException {
     }
@@ -42,7 +50,7 @@ public class RecursiveDecentParser implements Parser {
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
-    public RecursiveDecentParser(List<Token> tokens) {
+    public RecursiveDescentParser(List<Token> tokens) {
         this.tokens = tokens;
     }
 
@@ -51,20 +59,95 @@ public class RecursiveDecentParser implements Parser {
         this.errorReporters.add(errorReporter);
     }
 
-    public Expression parse() {
+    @Override
+    public List<Statement> parse() {
+        if (tokens == null || tokens.isEmpty()) return Collections.emptyList();
+
+        return program();
+    }
+
+    private List<Statement> program() {
+        var statements = new ArrayList<Statement>();
+        while (!isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        return statements;
+    }
+
+    private Statement declaration() {
         try {
-            if (tokens != null && !tokens.isEmpty()) {
-                return expression();
-            } else {
-                return null;
-            }
+            if (match(VAR)) return variableDeclaration();
+
+            return statement();
         } catch (ParseError error) {
+            synchronize();
             return null;
         }
     }
 
+    private Statement variableDeclaration() {
+        Token name = consume(IDENTIFIER, "Expected variable name");
+
+        Expression initializer = null;
+        if (match(EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new Statement.Variable(name, initializer);
+    }
+
+    private Statement statement() {
+        if (match(PRINT)) return printStatement();
+        if (match(LEFT_BRACE)) return new Statement.Block(block());
+
+        return expressionStatement();
+    }
+
+    private List<Statement> block() {
+        var statements = new ArrayList<Statement>();
+
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after block.");
+        return statements;
+    }
+
+    private Statement expressionStatement() {
+        var expression = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+        return new Statement.Expression(expression);
+    }
+
+    private Statement printStatement() {
+        var expression = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+        return new Statement.Print(expression);
+    }
+
     private Expression expression() {
-        return equality();
+        return assignment();
+    }
+
+    private Expression assignment() {
+        Expression expr = equality();
+
+        if (match(EQUAL)) {
+            Token equals = previous();
+            Expression value = assignment();
+
+            if (expr instanceof Expression.Variable) {
+                Token name = ((Expression.Variable) expr).name;
+                return new Expression.Assign(name, value);
+            }
+
+            reportError(equals, "Invalid assignment target.");
+        }
+
+        return expr;
     }
 
     private Expression equality() {
@@ -94,8 +177,8 @@ public class RecursiveDecentParser implements Parser {
     }
 
     private Expression primary() {
-        if (match(FALSE)) return new Expression.Literal(false);
         if (match(TRUE)) return new Expression.Literal(true);
+        if (match(FALSE)) return new Expression.Literal(false);
         if (match(NIL)) return new Expression.Literal(null);
 
         if (match(NUMBER, STRING)) {
@@ -103,9 +186,13 @@ public class RecursiveDecentParser implements Parser {
         }
 
         if (match(LEFT_PAREN)) {
-            Expression expression = expression();
+            var expression = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expression.Grouping(expression);
+        }
+
+        if (match(IDENTIFIER)) {
+            return new Expression.Variable(previous());
         }
 
         throw error(peek(), "Expect expression.");
@@ -123,7 +210,7 @@ public class RecursiveDecentParser implements Parser {
     }
 
     private void reportError(Token token, String message) {
-        for (ErrorReporter errorReporter : errorReporters) {
+        for (var errorReporter : errorReporters) {
             if (token.type == EOF) {
                 errorReporter.handle(new Error(token.line, " at end", message));
             } else {
@@ -155,7 +242,7 @@ public class RecursiveDecentParser implements Parser {
     }
 
     private Expression parseLeftAssociativeBinaryExpressions(Supplier<Expression> operand, Type... types) {
-        Expression expression = operand.get();
+        var expression = operand.get();
 
         while (match(types)) {
             Token operator = previous();
@@ -167,7 +254,7 @@ public class RecursiveDecentParser implements Parser {
     }
 
     private boolean match(Type... types) {
-        for (Type type : types) {
+        for (var type : types) {
             if (check(type)) {
                 advance();
                 return true;

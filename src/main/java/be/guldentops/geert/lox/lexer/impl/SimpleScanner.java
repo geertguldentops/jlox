@@ -112,7 +112,7 @@ public class SimpleScanner implements Scanner {
     }
 
     private void scanToken() {
-        char nextChar = advance();
+        var nextChar = advance();
 
         switch (nextChar) {
             case '(': addToken(LEFT_PAREN); break;
@@ -168,7 +168,7 @@ public class SimpleScanner implements Scanner {
     }
 
     private void addToken(Type type, Object literal) {
-        String text = sourceCode.substring(start, current);
+        var text = sourceCode.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
     }
 
@@ -195,13 +195,12 @@ public class SimpleScanner implements Scanner {
         // Unterminated string.
         if (isAtEnd()) {
             reportError(new Error(line, "Unterminated string."));
-            return;
+        } else {
+            // Consume the closing ".
+            advance();
+
+            addToken(STRING, trimSurroundingQuotes());
         }
-
-        // Consume the closing ".
-        advance();
-
-        addToken(STRING, trimSurroundingQuotes());
     }
 
     private String trimSurroundingQuotes() {
@@ -243,9 +242,9 @@ public class SimpleScanner implements Scanner {
         while (isAlphaNumeric(peek())) advance();
 
         // See if the identifier is a reserved word.
-        String text = sourceCode.substring(start, current);
+        var text = sourceCode.substring(start, current);
 
-        Type type = keywords.get(text);
+        var type = keywords.get(text);
         if (type == null) type = IDENTIFIER;
         addToken(type);
     }
@@ -255,7 +254,7 @@ public class SimpleScanner implements Scanner {
     }
 
     private void reportError(Error error) {
-        for (ErrorReporter errorReporter : errorReporters) {
+        for (var errorReporter : errorReporters) {
             errorReporter.handle(error);
         }
     }

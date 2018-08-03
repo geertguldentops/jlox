@@ -3,10 +3,13 @@ package be.guldentops.geert.lox.lexer.api;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_BRACE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_PAREN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS_EQUAL;
@@ -14,14 +17,38 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.MINUS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.NIL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_PAREN;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.SEMICOLON;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.SLASH;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.STAR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.TRUE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.VAR;
 
 public class TokenObjectMother {
 
     private TokenObjectMother() {
+    }
+
+    public static Token leftBrace() {
+        return new Token(LEFT_BRACE, "{", null, 1);
+    }
+
+    public static Token rightBrace() {
+        return new Token(RIGHT_BRACE, "}", null, 1);
+    }
+
+    public static Token print() {
+        return new Token(PRINT, "print", null, 1);
+    }
+
+    public static Token var() {
+        return new Token(VAR, "var", null, 1);
+    }
+
+    public static Token identifier(String lexeme) {
+        return new Token(IDENTIFIER, lexeme, null, 1);
     }
 
     public static Token greater() {
@@ -54,6 +81,10 @@ public class TokenObjectMother {
 
     public static Token bangEqual() {
         return new Token(BANG_EQUAL, "!=", null, 1);
+    }
+
+    public static Token equal() {
+        return new Token(EQUAL, "=", null, 1);
     }
 
     public static Token equalEqual() {
@@ -98,6 +129,10 @@ public class TokenObjectMother {
 
     public static Token pi() {
         return new Token(NUMBER, "3.14", 3.14, 1);
+    }
+
+    public static Token semicolon() {
+        return new Token(SEMICOLON, ";", null, 1);
     }
 
     public static Token eof() {

@@ -6,7 +6,6 @@
 
 This is a Java version of the lox interpreter from the book [Crafting Interpreters](http://www.craftinginterpreters.com/introduction.html)
 
-* Version
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ## How do I get set up? ##
@@ -15,9 +14,9 @@ This is a Java version of the lox interpreter from the book [Crafting Interprete
 
 Lox has 2 modes it can run in:
 
-1. REPL mode: Run the main method in the Lox class with exactly 1 program argument, the path to the Lox script you want to run.
+1. REPL mode: Run the main method in the LoxMain class with exactly 1 program argument, the path to the Lox script you want to run.
 
-2. Script mode: Run the main method in the Lox class with no program arguments.
+2. Script mode: Run the main method in the LoxMain class with no program arguments.
 
 
 ### Generating the AST ###
@@ -30,15 +29,29 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
 
 ## Lox Grammar ##
 
-    expression     → equality ;
-    equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-    comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
-    addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
-    multiplication → unary ( ( "/" | "*" ) unary )* ;
-    unary          → ( "!" | "-" ) unary
-                   | primary ;
-    primary        → NUMBER | STRING | "false" | "true" | "nil"
-                   | "(" expression ")" ;
+    program         → declaration* EOF ;
+    declaration     → varDecl
+                    | statement ;
+    varDecl         → "var" IDENTIFIER ( "=" expression )? ";" ;
+    statement       → exprStmt
+                    | printStmt
+                    | block ;
+    block           → "{" declaration* "}" ;
+    exprStmt        → expression ";" ;
+    printStmt       → "print" expression ";" ; 
+    expression      → assignment ;
+    assignment      → identifier "=" assignment
+                    | equality ;
+    equality        → comparison ( ( "!=" | "==" ) comparison )* ;
+    comparison      → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
+    addition        → multiplication ( ( "-" | "+" ) multiplication )* ;
+    multiplication  → unary ( ( "/" | "*" ) unary )* ;
+    unary           → ( "!" | "-" ) unary
+                    | primary ;
+    primary         → "true" | "false" | "nil" | "this"
+                    | NUMBER | STRING
+                    | "(" expression ")"
+                    | IDENTIFIER ;
                 
 ## Lox Precedence Rules ##
 

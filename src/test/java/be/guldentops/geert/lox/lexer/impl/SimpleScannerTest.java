@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.List;
-
 import static be.guldentops.geert.lox.lexer.api.Token.Type.AND;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
@@ -203,9 +201,9 @@ class SimpleScannerTest {
 
         @Test
         void scanNewLineIncreasesLineNumber() {
-            Scanner scanner = createScanner("\n");
+            var scanner = createScanner("\n");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
             assertThat(tokens.get(0).type).isEqualTo(EOF);
@@ -217,9 +215,9 @@ class SimpleScannerTest {
         }
 
         private void assertNoTokensScanned(String sourceCode) {
-            Scanner scanner = createScanner(sourceCode);
+            var scanner = createScanner(sourceCode);
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
             assertTokenIsEndOfLine(tokens.get(0));
@@ -233,9 +231,9 @@ class SimpleScannerTest {
 
         @Test
         void singleCharacterString() {
-            Scanner scanner = createScanner("\"A\"");
+            var scanner = createScanner("\"A\"");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
             assertThat(tokens.get(0).type).isEqualTo(STRING);
@@ -249,9 +247,9 @@ class SimpleScannerTest {
 
         @Test
         void multipleCharactersString() {
-            Scanner scanner = createScanner("\"Hello\"");
+            var scanner = createScanner("\"Hello\"");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
             assertThat(tokens.get(0).type).isEqualTo(STRING);
@@ -265,9 +263,9 @@ class SimpleScannerTest {
 
         @Test
         void multiLineString() {
-            Scanner scanner = createScanner("\"Hello\nWorld\"");
+            var scanner = createScanner("\"Hello\nWorld\"");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
             assertThat(tokens.get(0).type).isEqualTo(STRING);
@@ -288,9 +286,9 @@ class SimpleScannerTest {
 
         @Test
         void singleDigitNumber() {
-            Scanner scanner = createScanner("9");
+            var scanner = createScanner("9");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
             assertThat(tokens.get(0).type).isEqualTo(NUMBER);
@@ -304,9 +302,9 @@ class SimpleScannerTest {
 
         @Test
         void multipleDigitNumber() {
-            Scanner scanner = createScanner("12");
+            var scanner = createScanner("12");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
             assertThat(tokens.get(0).type).isEqualTo(NUMBER);
@@ -320,9 +318,9 @@ class SimpleScannerTest {
 
         @Test
         void fractionalNumber() {
-            Scanner scanner = createScanner("1.2");
+            var scanner = createScanner("1.2");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
             assertThat(tokens.get(0).type).isEqualTo(NUMBER);
@@ -344,9 +342,9 @@ class SimpleScannerTest {
                 "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
         })
         void singleCharacterIdentifier(String identifier) {
-            Scanner scanner = createScanner(identifier);
+            var scanner = createScanner(identifier);
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
             assertThat(tokens.get(0).type).isEqualTo(IDENTIFIER);
@@ -360,9 +358,9 @@ class SimpleScannerTest {
 
         @Test
         void multipleCharactersIdentifier() {
-            Scanner scanner = createScanner("myIdentifier");
+            var scanner = createScanner("myIdentifier");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
             assertThat(tokens.get(0).type).isEqualTo(IDENTIFIER);
@@ -465,9 +463,9 @@ class SimpleScannerTest {
 
         @Test
         void unknownCharacter() {
-            Scanner scanner = createScanner("@");
+            var scanner = createScanner("@");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
             assertTokenIsEndOfLine(tokens.get(0));
@@ -480,9 +478,9 @@ class SimpleScannerTest {
 
         @Test
         void unterminatedString() {
-            Scanner scanner = createScanner("\"H");
+            var scanner = createScanner("\"H");
 
-            List<Token> tokens = scanner.scanTokens();
+            var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
             assertTokenIsEndOfLine(tokens.get(0));
@@ -495,16 +493,16 @@ class SimpleScannerTest {
     }
 
     private Scanner createScanner(String sourceCode) {
-        Scanner scanner = new SimpleScanner(sourceCode);
+        var scanner = new SimpleScanner(sourceCode);
         scanner.addErrorReporter(fakeErrorReporter);
 
         return scanner;
     }
 
     private void assertSingleTokenScanned(String sourceCode, Type type) {
-        Scanner scanner = createScanner(sourceCode);
+        var scanner = createScanner(sourceCode);
 
-        List<Token> tokens = scanner.scanTokens();
+        var tokens = scanner.scanTokens();
 
         assertThat(tokens).hasSize(2);
         assertTokenHasTypeAndLexeme(tokens.get(0), type, sourceCode);

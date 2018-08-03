@@ -2,11 +2,14 @@ package be.guldentops.geert.lox.grammar;
 
 import be.guldentops.geert.lox.lexer.api.Token;
 
-public abstract class Expression {
+public interface Expression {
 
-    public abstract <R> R accept(Visitor<R> visitor);
+    <R> R accept(Visitor<R> visitor);
 
-    public interface Visitor<R> {
+    interface Visitor<R> {
+
+        R visitAssignExpression(Assign expression);
+
         R visitBinaryExpression(Binary expression);
 
         R visitGroupingExpression(Grouping expression);
@@ -14,9 +17,26 @@ public abstract class Expression {
         R visitLiteralExpression(Literal expression);
 
         R visitUnaryExpression(Unary expression);
+
+        R visitVariableExpression(Variable expression);
     }
 
-    public static class Binary extends Expression {
+    class Assign implements Expression {
+
+        public final Token name;
+        public final Expression value;
+
+        public Assign(Token name, Expression value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitAssignExpression(this);
+        }
+    }
+
+    class Binary implements Expression {
 
         public final Expression left;
         public final Token operator;
@@ -33,7 +53,7 @@ public abstract class Expression {
         }
     }
 
-    public static class Grouping extends Expression {
+    class Grouping implements Expression {
 
         public final Expression expression;
 
@@ -46,7 +66,7 @@ public abstract class Expression {
         }
     }
 
-    public static class Literal extends Expression {
+    class Literal implements Expression {
 
         public final Object value;
 
@@ -59,7 +79,7 @@ public abstract class Expression {
         }
     }
 
-    public static class Unary extends Expression {
+    class Unary implements Expression {
 
         public final Token operator;
         public final Expression right;
@@ -71,6 +91,19 @@ public abstract class Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitUnaryExpression(this);
+        }
+    }
+
+    class Variable implements Expression {
+
+        public final Token name;
+
+        public Variable(Token name) {
+            this.name = name;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitVariableExpression(this);
         }
     }
 }

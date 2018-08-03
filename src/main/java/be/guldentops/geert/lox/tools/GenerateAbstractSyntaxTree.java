@@ -13,21 +13,31 @@ public class GenerateAbstractSyntaxTree {
             System.exit(1);
         }
 
-        String outputDir = args[0];
+        var outputDir = args[0];
+
         defineAbstractSyntaxTree(outputDir, "Expression", Arrays.asList(
+                "Assign   : Token name, Expression value",
                 "Binary   : Expression left, Token operator, Expression right",
                 "Grouping : Expression expression",
                 "Literal  : Object value",
-                "Unary    : Token operator, Expression right"
+                "Unary    : Token operator, Expression right",
+                "Variable : Token name"
+        ));
+
+        defineAbstractSyntaxTree(outputDir, "Statement", Arrays.asList(
+                "Block      : List<Statement> statements",
+                "Expression : be.guldentops.geert.lox.grammar.Expression expression",
+                "Print      : be.guldentops.geert.lox.grammar.Expression expression",
+                "Variable   : Token name, be.guldentops.geert.lox.grammar.Expression initializer"
         ));
     }
 
     private static void defineAbstractSyntaxTree(String outputDir,
                                                  String baseClassName,
                                                  List<String> types) {
-        String path = outputDir + "/" + baseClassName + ".java";
+        var path = outputDir + "/" + baseClassName + ".java";
 
-        try (PrintWriter writer = new PrintWriter(path, "UTF-8")) {
+        try (var writer = new PrintWriter(path, "UTF-8")) {
             writeBaseClassHeader(baseClassName, writer);
             writeBaseClassBody(baseClassName, types, writer);
             writeBaseClassFooter(writer);
@@ -42,7 +52,7 @@ public class GenerateAbstractSyntaxTree {
         writer.println("import java.util.List;");
         writer.println("import be.guldentops.geert.lox.lexer.api.Token;");
         writer.println("");
-        writer.printf("public abstract class %s {", baseClassName);
+        writer.printf("public interface %s {", baseClassName);
         writer.println();
     }
 
@@ -54,26 +64,26 @@ public class GenerateAbstractSyntaxTree {
 
     private static void writeAbstractAcceptMethod(PrintWriter writer) {
         writer.println("");
-        writer.println("  public abstract <R> R accept(Visitor<R> visitor);");
+        writer.println("  <R> R accept(Visitor<R> visitor);");
     }
 
     private static void writeVisitorInterface(PrintWriter writer, String baseClassName, List<String> types) {
         writer.println();
-        writer.println(" public interface Visitor<R> {");
+        writer.println(" interface Visitor<R> {");
 
-        for (String type : types) {
-            String typeName = type.split(":")[0].trim();
-            writer.printf("    R visit%s%s (%s  %s);", typeName, baseClassName, typeName, baseClassName.toLowerCase());
+        for (var type : types) {
             writer.println();
+            var typeName = type.split(":")[0].trim();
+            writer.printf("    R visit%s%s (%s  %s);", typeName, baseClassName, typeName, baseClassName.toLowerCase());
         }
 
         writer.println("  }");
     }
 
     private static void writeInnerClasses(String baseClassName, List<String> types, PrintWriter writer) {
-        for (String type : types) {
-            String className = type.split(":")[0].trim();
-            String fields = type.split(":")[1].trim();
+        for (var type : types) {
+            var className = type.split(":")[0].trim();
+            var fields = type.split(":")[1].trim();
             defineType(writer, baseClassName, className, fields);
         }
     }
@@ -93,14 +103,14 @@ public class GenerateAbstractSyntaxTree {
 
     private static void writeClassHeader(PrintWriter writer, String baseClassName, String className) {
         writer.println();
-        writer.printf("public static class %s extends %s {", className, baseClassName);
+        writer.printf("class %s implements %s {", className, baseClassName);
         writer.println();
     }
 
     private static void writeFields(PrintWriter writer, String[] fieldsArray) {
         writer.println();
 
-        for (String field : fieldsArray) {
+        for (var field : fieldsArray) {
             writer.printf("    public final %s;", field);
             writer.println();
         }
@@ -114,8 +124,8 @@ public class GenerateAbstractSyntaxTree {
         writer.printf("    public %s(%s) {", className, fieldList);
         writer.println();
 
-        for (String field : fields) {
-            String name = field.split(" ")[1];
+        for (var field : fields) {
+            var name = field.split(" ")[1];
             writer.printf("      this.%s = %s;", name, name);
             writer.println();
         }

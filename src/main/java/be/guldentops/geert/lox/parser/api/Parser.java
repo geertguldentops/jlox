@@ -1,9 +1,11 @@
 package be.guldentops.geert.lox.parser.api;
 
-import be.guldentops.geert.lox.grammar.Expression;
+import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.api.CanReportErrors;
+
+import java.util.List;
 
 public interface Parser extends CanReportErrors {
 
-    Expression parse();
+    List<Statement> parse();
 }
