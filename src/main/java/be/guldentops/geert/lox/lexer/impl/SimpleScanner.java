@@ -82,7 +82,7 @@ public class SimpleScanner implements Scanner {
     private int current = 0;
     private int line = 1;
 
-    private List<ErrorReporter> errorReporters = new ArrayList<>();
+    private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
     public SimpleScanner(String sourceCode) {
         if (sourceCode == null) throw new IllegalArgumentException("source code should not be null!");
@@ -92,7 +92,7 @@ public class SimpleScanner implements Scanner {
 
     @Override
     public void addErrorReporter(ErrorReporter errorReporter) {
-        errorReporters.add(errorReporter);
+        this.errorReporters.add(errorReporter);
     }
 
     @Override

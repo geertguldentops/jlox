@@ -3,12 +3,13 @@ package be.guldentops.geert.lox;
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.error.impl.ConsoleErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
+import be.guldentops.geert.lox.interpreter.api.Interpreter;
+import be.guldentops.geert.lox.interpreter.impl.PostOrderTraversalInterpreter;
 import be.guldentops.geert.lox.lexer.api.Scanner;
 import be.guldentops.geert.lox.lexer.api.Token;
 import be.guldentops.geert.lox.lexer.impl.SimpleScanner;
 import be.guldentops.geert.lox.parser.api.Parser;
 import be.guldentops.geert.lox.parser.impl.RecursiveDecentParser;
-import be.guldentops.geert.lox.tools.AbstractSyntaxTreePrinter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,6 +22,9 @@ import java.util.List;
 public class Lox {
 
     private final ErrorReporter errorReporter = new ConsoleErrorReporter();
+
+    // MUST be a global variable so REPL sessions can reuse the same interpreter!
+    private final Interpreter interpreter = new PostOrderTraversalInterpreter();
 
     public static void main(String[] args) throws IOException {
         new Lox().run(args);
@@ -43,6 +47,7 @@ public class Lox {
 
         // Indicate an error in the exit code.
         if (errorReporter.receivedError()) System.exit(65);
+        if (errorReporter.receivedRuntimeError()) System.exit(70);
     }
 
     private void runPrompt() throws IOException {
@@ -59,7 +64,6 @@ public class Lox {
     private void run(String sourceCode) {
         Scanner scanner = new SimpleScanner(sourceCode);
         scanner.addErrorReporter(errorReporter);
-
         List<Token> tokens = scanner.scanTokens();
 
         Parser parser = new RecursiveDecentParser(tokens);
@@ -69,6 +73,28 @@ public class Lox {
         // Stop if there was a syntax error.
         if (errorReporter.receivedError()) return;
 
-        System.out.println(new AbstractSyntaxTreePrinter().print(expression));
+
+        interpreter.addErrorReporter(errorReporter);
+        Object result = interpreter.interpret(expression);
+
+        // Stop if there was a runtime error.
+        if (errorReporter.receivedRuntimeError()) return;
+
+        System.out.println(stringify(result));
+    }
+
+    private String stringify(Object object) {
+        if (object == null) return "nil";
+
+        // Hack. Work around Java adding ".0" to integer-valued doubles.
+        if (object instanceof Double) {
+            String text = object.toString();
+            if (text.endsWith(".0")) {
+                text = text.substring(0, text.length() - 2);
+            }
+            return text;
+        }
+
+        return object.toString();
     }
 }

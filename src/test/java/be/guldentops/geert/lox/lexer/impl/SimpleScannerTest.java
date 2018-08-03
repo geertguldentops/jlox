@@ -54,7 +54,7 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.WHILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ScannerTest {
+class SimpleScannerTest {
 
     private FakeErrorReporter fakeErrorReporter;
 
@@ -473,9 +473,9 @@ class ScannerTest {
             assertTokenIsEndOfLine(tokens.get(0));
 
             assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().getLine()).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().getLocation()).isNull();
-            assertThat(fakeErrorReporter.getError().getMessage()).isEqualTo("Unexpected character.");
+            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+            assertThat(fakeErrorReporter.getError().location).isNull();
+            assertThat(fakeErrorReporter.getError().message).isEqualTo("Unexpected character.");
         }
 
         @Test
@@ -488,9 +488,9 @@ class ScannerTest {
             assertTokenIsEndOfLine(tokens.get(0));
 
             assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().getLine()).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().getLocation()).isNull();
-            assertThat(fakeErrorReporter.getError().getMessage()).isEqualTo("Unterminated string.");
+            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+            assertThat(fakeErrorReporter.getError().location).isNull();
+            assertThat(fakeErrorReporter.getError().message).isEqualTo("Unterminated string.");
         }
     }
 

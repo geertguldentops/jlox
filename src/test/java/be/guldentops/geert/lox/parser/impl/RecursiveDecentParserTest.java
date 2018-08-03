@@ -49,9 +49,9 @@ class RecursiveDecentParserTest {
         void noTokens() {
             Parser parser = createParser((List) null);
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
@@ -60,9 +60,9 @@ class RecursiveDecentParserTest {
         void emptyListOfTokens() {
             Parser parser = createParser(Collections.emptyList());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
@@ -75,54 +75,54 @@ class RecursiveDecentParserTest {
         void falseToken() {
             Parser parser = createParser(_false(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertLiteralExpression(ast, false);
+            assertLiteralExpression(expression, false);
         }
 
         @Test
         void trueToken() {
             Parser parser = createParser(_true(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertLiteralExpression(ast, true);
+            assertLiteralExpression(expression, true);
         }
 
         @Test
         void nilToken() {
             Parser parser = createParser(nil(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertLiteralExpression(ast, null);
+            assertLiteralExpression(expression, null);
         }
 
         @Test
         void integerNumberToken() {
             Parser parser = createParser(one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertLiteralExpression(ast, 1.0);
+            assertLiteralExpression(expression, 1.0);
         }
 
         @Test
         void floatingPointNumberToken() {
             Parser parser = createParser(pi(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertLiteralExpression(ast, 3.14);
+            assertLiteralExpression(expression, 3.14);
         }
 
         @Test
         void stringToken() {
             Parser parser = createParser(new Token(Token.Type.STRING, "\"Hello\"", "Hello", 1), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertLiteralExpression(ast, "Hello");
+            assertLiteralExpression(expression, "Hello");
         }
     }
 
@@ -133,10 +133,10 @@ class RecursiveDecentParserTest {
         void leftAndRightParenWithLiteralSubExpression() {
             Parser parser = createParser(leftParen(), one(), rightParen(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isInstanceOf(Expression.Grouping.class);
-            Expression.Grouping groupingExpression = (Expression.Grouping) ast;
+            assertThat(expression).isInstanceOf(Expression.Grouping.class);
+            Expression.Grouping groupingExpression = (Expression.Grouping) expression;
 
             assertThat(groupingExpression.expression).isNotNull();
             assertLiteralExpression(groupingExpression.expression, 1.0);
@@ -150,10 +150,10 @@ class RecursiveDecentParserTest {
         void bangTokenFollowedByLiteralToken() {
             Parser parser = createParser(bang(), _false(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isInstanceOf(Expression.Unary.class);
-            Expression.Unary unaryExpression = (Expression.Unary) ast;
+            assertThat(expression).isInstanceOf(Expression.Unary.class);
+            Expression.Unary unaryExpression = (Expression.Unary) expression;
 
             assertThat(unaryExpression.operator).isEqualToComparingFieldByField(bang());
             assertLiteralExpression(unaryExpression.right, false);
@@ -163,10 +163,10 @@ class RecursiveDecentParserTest {
         void minusTokenFollowedByLiteralToken() {
             Parser parser = createParser(minus(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isInstanceOf(Expression.Unary.class);
-            Expression.Unary unaryExpression = (Expression.Unary) ast;
+            assertThat(expression).isInstanceOf(Expression.Unary.class);
+            Expression.Unary unaryExpression = (Expression.Unary) expression;
 
             assertThat(unaryExpression.operator).isEqualToComparingFieldByField(minus());
             assertLiteralExpression(unaryExpression.right, 1.0);
@@ -176,10 +176,10 @@ class RecursiveDecentParserTest {
         void multipleUnaryOperations() {
             Parser parser = createParser(bang(), bang(), bang(), _false(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isInstanceOf(Expression.Unary.class);
-            Expression.Unary farLeftUnaryExpression = (Expression.Unary) ast;
+            assertThat(expression).isInstanceOf(Expression.Unary.class);
+            Expression.Unary farLeftUnaryExpression = (Expression.Unary) expression;
             assertThat(farLeftUnaryExpression.operator).isEqualToComparingFieldByField(bang());
 
             assertThat(farLeftUnaryExpression.right).isInstanceOf(Expression.Unary.class);
@@ -201,100 +201,100 @@ class RecursiveDecentParserTest {
         void slashTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), slash(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, slash(), 2.0);
+            assertBinaryExpression(expression, 1.0, slash(), 2.0);
         }
 
         @Test
         void starTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), star(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, star(), 2.0);
+            assertBinaryExpression(expression, 1.0, star(), 2.0);
         }
 
         @Test
         void minusTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), minus(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, minus(), 2.0);
+            assertBinaryExpression(expression, 1.0, minus(), 2.0);
         }
 
         @Test
         void plusTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), plus(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, plus(), 2.0);
+            assertBinaryExpression(expression, 1.0, plus(), 2.0);
         }
 
         @Test
         void greaterTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), greater(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, greater(), 2.0);
+            assertBinaryExpression(expression, 1.0, greater(), 2.0);
         }
 
         @Test
         void greaterEqualTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), greaterEqual(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, greaterEqual(), 2.0);
+            assertBinaryExpression(expression, 1.0, greaterEqual(), 2.0);
         }
 
         @Test
         void lessTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), less(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, less(), 2.0);
+            assertBinaryExpression(expression, 1.0, less(), 2.0);
         }
 
         @Test
         void lessEqualTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), lessEqual(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, lessEqual(), 2.0);
+            assertBinaryExpression(expression, 1.0, lessEqual(), 2.0);
         }
 
         @Test
         void bangEqualTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), bangEqual(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, bangEqual(), 2.0);
+            assertBinaryExpression(expression, 1.0, bangEqual(), 2.0);
         }
 
         @Test
         void equalEqualTokenWithLeftAndRightOperands() {
             Parser parser = createParser(one(), equalEqual(), two(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertBinaryExpression(ast, 1.0, equalEqual(), 2.0);
+            assertBinaryExpression(expression, 1.0, equalEqual(), 2.0);
         }
 
         @Test
         void multipleBinaryOperand() {
             Parser parser = createParser(one(), star(), two(), plus(), pi(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isInstanceOf(Expression.Binary.class);
-            Expression.Binary firstBinaryExpression = (Expression.Binary) ast;
+            assertThat(expression).isInstanceOf(Expression.Binary.class);
+            Expression.Binary firstBinaryExpression = (Expression.Binary) expression;
 
             assertThat(firstBinaryExpression.left).isInstanceOf(Expression.Binary.class);
             Expression.Binary secondBinaryExpression = (Expression.Binary) firstBinaryExpression.left;
@@ -324,9 +324,9 @@ class RecursiveDecentParserTest {
         void onlyEOFToken() {
             Parser parser = createParser(eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -335,9 +335,9 @@ class RecursiveDecentParserTest {
         void bangEqualWithoutLeftOperand() {
             Parser parser = createParser(bangEqual(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme("!=");
         }
@@ -346,9 +346,9 @@ class RecursiveDecentParserTest {
         void equalEqualWithoutLeftOperand() {
             Parser parser = createParser(equalEqual(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme("==");
         }
@@ -357,9 +357,9 @@ class RecursiveDecentParserTest {
         void leftParenWithoutRightParen() {
             Parser parser = createParser(leftParen(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -368,9 +368,9 @@ class RecursiveDecentParserTest {
         void leftParenAndLiteralButNoRightParen() {
             Parser parser = createParser(leftParen(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertRightParenMissing();
         }
@@ -379,9 +379,9 @@ class RecursiveDecentParserTest {
         void leftAndRightParenWithoutSubExpression() {
             Parser parser = createParser(leftParen(), rightParen(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme(")");
         }
@@ -390,9 +390,9 @@ class RecursiveDecentParserTest {
         void rightParenWithoutLeftParen() {
             Parser parser = createParser(rightParen(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme(")");
         }
@@ -401,9 +401,9 @@ class RecursiveDecentParserTest {
         void rightParenAndLiteralButNoLeftParen() {
             Parser parser = createParser(rightParen(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme(")");
         }
@@ -412,9 +412,9 @@ class RecursiveDecentParserTest {
         void bangTokenWithoutRightOperand() {
             Parser parser = createParser(bang(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -423,9 +423,9 @@ class RecursiveDecentParserTest {
         void minusTokenWithoutRightOperand() {
             Parser parser = createParser(minus(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -434,9 +434,9 @@ class RecursiveDecentParserTest {
         void slashTokenWithoutLeftOperand() {
             Parser parser = createParser(slash(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme("/");
         }
@@ -445,9 +445,9 @@ class RecursiveDecentParserTest {
         void slashTokenWithoutRightOperand() {
             Parser parser = createParser(one(), slash(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -456,9 +456,9 @@ class RecursiveDecentParserTest {
         void starTokenWithoutLeftOperand() {
             Parser parser = createParser(star(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme("*");
         }
@@ -467,9 +467,9 @@ class RecursiveDecentParserTest {
         void starTokenWithoutRightOperand() {
             Parser parser = createParser(one(), star(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -478,9 +478,9 @@ class RecursiveDecentParserTest {
         void plusTokenWithoutLeftOperand() {
             Parser parser = createParser(plus(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme("+");
         }
@@ -489,9 +489,9 @@ class RecursiveDecentParserTest {
         void plusTokenWithoutRightOperand() {
             Parser parser = createParser(one(), plus(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -500,9 +500,9 @@ class RecursiveDecentParserTest {
         void greaterTokenWithoutLeftOperand() {
             Parser parser = createParser(greater(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme(">");
         }
@@ -511,9 +511,9 @@ class RecursiveDecentParserTest {
         void greaterTokenWithoutRightOperand() {
             Parser parser = createParser(one(), greater(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -522,9 +522,9 @@ class RecursiveDecentParserTest {
         void greaterEqualTokenWithoutLeftOperand() {
             Parser parser = createParser(greaterEqual(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme(">=");
         }
@@ -533,9 +533,9 @@ class RecursiveDecentParserTest {
         void greaterEqualTokenWithoutRightOperand() {
             Parser parser = createParser(one(), greaterEqual(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -544,9 +544,9 @@ class RecursiveDecentParserTest {
         void lessTokenWithoutLeftOperand() {
             Parser parser = createParser(less(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme("<");
         }
@@ -555,9 +555,9 @@ class RecursiveDecentParserTest {
         void lessTokenWithoutRightOperand() {
             Parser parser = createParser(one(), less(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -566,9 +566,9 @@ class RecursiveDecentParserTest {
         void lessEqualTokenWithoutLeftOperand() {
             Parser parser = createParser(lessEqual(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme("<=");
         }
@@ -577,9 +577,9 @@ class RecursiveDecentParserTest {
         void lessEqualTokenWithoutRightOperand() {
             Parser parser = createParser(one(), lessEqual(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -588,9 +588,9 @@ class RecursiveDecentParserTest {
         void bangEqualTokenWithoutLeftOperand() {
             Parser parser = createParser(bangEqual(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme("!=");
         }
@@ -599,9 +599,9 @@ class RecursiveDecentParserTest {
         void bangEqualTokenWithoutRightOperand() {
             Parser parser = createParser(one(), bangEqual(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -610,9 +610,9 @@ class RecursiveDecentParserTest {
         void equalEqualTokenWithoutLeftOperand() {
             Parser parser = createParser(equalEqual(), one(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtLexeme("==");
         }
@@ -621,9 +621,9 @@ class RecursiveDecentParserTest {
         void eqalEqualTokenWithoutRightOperand() {
             Parser parser = createParser(one(), equalEqual(), eof());
 
-            Expression ast = parser.parse();
+            Expression expression = parser.parse();
 
-            assertThat(ast).isNull();
+            assertThat(expression).isNull();
 
             assertErrorAtEnd();
         }
@@ -648,22 +648,22 @@ class RecursiveDecentParserTest {
 
     private void assertErrorAtLexeme(String lexeme) {
         assertThat(fakeErrorReporter.receivedError()).isTrue();
-        assertThat(fakeErrorReporter.getError().getLine()).isEqualTo(1);
-        assertThat(fakeErrorReporter.getError().getLocation()).isEqualTo(String.format(" at '%s'", lexeme));
-        assertThat(fakeErrorReporter.getError().getMessage()).isEqualTo("Expect expression.");
+        assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+        assertThat(fakeErrorReporter.getError().location).isEqualTo(String.format(" at '%s'", lexeme));
+        assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
     }
 
     private void assertErrorAtEnd() {
         assertThat(fakeErrorReporter.receivedError()).isTrue();
-        assertThat(fakeErrorReporter.getError().getLine()).isEqualTo(1);
-        assertThat(fakeErrorReporter.getError().getLocation()).isEqualTo(" at end");
-        assertThat(fakeErrorReporter.getError().getMessage()).isEqualTo("Expect expression.");
+        assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+        assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
+        assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
     }
 
     private void assertRightParenMissing() {
         assertThat(fakeErrorReporter.receivedError()).isTrue();
-        assertThat(fakeErrorReporter.getError().getLine()).isEqualTo(1);
-        assertThat(fakeErrorReporter.getError().getLocation()).isEqualTo(" at end");
-        assertThat(fakeErrorReporter.getError().getMessage()).isEqualTo("Expect ')' after expression.");
+        assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+        assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
+        assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ')' after expression.");
     }
 }

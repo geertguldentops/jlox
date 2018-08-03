@@ -40,7 +40,7 @@ public class RecursiveDecentParser implements Parser {
     private final List<Token> tokens;
     private int current = 0;
 
-    private List<ErrorReporter> errorReporters = new ArrayList<>();
+    private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
     public RecursiveDecentParser(List<Token> tokens) {
         this.tokens = tokens;
