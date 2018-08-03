@@ -4,6 +4,14 @@ import be.guldentops.geert.lox.error.ErrorReporter;
 
 import java.io.IOException;
 
+/**
+ * This class is NOT tested since it:
+ *
+ * * Exposes the static method main which makes it harder to test.
+ * * When errors occur or the program is incorrectly used it performs a System.exit which is hard to test.
+ *
+ * Because it is not tested its logic is kept to a bare minimum.
+ */
 class LoxMain {
 
     public static void main(String[] args) throws IOException {
