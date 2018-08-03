@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._super;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._this;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
@@ -140,6 +141,11 @@ class AbstractSyntaxTreePrinterTest {
         void printThisExpression() {
             assertThat(astPrinter.print(_this())).isEqualTo("this");
         }
+
+        @Test
+        void printSuperExpression() {
+            assertThat(astPrinter.print(_super(identifier("method")))).isEqualTo("(super method)");
+        }
     }
 
     @Nested
@@ -209,6 +215,15 @@ class AbstractSyntaxTreePrinterTest {
                             function("provide", emptyList(), emptyList())
                     ))
             )).isEqualTo("(class Provider (fun provide () ))");
+        }
+
+        @Test
+        void printClassWithSuperClassStatement() {
+            assertThat(astPrinter.print(
+                    _class("Rectangle", variable("Shape"), List.of(
+                            function("calculateCircumference", emptyList(), emptyList())
+                    ))
+            )).isEqualTo("(class Rectangle(superClass Shape) (fun calculateCircumference () ))");
         }
     }
 }

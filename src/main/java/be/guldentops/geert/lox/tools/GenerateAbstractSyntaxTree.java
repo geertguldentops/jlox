@@ -5,6 +5,9 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * No explicit test for this class exists since the code it generates is extensively tested in the parser, resolver and interpreter!
+ */
 class GenerateAbstractSyntaxTree {
 
     public static void main(String[] args) {
@@ -24,6 +27,7 @@ class GenerateAbstractSyntaxTree {
                 "Literal  : Object value",
                 "Logical  : Expression left, Token operator, Expression right",
                 "Set      : Expression object, Token name, Expression value",
+                "Super    : Token keyword, Token method",
                 "This     : Token keyword",
                 "Unary    : Token operator, Expression right",
                 "Variable : Token name"
@@ -31,7 +35,7 @@ class GenerateAbstractSyntaxTree {
 
         defineAbstractSyntaxTree(outputDir, "Statement", Arrays.asList(
                 "Block      : List<Statement> statements",
-                "Class      : Token name, List<Statement.Function> methods",
+                "Class      : Token name, be.guldentops.geert.lox.grammar.Expression.Variable superclass, List<Statement.Function> methods",
                 "Expression : be.guldentops.geert.lox.grammar.Expression expression",
                 "Function   : Token name, List<Token> parameters, List<Statement> body",
                 "If         : be.guldentops.geert.lox.grammar.Expression condition, Statement thenBranch, Statement elseBranch",

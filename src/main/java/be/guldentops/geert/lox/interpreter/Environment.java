@@ -6,11 +6,9 @@ import be.guldentops.geert.lox.lexer.Token;
 import java.util.HashMap;
 import java.util.Map;
 
-import static be.guldentops.geert.lox.lexer.Token.Type.IDENTIFIER;
-
 class Environment {
 
-    private final Environment enclosing;
+    final Environment enclosing;
 
     private final Map<String, Object> values = new HashMap<>();
 
@@ -33,8 +31,15 @@ class Environment {
         values.put(name.lexeme, value);
     }
 
+    void define(String name, Object value) {
+        if (values.containsKey(name))
+            throw new RuntimeError(null, String.format("Variable '%s' is already defined.", name));
+
+        values.put(name, value);
+    }
+
     void defineNativeMethod(String name, LoxCallable loxCallable) {
-        define(new Token(IDENTIFIER, name, null, -1), loxCallable);
+        define(name, loxCallable);
     }
 
     void assign(Token name, Object value) {

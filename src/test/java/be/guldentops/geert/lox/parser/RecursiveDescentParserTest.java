@@ -17,6 +17,7 @@ import static be.guldentops.geert.lox.lexer.TokenObjectMother._false;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother._for;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother._if;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother._return;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother._super;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother._this;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother._true;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother._while;
@@ -361,6 +362,21 @@ class RecursiveDescentParserTest {
             var expression = extractOnlyExpressionFrom(parser.parse());
 
             assertThat(castTo(expression, Expression.This.class).keyword).isEqualToComparingFieldByField(_this());
+        }
+    }
+
+    @Nested
+    class SuperExpression {
+
+        @Test
+        void superToken() {
+            var parser = createParser(_super(), dot(), identifier("method"), semicolon(), eof());
+
+            var expression = extractOnlyExpressionFrom(parser.parse());
+
+            var aSuper = castTo(expression, Expression.Super.class);
+            assertThat(aSuper.keyword).isEqualToComparingFieldByField(_super());
+            assertThat(aSuper.method).isEqualToComparingFieldByField(identifier("method"));
         }
     }
 
@@ -926,6 +942,7 @@ class RecursiveDescentParserTest {
 
             var classStatement = castTo(statements.get(0), Statement.Class.class);
             assertThat(classStatement.name).isEqualToComparingFieldByField(identifier("EmptyClass"));
+            assertThat(classStatement.superclass).isNull();
             assertThat(classStatement.methods).isEmpty();
         }
 
@@ -942,10 +959,27 @@ class RecursiveDescentParserTest {
 
             var classStatement = castTo(statements.get(0), Statement.Class.class);
             assertThat(classStatement.name).isEqualToComparingFieldByField(identifier("Printer"));
+            assertThat(classStatement.superclass).isNull();
             assertThat(classStatement.methods).hasSize(2);
 
             assertFunctionDeclarationWithBodyPrints(classStatement.methods.get(0), "print1", 1.0);
             assertFunctionDeclarationWithBodyPrints(classStatement.methods.get(1), "print2", 2.0);
+        }
+
+        @Test
+        void classWithSuperClassMultipleMethods() {
+            var parser = createParser(_class(), identifier("Circle"), less(), identifier("Shape"), leftBrace(),
+                    rightBrace(), eof());
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+//            assertThat(fakeErrorReporter.getError().message).isEqualTo("Foo");
+
+            var classStatement = castTo(statements.get(0), Statement.Class.class);
+            assertThat(classStatement.name).isEqualToComparingFieldByField(identifier("Circle"));
+            assertVariableExpression(classStatement.superclass, identifier("Shape"));
+            assertThat(classStatement.methods).isEmpty();
         }
     }
 
@@ -1938,6 +1972,49 @@ class RecursiveDescentParserTest {
                 assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
                 assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '}' after class body.");
             }
+
+            @Test
+            void classWithLessTokenButMissingSuperClassIdentifier() {
+                var parser = createParser(_class(), identifier("Foo"), less(), leftBrace(), rightBrace(), eof());
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '{'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expected super class name.");
+            }
+        }
+
+        @Nested
+        class Super {
+
+            @Test
+            void superWithMissingDot() {
+                var parser = createParser(_super(), identifier("method"), semicolon(), eof());
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'method'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '.' after 'super'.");
+            }
+
+            @Test
+            void superWithMissingMethod() {
+                var parser = createParser(_super(), dot(), semicolon(), eof());
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ';'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect superclass method name.");
+            }
         }
 
         @Nested
@@ -2112,6 +2189,7 @@ class RecursiveDescentParserTest {
 
                 var classStatement = castTo(statements.get(1), Statement.Class.class);
                 assertThat(classStatement.name).isEqualToComparingFieldByField(identifier("EmptyClass"));
+                assertThat(classStatement.superclass).isNull();
                 assertThat(classStatement.methods).isEmpty();
             }
         }

@@ -45,10 +45,12 @@ public interface Statement {
     class Class implements Statement {
 
         public final Token name;
+        public final be.guldentops.geert.lox.grammar.Expression.Variable superclass;
         public final List<Statement.Function> methods;
 
-        public Class(Token name, List<Statement.Function> methods) {
+        public Class(Token name, be.guldentops.geert.lox.grammar.Expression.Variable superclass, List<Statement.Function> methods) {
             this.name = name;
+            this.superclass = superclass;
             this.methods = methods;
         }
 

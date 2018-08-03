@@ -99,6 +99,18 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     }
 
     @Override
+    public Void visitSuperExpression(Expression.Super expression) {
+        if (currentClass == ClassType.NONE) {
+            reportError(expression.keyword, "Cannot use 'super' outside of a class.");
+        } else if (currentClass != ClassType.SUBCLASS) {
+            reportError(expression.keyword, "Cannot use 'super' in a class with no superclass.");
+        }
+
+        resolveLocal(expression, expression.keyword);
+        return null;
+    }
+
+    @Override
     public Void visitThisExpression(Expression.This expression) {
         if (currentClass == ClassType.NONE) {
             reportError(expression.keyword, "Cannot use 'this' outside of a class.");
@@ -152,10 +164,22 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitClassStatement(Statement.Class statement) {
-        ClassType enclosingClass = currentClass;
+        var enclosingClass = currentClass;
         currentClass = ClassType.CLASS;
 
         declare(statement.name);
+
+        if (statement.superclass != null) {
+            currentClass = ClassType.SUBCLASS;
+            resolve(statement.superclass);
+        }
+
+        define(statement.name);
+
+        if (statement.superclass != null) {
+            beginScope();
+            scopes.peek().put("super", true);
+        }
 
         beginScope();
         scopes.peek().put("this", true);
@@ -167,7 +191,9 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
         endScope();
 
-        define(statement.name);
+        if (statement.superclass != null) {
+            endScope();
+        }
 
         currentClass = enclosingClass;
         return null;
@@ -209,7 +235,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     }
 
     private void resolveFunction(Statement.Function function, FunctionType type) {
-        FunctionType enclosingFunction = currentFunction;
+        var enclosingFunction = currentFunction;
         currentFunction = type;
 
         beginScope();
@@ -298,6 +324,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     private enum ClassType {
         NONE,
-        CLASS
+        CLASS,
+        SUBCLASS
     }
 }

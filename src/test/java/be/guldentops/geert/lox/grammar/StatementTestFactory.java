@@ -49,6 +49,10 @@ public class StatementTestFactory {
     }
 
     public static Statement.Class _class(String name, List<Statement.Function> methods) {
-        return new Statement.Class(identifier(name), methods);
+        return _class(name, null, methods);
+    }
+
+    public static Statement.Class _class(String name, Expression.Variable superclass, List<Statement.Function> methods) {
+        return new Statement.Class(identifier(name), superclass, methods);
     }
 }

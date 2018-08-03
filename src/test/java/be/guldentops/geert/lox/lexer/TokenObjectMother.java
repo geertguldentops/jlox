@@ -33,6 +33,7 @@ import static be.guldentops.geert.lox.lexer.Token.Type.RIGHT_PAREN;
 import static be.guldentops.geert.lox.lexer.Token.Type.SEMICOLON;
 import static be.guldentops.geert.lox.lexer.Token.Type.SLASH;
 import static be.guldentops.geert.lox.lexer.Token.Type.STAR;
+import static be.guldentops.geert.lox.lexer.Token.Type.SUPER;
 import static be.guldentops.geert.lox.lexer.Token.Type.THIS;
 import static be.guldentops.geert.lox.lexer.Token.Type.TRUE;
 import static be.guldentops.geert.lox.lexer.Token.Type.VAR;
@@ -189,6 +190,10 @@ public class TokenObjectMother {
 
     public static Token _this() {
         return new Token(THIS, "this", null, 1);
+    }
+
+    public static Token _super() {
+        return new Token(SUPER, "super", null, 1);
     }
 
     public static Token dot() {

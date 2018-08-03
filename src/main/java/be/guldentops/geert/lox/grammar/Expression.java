@@ -26,6 +26,8 @@ public interface Expression {
 
         R visitSetExpression(Set expression);
 
+        R visitSuperExpression(Super expression);
+
         R visitThisExpression(This expression);
 
         R visitUnaryExpression(Unary expression);
@@ -154,6 +156,21 @@ public interface Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitSetExpression(this);
+        }
+    }
+
+    class Super implements Expression {
+
+        public final Token keyword;
+        public final Token method;
+
+        public Super(Token keyword, Token method) {
+            this.keyword = keyword;
+            this.method = method;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitSuperExpression(this);
         }
     }
 

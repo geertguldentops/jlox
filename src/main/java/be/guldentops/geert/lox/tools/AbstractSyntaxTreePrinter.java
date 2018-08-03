@@ -60,6 +60,11 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
     }
 
     @Override
+    public String visitSuperExpression(Expression.Super expression) {
+        return "(" + expression.keyword.lexeme + " " + expression.method.lexeme + ")";
+    }
+
+    @Override
     public String visitThisExpression(Expression.This expression) {
         return expression.keyword.lexeme;
     }
@@ -76,7 +81,7 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
 
     @Override
     public String visitBlockStatement(Statement.Block block) {
-        StringBuilder sb = new StringBuilder("(block ");
+        var sb = new StringBuilder("(block ");
 
         for (var statement : block.statements) {
             sb.append(print(statement));
@@ -89,15 +94,21 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
 
     @Override
     public String visitClassStatement(Statement.Class statement) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("(class ").append(statement.name.lexeme);
+        var sb = new StringBuilder();
+        sb.append("(class ").append(statement.name.lexeme);
+        appendSuperClass(sb, statement);
 
         for (Statement.Function method : statement.methods) {
-            builder.append(" ").append(print(method));
+            sb.append(" ").append(print(method));
         }
 
-        builder.append(")");
-        return builder.toString();
+        sb.append(")");
+        return sb.toString();
+    }
+
+    private void appendSuperClass(StringBuilder sb, Statement.Class statement) {
+        if (statement.superclass != null)
+            sb.append("(superClass ").append(print(statement.superclass)).append(")");
     }
 
     @Override

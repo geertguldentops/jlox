@@ -34,7 +34,8 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
                     | funDecl
                     | varDecl
                     | statement ;
-    classDecl       → "class" IDENTIFIER "{" function* "}" ;
+    classDecl       → "class" IDENTIFIER ( "<" IDENTIFIER )?
+                    "{" function* "}" ;
     funDecl         → "fun" function ;
     function        → IDENTIFIER "(" parameters? ")" block ;
     parameters      → IDENTIFIER ( "," IDENTIFIER )* ;
@@ -67,9 +68,8 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
     call            → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
     arguments       → expression ( "," expression )* ;
     primary         → "true" | "false" | "nil" | "this"
-                    | NUMBER | STRING
-                    | "(" expression ")"
-                    | IDENTIFIER ;
+                    | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+                    | "super" "." IDENTIFIER ;
                 
 ## Lox Precedence Rules ##
 

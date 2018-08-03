@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._super;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._this;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
@@ -545,6 +546,41 @@ class PostOrderTraversalInterpreterTest {
             assertThat(fakeErrorReporter.getRuntimeError())
                     .isInstanceOf(RuntimeError.class)
                     .hasMessage("Undefined property 'beacon'.");
+        }
+
+        @Test
+        void classSuperclassMustAlsoBeAClass() {
+            interpret(
+                    variableDeclaration("Circle", literal("Not a class!")),
+                    _class("Square", variable("Circle"), emptyList())
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Superclass must be a class.");
+        }
+
+        @Test
+        void superMethodDoesNotExistOnSuperclass() {
+            interpret(
+                    _class("Shape", emptyList()),
+                    _class("Rectangle", variable("Shape"), List.of(
+                            function("calculateCircumference", emptyList(),
+                                    List.of(
+                                            expressionStatement(call(_super(identifier("calculateCircumference")))),
+                                            print(literal("Rectangle circumference"))
+                                    )
+                            )
+                    )),
+                    expressionStatement(call(get(call(variable("Rectangle")), identifier("calculateCircumference"))))
+            );
+
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Undefined property 'calculateCircumference'.");
         }
 
         private void assertBinaryExpressionCanOnlyOperateOnNumbersOrStrings(Expression expression1, Token operator, Expression expression2) {
@@ -1167,6 +1203,42 @@ class PostOrderTraversalInterpreterTest {
 
             assertThat(outContent.toString()).isEqualTo("Geert\n");
         }
+
+        @Test
+        void callInheritedMethod() {
+            interpret(
+                    _class("SuperPrinter", List.of(
+                            function("print", emptyList(), List.of(
+                                    print(literal("Printing in SuperPrinter"))
+                            ))
+                    )),
+                    _class("Printer", variable("SuperPrinter"), emptyList()),
+                    variableDeclaration("printer", call("Printer")),
+                    expressionStatement(call(get(variable("printer"), identifier("print"))))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("Printing in SuperPrinter\n");
+        }
+
+        @Test
+        void callOverriddenMethod() {
+            interpret(
+                    _class("SuperPrinter", List.of(
+                            function("print", emptyList(), List.of(
+                                    print(literal("Printing in SuperPrinter"))
+                            ))
+                    )),
+                    _class("Printer", variable("SuperPrinter"), List.of(
+                            function("print", emptyList(), List.of(
+                                    print(literal("Printing in Printer"))
+                            ))
+                    )),
+                    variableDeclaration("printer", call("Printer")),
+                    expressionStatement(call(get(variable("printer"), identifier("print"))))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("Printing in Printer\n");
+        }
     }
 
     @Nested
@@ -1289,6 +1361,49 @@ class PostOrderTraversalInterpreterTest {
             );
 
             assertThat(outContent.toString()).isEqualTo("3.14\n2.72\n");
+        }
+    }
+
+    @Nested
+    class SuperCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void callSuperMethodOnParent() {
+            interpret(
+                    _class("Shape", List.of(
+                            function("calculateCircumference", emptyList(),
+                                    List.of(
+                                            print(literal("Shape circumference"))
+                                    )
+                            )
+                    )),
+                    _class("Rectangle", variable("Shape"), List.of(
+                            function("calculateCircumference", emptyList(),
+                                    List.of(
+                                            expressionStatement(call(_super(identifier("calculateCircumference")))),
+                                            print(literal("Rectangle circumference"))
+                                    )
+                            )
+                    )),
+                    expressionStatement(call(get(call(variable("Rectangle")), identifier("calculateCircumference"))))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("Shape circumference\nRectangle circumference\n");
         }
     }
 

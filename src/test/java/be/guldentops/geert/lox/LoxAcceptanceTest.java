@@ -263,6 +263,27 @@ class LoxAcceptanceTest {
 
             assertThat(outContent.toString()).isEqualTo("50.265482448\n");
         }
+
+        @Test
+        void canRunCallInheritedMethodScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/CallInheritedMethod.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("Fry until golden brown.\n");
+        }
+
+        @Test
+        void canRunOverrideMethodScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/OverrideMethod.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("Fry until golden brown.\nPipe full of custard and coat with chocolate.\n");
+        }
+
+        @Test
+        void canRunSuperLookupStartsInClassContainingSuperScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/SuperLookupStartsInClassContainingSuper.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("A method\n");
+        }
     }
 
     @Nested

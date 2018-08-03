@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._super;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._this;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
@@ -285,6 +286,93 @@ class VariableResolverTest {
         }
 
         @Test
+        void superClassInGlobalScope() {
+            var _this = _this();
+
+            resolve(
+                    _class("Shape", emptyList()),
+                    _class("Rectangle", variable("Shape"), List.of(
+                            function("calculateCircumference", emptyList(),
+                                    List.of(
+                                            print(get(_this, identifier("Rectangle circumference")))
+                                    )
+                            )
+                    )),
+                    expressionStatement(call(get(call(variable("Rectangle")), identifier("calculateCircumference"))))
+            );
+
+            assertNoErrors();
+
+            assertThat(fakeResolutionAnalyzer.depthPerExpression)
+                    .hasSize(1)
+                    .contains(
+                            entry(_this, 1)
+                    );
+        }
+
+        @Test
+        void superClassInSameBlockScope() {
+            var shape = variable("Shape");
+            var _this = _this();
+            var rectangle = variable("Rectangle");
+
+            resolve(
+                    blockStatement(
+                            _class("Shape", emptyList()),
+                            _class("Rectangle", shape, List.of(
+                                    function("calculateCircumference", emptyList(),
+                                            List.of(
+                                                    print(get(_this, identifier("Rectangle circumference")))
+                                            )
+                                    )
+                            )),
+                            expressionStatement(call(get(call(rectangle), identifier("calculateCircumference"))))
+                    )
+            );
+
+            assertNoErrors();
+
+            assertThat(fakeResolutionAnalyzer.depthPerExpression)
+                    .hasSize(3)
+                    .contains(
+                            entry(_this, 1),
+                            entry(shape, 0),
+                            entry(rectangle, 0)
+                    );
+        }
+
+        @Test
+        void superClassInOuterBlockScope() {
+            var shape = variable("Shape");
+            var _this = _this();
+
+            resolve(
+                    blockStatement(
+                            _class("Shape", emptyList()),
+                            blockStatement(
+                                    _class("Rectangle", shape, List.of(
+                                            function("calculateCircumference", emptyList(),
+                                                    List.of(
+                                                            print(get(_this, identifier("Rectangle circumference")))
+                                                    )
+                                            )
+                                    ))
+                            )
+                    ),
+                    expressionStatement(call(get(call(variable("Rectangle")), identifier("calculateCircumference"))))
+            );
+
+            assertNoErrors();
+
+            assertThat(fakeResolutionAnalyzer.depthPerExpression)
+                    .hasSize(2)
+                    .contains(
+                            entry(shape, 1),
+                            entry(_this, 1)
+                    );
+        }
+
+        @Test
         void canNotResolveThisWithoutClassInGlobalScope() {
             resolve(
                     print(_this())
@@ -312,6 +400,84 @@ class VariableResolverTest {
             assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
             assertThat(fakeErrorReporter.getError().location).isEqualTo("this");
             assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot use 'this' outside of a class.");
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
+        }
+    }
+
+    @Nested
+    class SuperExpression {
+
+        @Test
+        void callSuperMethodOnParent() {
+            var super_calculateCircumference = _super(identifier("calculateCircumference"));
+
+            resolve(
+                    _class("Shape", List.of(
+                            function("calculateCircumference", emptyList(),
+                                    List.of(
+                                            print(literal("Shape circumference"))
+                                    )
+                            )
+                    )),
+                    _class("Rectangle", variable("Shape"), List.of(
+                            function("calculateCircumference", emptyList(),
+                                    List.of(
+                                            expressionStatement(call(super_calculateCircumference)),
+                                            print(literal("Rectangle circumference"))
+                                    )
+                            )
+                    )),
+                    expressionStatement(call(get(call(variable("Rectangle")), identifier("calculateCircumference"))))
+            );
+
+            assertNoErrors();
+
+            assertThat(fakeResolutionAnalyzer.depthPerExpression)
+                    .hasSize(1)
+                    .contains(
+                            entry(super_calculateCircumference, 2)
+                    );
+        }
+
+        @Test
+        void superOutsideOfClass() {
+            resolve(
+                    function("calculateCircumference", emptyList(),
+                            List.of(
+                                    expressionStatement(call(_super(identifier("calculateCircumference")))),
+                                    print(literal("Rectangle circumference"))
+                            )
+                    ),
+                    expressionStatement(call("calculateCircumference"))
+            );
+
+            assertThat(fakeErrorReporter.receivedError()).isTrue();
+            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+            assertThat(fakeErrorReporter.getError().location).isEqualTo("super");
+            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot use 'super' outside of a class.");
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
+        }
+
+        @Test
+        void superInClassWithoutSuperclass() {
+            resolve(
+                    _class("Rectangle", List.of(
+                            function("calculateCircumference", emptyList(),
+                                    List.of(
+                                            expressionStatement(call(_super(identifier("calculateCircumference")))),
+                                            print(literal("Rectangle circumference"))
+                                    )
+                            )
+                    )),
+                    expressionStatement(call(get(call(variable("Rectangle")), identifier("calculateCircumference"))))
+            );
+
+            assertThat(fakeErrorReporter.receivedError()).isTrue();
+            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+            assertThat(fakeErrorReporter.getError().location).isEqualTo("super");
+            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot use 'super' in a class with no superclass.");
             assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
             assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
         }

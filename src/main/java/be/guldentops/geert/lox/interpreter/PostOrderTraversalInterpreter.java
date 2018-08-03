@@ -70,7 +70,21 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Void visitClassStatement(Statement.Class statement) {
+        Object superclass = null;
+        if (statement.superclass != null) {
+            superclass = evaluate(statement.superclass);
+
+            if (!(superclass instanceof LoxClass)) {
+                throw new RuntimeError(statement.superclass.name, "Superclass must be a class.");
+            }
+        }
+
         environment.define(statement.name, null);
+
+        if (superclass != null) {
+            environment = Environment.createLocal(environment);
+            environment.define("super", superclass);
+        }
 
         var methods = new HashMap<String, LoxFunction>();
         for (var method : statement.methods) {
@@ -78,7 +92,12 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
             methods.put(method.name.lexeme, function);
         }
 
-        LoxClass clazz = new LoxClass(statement.name.lexeme, methods);
+        LoxClass clazz = new LoxClass(statement.name.lexeme, (LoxClass) superclass, methods);
+
+        if (superclass != null) {
+            environment = environment.enclosing;
+        }
+
         environment.assign(statement.name, clazz);
 
         return null;
@@ -315,6 +334,24 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         }
 
         throw new RuntimeError(expression.name, "Only instances have fields.");
+    }
+
+    @Override
+    public Object visitSuperExpression(Expression.Super expression) {
+        int distance = locals.get(expression);
+
+        var superclass = (LoxClass) environment.getAt(distance, "super");
+
+        // "this" is always one level nearer than "super"'s environment.
+        var object = (LoxInstance) environment.getAt(distance - 1, "this");
+
+        LoxFunction method = superclass.findMethod(object, expression.method.lexeme);
+
+        if (method == null) {
+            throw new RuntimeError(expression.method, String.format("Undefined property '%s'.", expression.method.lexeme));
+        }
+
+        return method;
     }
 
     @Override

@@ -46,6 +46,7 @@ import static be.guldentops.geert.lox.lexer.Token.Type.SEMICOLON;
 import static be.guldentops.geert.lox.lexer.Token.Type.SLASH;
 import static be.guldentops.geert.lox.lexer.Token.Type.STAR;
 import static be.guldentops.geert.lox.lexer.Token.Type.STRING;
+import static be.guldentops.geert.lox.lexer.Token.Type.SUPER;
 import static be.guldentops.geert.lox.lexer.Token.Type.THIS;
 import static be.guldentops.geert.lox.lexer.Token.Type.TRUE;
 import static be.guldentops.geert.lox.lexer.Token.Type.VAR;
@@ -101,6 +102,13 @@ class RecursiveDescentParser implements Parser {
 
     private Statement classDeclaration() {
         Token name = consume(IDENTIFIER, "Expect class name.");
+
+        Expression.Variable superclass = null;
+        if (match(LESS)) {
+            consume(IDENTIFIER, "Expected super class name.");
+            superclass = new Expression.Variable(previous());
+        }
+
         consume(LEFT_BRACE, "Expect '{' before class body.");
 
         List<Statement.Function> methods = new ArrayList<>();
@@ -110,7 +118,7 @@ class RecursiveDescentParser implements Parser {
 
         consume(RIGHT_BRACE, "Expect '}' after class body.");
 
-        return new Statement.Class(name, methods);
+        return new Statement.Class(name, superclass, methods);
     }
 
     private Statement.Function function(String function) {
@@ -376,6 +384,13 @@ class RecursiveDescentParser implements Parser {
         }
 
         if (match(THIS)) return new Expression.This(previous());
+
+        if (match(SUPER)) {
+            Token keyword = previous();
+            consume(DOT, "Expect '.' after 'super'.");
+            Token method = consume(IDENTIFIER, "Expect superclass method name.");
+            return new Expression.Super(keyword, method);
+        }
 
         if (match(IDENTIFIER)) return new Expression.Variable(previous());
 

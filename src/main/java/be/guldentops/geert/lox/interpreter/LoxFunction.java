@@ -1,11 +1,8 @@
 package be.guldentops.geert.lox.interpreter;
 
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.lexer.Token;
 
 import java.util.List;
-
-import static be.guldentops.geert.lox.lexer.Token.Type.THIS;
 
 class LoxFunction implements LoxCallable {
 
@@ -29,7 +26,7 @@ class LoxFunction implements LoxCallable {
 
     LoxFunction bind(LoxInstance instance) {
         var environment = Environment.createLocal(closure);
-        environment.define(new Token(THIS, "this", null, 1), instance);
+        environment.define("this", instance);
         return LoxFunction.createFunction(declaration, environment);
     }
 

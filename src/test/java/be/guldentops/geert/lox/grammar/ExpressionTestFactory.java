@@ -60,4 +60,8 @@ public class ExpressionTestFactory {
     public static Expression.This _this() {
         return new Expression.This(TokenObjectMother._this());
     }
+
+    public static Expression.Super _super(Token method) {
+        return new Expression.Super(TokenObjectMother._super(), method);
+    }
 }
