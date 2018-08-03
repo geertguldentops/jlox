@@ -15,15 +15,19 @@ import java.nio.file.Paths;
 
 class Lox {
 
-    private final ErrorReporter errorReporter;
+    private final ErrorReporter syntaxErrorReporter;
+    private final ErrorReporter semanticErrorReporter;
+    private final ErrorReporter runtimeErrorReporter;
 
     // MUST be a global variable so REPL sessions can reuse the same interpreter!
     private final Interpreter interpreter;
 
-    Lox(ErrorReporter errorReporter) {
-        this.errorReporter = errorReporter;
+    Lox(ErrorReporter syntaxErrorReporter, ErrorReporter semanticErrorReporter, ErrorReporter runtimeErrorReporter) {
+        this.syntaxErrorReporter = syntaxErrorReporter;
+        this.semanticErrorReporter = semanticErrorReporter;
+        this.runtimeErrorReporter = runtimeErrorReporter;
         this.interpreter = Interpreter.createDefault();
-        this.interpreter.addErrorReporter(errorReporter);
+        this.interpreter.addErrorReporter(runtimeErrorReporter);
     }
 
     void runFile(String path) throws IOException {
@@ -37,28 +41,34 @@ class Lox {
         while (true) {
             System.out.print("> ");
             run(reader.readLine());
-            errorReporter.reset();
+            resetAllErrorReporters();
         }
+    }
+
+    private void resetAllErrorReporters() {
+        syntaxErrorReporter.reset();
+        semanticErrorReporter.reset();
+        runtimeErrorReporter.reset();
     }
 
     private void run(String sourceCode) {
         var scanner = Scanner.createDefault(sourceCode);
-        scanner.addErrorReporter(errorReporter);
+        scanner.addErrorReporter(syntaxErrorReporter);
         var tokens = scanner.scanTokens();
 
         var parser = Parser.createDefault(tokens);
-        parser.addErrorReporter(errorReporter);
+        parser.addErrorReporter(syntaxErrorReporter);
         var statements = parser.parse();
 
         // Stop if the parser found a syntax error.
-        if (errorReporter.receivedError()) return;
+        if (syntaxErrorReporter.receivedError()) return;
 
         var resolver = Resolver.createDefault(interpreter);
-        resolver.addErrorReporter(errorReporter);
+        resolver.addErrorReporter(semanticErrorReporter);
         resolver.resolve(statements);
 
-        // Stop if the resolver found a syntax error.
-        if (errorReporter.receivedError()) return;
+        // Stop if the resolver found a semantic error.
+        if (semanticErrorReporter.receivedError()) return;
 
         interpreter.interpret(statements);
     }

@@ -1,7 +1,6 @@
 package be.guldentops.geert.lox.interpreter;
 
 import be.guldentops.geert.lox.error.FakeErrorReporter;
-import be.guldentops.geert.lox.error.RuntimeError;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.Token;
@@ -269,24 +268,21 @@ class PostOrderTraversalInterpreterTest {
         void unaryExpressionWithInvalidRight() {
             assertThat(interpreter.interpret(unary(minus(), literal("hello world")))).isNull();
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Operand must be a number.");
+            assertError("[line 1] RuntimeError: at '-' operand must be a number.");
         }
 
         @Test
         void unaryExpressionWithInvalidOperator() {
             assertThat(interpreter.interpret(unary(nil(), literal(1.0)))).isNull();
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
 
         @Test
         void binaryExpressionWithInvalidOperator() {
             assertThat(interpreter.interpret(binary(literal(2.0), bang(), literal(1.0)))).isNull();
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
 
         @Test
@@ -370,20 +366,14 @@ class PostOrderTraversalInterpreterTest {
         void divideByZero() {
             assertThat(interpreter.interpret(binary(literal(5.0), slash(), literal(0.0)))).isNull();
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Can not divide by zero!");
+            assertError("[line 1] RuntimeError: at '/' can not divide by zero!");
         }
 
         @Test
         void runtimeErrorWhenPrinting() {
             interpret(print(binary(literal(5.0), slash(), literal(0.0))));
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Can not divide by zero!");
+            assertError("[line 1] RuntimeError: at '/' can not divide by zero!");
 
         }
 
@@ -391,10 +381,7 @@ class PostOrderTraversalInterpreterTest {
         void variableExpressionWithoutVariableDefined() {
             assertThat(interpreter.interpret(variable("a"))).isNull();
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Undefined variable 'a'.");
+            assertError("[line 1] RuntimeError: at 'a' undefined variable.");
         }
 
         @Test
@@ -405,20 +392,14 @@ class PostOrderTraversalInterpreterTest {
 
             assertThat(environment.get(identifier("a"))).isEqualTo(1.0);
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Variable 'a' is already defined.");
+            assertError("[line 1] RuntimeError: at 'a' variable is already defined.");
         }
 
         @Test
         void assignmentExpressionWithoutVariableDefined() {
             assertThat(interpreter.interpret(assign("a", literal(1.0)))).isNull();
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Undefined variable 'a'.");
+            assertError("[line 1] RuntimeError: at 'a' undefined variable.");
         }
 
         @Test
@@ -429,10 +410,7 @@ class PostOrderTraversalInterpreterTest {
                     )
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Undefined variable 'a'.");
+            assertError("[line 1] RuntimeError: at 'a' undefined variable.");
         }
 
         @Test
@@ -441,10 +419,7 @@ class PostOrderTraversalInterpreterTest {
                     expressionStatement(call("function that does not exist"))
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Undefined variable 'function that does not exist'.");
+            assertError("[line 1] RuntimeError: at 'function that does not exist' undefined variable.");
         }
 
         @Test
@@ -454,10 +429,7 @@ class PostOrderTraversalInterpreterTest {
                     expressionStatement(call("totally not a function"))
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Can only call functions and classes.");
+            assertError("[line 1] RuntimeError: at ')' can only call functions and classes.");
         }
 
         @Test
@@ -471,10 +443,7 @@ class PostOrderTraversalInterpreterTest {
                     expressionStatement(call("twoArgumentsFunction", literal(1.0)))
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Expected 2 argument(s) but got 1.");
+            assertError("[line 1] RuntimeError: at ')' expected 2 argument(s) but got 1.");
         }
 
         @Test
@@ -488,10 +457,7 @@ class PostOrderTraversalInterpreterTest {
                     expressionStatement(call("singleArgumentsFunction", literal(1.0), literal(2.0)))
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Expected 1 argument(s) but got 2.");
+            assertError("[line 1] RuntimeError: at ')' expected 1 argument(s) but got 2.");
         }
 
         @Test
@@ -502,10 +468,7 @@ class PostOrderTraversalInterpreterTest {
                     print(get(variable("p"), identifier("x")))
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Undefined property 'x'.");
+            assertError("[line 1] RuntimeError: at 'x' undefined property.");
         }
 
         @Test
@@ -515,10 +478,7 @@ class PostOrderTraversalInterpreterTest {
                     print(get(variable("p"), identifier("x")))
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Only instances have properties.");
+            assertError("[line 1] RuntimeError: at 'x' only instances have properties.");
         }
 
         @Test
@@ -528,10 +488,7 @@ class PostOrderTraversalInterpreterTest {
                     print(set(variable("p"), identifier("x"), literal(2.0)))
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Only instances have fields.");
+            assertError("[line 1] RuntimeError: at 'x' only instances have fields.");
         }
 
         @Test
@@ -542,10 +499,7 @@ class PostOrderTraversalInterpreterTest {
                     expressionStatement(call(get(variable("favouriteBreakfast"), identifier("beacon"))))
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Undefined property 'beacon'.");
+            assertError("[line 1] RuntimeError: at 'beacon' undefined property.");
         }
 
         @Test
@@ -555,10 +509,7 @@ class PostOrderTraversalInterpreterTest {
                     _class("Square", variable("Circle"), emptyList())
             );
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Superclass must be a class.");
+            assertError("[line 1] RuntimeError: at 'Circle' superclass must be a class.");
         }
 
         @Test
@@ -577,34 +528,30 @@ class PostOrderTraversalInterpreterTest {
             );
 
 
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage("Undefined property 'calculateCircumference'.");
+            assertError("[line 1] RuntimeError: at 'calculateCircumference' undefined property.");
         }
 
         private void assertBinaryExpressionCanOnlyOperateOnNumbersOrStrings(Expression expression1, Token operator, Expression expression2) {
-            assertBinaryExpressionThrowsRuntimeErrorWithMessage(expression1, operator, expression2, "Operands must be two numbers or two strings.");
+            assertBinaryExpressionThrowsRuntimeErrorWithMessage(expression1, operator, expression2, "[line 1] RuntimeError: at '" + operator.lexeme + "' operands must be two numbers or two strings.");
         }
 
         private void assertBinaryExpressionCanOnlyOperateOnNumbers(Expression expression1, Token operator, Expression expression2) {
-            assertBinaryExpressionThrowsRuntimeErrorWithMessage(expression1, operator, expression2, "Operands must be numbers.");
+            assertBinaryExpressionThrowsRuntimeErrorWithMessage(expression1, operator, expression2, "[line 1] RuntimeError: at '" + operator.lexeme + "' operands must be numbers.");
         }
 
         private void assertBinaryExpressionThrowsRuntimeErrorWithMessage(Expression expression1, Token operator, Expression expression2, String message) {
             assertThat(interpreter.interpret(binary(expression1, operator, expression2))).isNull();
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage(message);
+            assertError(message);
 
             fakeErrorReporter.reset();
 
             assertThat(interpreter.interpret(binary(expression2, operator, expression1))).isNull();
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
-            assertThat(fakeErrorReporter.getRuntimeError())
-                    .isInstanceOf(RuntimeError.class)
-                    .hasMessage(message);
+            assertError(message);
+        }
+
+        private void assertError(String message) {
+            assertThat(fakeErrorReporter.receivedError()).isTrue();
+            assertThat(fakeErrorReporter.getError()).isInstanceOf(RuntimeError.class).hasToString(message);
         }
     }
 

@@ -1,6 +1,5 @@
 package be.guldentops.geert.lox.interpreter;
 
-import be.guldentops.geert.lox.error.RuntimeError;
 import be.guldentops.geert.lox.lexer.Token;
 
 import java.util.HashMap;
@@ -23,7 +22,7 @@ class LoxInstance {
         var method = clazz.findMethod(this, name.lexeme);
         if (method != null) return method;
 
-        throw new RuntimeError(name, String.format("Undefined property '%s'.", name.lexeme));
+        throw new RuntimeError(name, "undefined property.");
     }
 
     public void set(Token name, Object value) {

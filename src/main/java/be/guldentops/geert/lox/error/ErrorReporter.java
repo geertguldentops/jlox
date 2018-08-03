@@ -10,9 +10,5 @@ public interface ErrorReporter {
 
     boolean receivedError();
 
-    void handle(RuntimeError error);
-
-    boolean receivedRuntimeError();
-
     void reset();
 }

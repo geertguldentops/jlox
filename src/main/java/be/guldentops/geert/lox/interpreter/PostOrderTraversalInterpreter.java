@@ -1,7 +1,6 @@
 package be.guldentops.geert.lox.interpreter;
 
 import be.guldentops.geert.lox.error.ErrorReporter;
-import be.guldentops.geert.lox.error.RuntimeError;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.Token;
@@ -75,7 +74,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
             superclass = evaluate(statement.superclass);
 
             if (!(superclass instanceof LoxClass)) {
-                throw new RuntimeError(statement.superclass.name, "Superclass must be a class.");
+                throw new RuntimeError(statement.superclass.name, "superclass must be a class.");
             }
         }
 
@@ -249,7 +248,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
                     return (String) left + (String) right;
                 }
 
-                throw new RuntimeError(expression.operator, "Operands must be two numbers or two strings.");
+                throw new RuntimeError(expression.operator, "operands must be two numbers or two strings.");
             case SLASH:
                 checkNumberOperands(expression.operator, left, right);
                 checkNull(expression.operator, (double) right);
@@ -271,7 +270,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         var callee = evaluate(expression.callee);
 
         if (!(callee instanceof LoxCallable)) {
-            throw new RuntimeError(expression.paren, "Can only call functions and classes.");
+            throw new RuntimeError(expression.paren, "can only call functions and classes.");
         }
 
         var arguments = expression.arguments.stream()
@@ -283,7 +282,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         if (arguments.size() != function.arity()) {
             throw new RuntimeError(
                     expression.paren,
-                    String.format("Expected %d argument(s) but got %d.", function.arity(), arguments.size())
+                    String.format("expected %d argument(s) but got %d.", function.arity(), arguments.size())
             );
         }
 
@@ -297,7 +296,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
             return ((LoxInstance) object).get(expression.name);
         }
 
-        throw new RuntimeError(expression.name, "Only instances have properties.");
+        throw new RuntimeError(expression.name, "only instances have properties.");
     }
 
     @Override
@@ -333,7 +332,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
             return value;
         }
 
-        throw new RuntimeError(expression.name, "Only instances have fields.");
+        throw new RuntimeError(expression.name, "only instances have fields.");
     }
 
     @Override
@@ -348,7 +347,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         LoxFunction method = superclass.findMethod(object, expression.method.lexeme);
 
         if (method == null) {
-            throw new RuntimeError(expression.method, String.format("Undefined property '%s'.", expression.method.lexeme));
+            throw new RuntimeError(expression.method, "undefined property.");
         }
 
         return method;
@@ -403,17 +402,17 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     private void checkNumberOperand(Token operator, Object operand) {
         if (operand instanceof Double) return;
 
-        throw new RuntimeError(operator, "Operand must be a number.");
+        throw new RuntimeError(operator, "operand must be a number.");
     }
 
     private void checkNumberOperands(Token operator, Object left, Object right) {
         if (left instanceof Double && right instanceof Double) return;
 
-        throw new RuntimeError(operator, "Operands must be numbers.");
+        throw new RuntimeError(operator, "operands must be numbers.");
     }
 
     private void checkNull(Token operator, double d) {
-        if (d == 0) throw new RuntimeError(operator, "Can not divide by zero!");
+        if (d == 0) throw new RuntimeError(operator, "can not divide by zero!");
     }
 
     private boolean isEqual(Object a, Object b) {

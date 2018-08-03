@@ -247,11 +247,7 @@ class VariableResolverTest {
                     )
             );
 
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo("a");
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot read local variable in its own initializer.");
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertError("[line 1] SemanticError: at 'a' cannot read local variable in its own initializer.");
             assertThat(fakeResolutionAnalyzer.depthPerExpression)
                     .hasSize(1)
                     .contains(entry(variable, 0));
@@ -378,11 +374,7 @@ class VariableResolverTest {
                     print(_this())
             );
 
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo("this");
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot use 'this' outside of a class.");
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertError("[line 1] SemanticError: at 'this' cannot use 'this' outside of a class.");
             assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
         }
 
@@ -396,11 +388,7 @@ class VariableResolverTest {
                     )
             );
 
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo("this");
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot use 'this' outside of a class.");
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertError("[line 1] SemanticError: at 'this' cannot use 'this' outside of a class.");
             assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
         }
     }
@@ -452,11 +440,7 @@ class VariableResolverTest {
                     expressionStatement(call("calculateCircumference"))
             );
 
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo("super");
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot use 'super' outside of a class.");
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertError("[line 1] SemanticError: at 'super' cannot use 'super' outside of a class.");
             assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
         }
 
@@ -474,11 +458,7 @@ class VariableResolverTest {
                     expressionStatement(call(get(call(variable("Rectangle")), identifier("calculateCircumference"))))
             );
 
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo("super");
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot use 'super' in a class with no superclass.");
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertError("[line 1] SemanticError: at 'super' cannot use 'super' in a class with no superclass.");
             assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
         }
     }
@@ -808,11 +788,7 @@ class VariableResolverTest {
                     _return(literal("at top level"))
             );
 
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo("return");
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot return from top-level code.");
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertError("[line 1] SemanticError: at 'return' cannot return from top-level code.");
             assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
         }
     }
@@ -831,11 +807,7 @@ class VariableResolverTest {
                     )
             );
 
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo("a");
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Variable with this name already declared in this scope.");
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertError("[line 1] SemanticError: at 'a' variable with this name already declared in this scope.");
             assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
         }
 
@@ -871,11 +843,7 @@ class VariableResolverTest {
                     )
             );
 
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo("return");
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot return a value from an initializer.");
-            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertError("[line 1] SemanticError: at 'return' cannot return a value from an initializer.");
             assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
         }
     }
@@ -900,6 +868,10 @@ class VariableResolverTest {
 
     private void assertNoErrors() {
         assertThat(fakeErrorReporter.receivedError()).isFalse();
-        assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+    }
+
+    private void assertError(String message) {
+        assertThat(fakeErrorReporter.receivedError()).isTrue();
+        assertThat(fakeErrorReporter.getError()).hasToString(message);
     }
 }

@@ -1,7 +1,7 @@
 package be.guldentops.geert.lox.parser;
 
-import be.guldentops.geert.lox.error.Error;
 import be.guldentops.geert.lox.error.ErrorReporter;
+import be.guldentops.geert.lox.error.SyntaxError;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.Token;
@@ -101,56 +101,56 @@ class RecursiveDescentParser implements Parser {
     }
 
     private Statement classDeclaration() {
-        Token name = consume(IDENTIFIER, "Expect class name.");
+        Token name = consume(IDENTIFIER, "expect class name.");
 
         Expression.Variable superclass = null;
         if (match(LESS)) {
-            consume(IDENTIFIER, "Expected super class name.");
+            consume(IDENTIFIER, "expected super class name.");
             superclass = new Expression.Variable(previous());
         }
 
-        consume(LEFT_BRACE, "Expect '{' before class body.");
+        consume(LEFT_BRACE, "expect '{' before class body.");
 
         List<Statement.Function> methods = new ArrayList<>();
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
             methods.add(function("method"));
         }
 
-        consume(RIGHT_BRACE, "Expect '}' after class body.");
+        consume(RIGHT_BRACE, "expect '}' after class body.");
 
         return new Statement.Class(name, superclass, methods);
     }
 
     private Statement.Function function(String function) {
-        Token name = consume(IDENTIFIER, "Expect " + function + " name.");
+        Token name = consume(IDENTIFIER, "expect " + function + " name.");
 
-        consume(LEFT_PAREN, "Expect '(' after " + function + " name.");
+        consume(LEFT_PAREN, "expect '(' after " + function + " name.");
         List<Token> parameters = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
             do {
                 if (parameters.size() >= 8) {
-                    reportError(peek(), "Cannot have more than 8 parameters.");
+                    reportError(peek(), "cannot have more than 8 parameters.");
                 }
 
-                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+                parameters.add(consume(IDENTIFIER, "expect parameter name."));
             } while (match(COMMA));
         }
-        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(RIGHT_PAREN, "expect ')' after parameters.");
 
-        consume(LEFT_BRACE, "Expect '{' before " + function + " body.");
+        consume(LEFT_BRACE, "expect '{' before " + function + " body.");
         List<Statement> body = block();
         return new Statement.Function(name, parameters, body);
     }
 
     private Statement variableDeclaration() {
-        Token name = consume(IDENTIFIER, "Expected variable name");
+        Token name = consume(IDENTIFIER, "expected variable name");
 
         Expression initializer = null;
         if (match(EQUAL)) {
             initializer = expression();
         }
 
-        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        consume(SEMICOLON, "expect ';' after variable declaration.");
         return new Statement.Variable(name, initializer);
     }
 
@@ -172,12 +172,12 @@ class RecursiveDescentParser implements Parser {
             value = expression();
         }
 
-        consume(SEMICOLON, "Expect ';' after return value.");
+        consume(SEMICOLON, "expect ';' after return value.");
         return new Statement.Return(keyword, value);
     }
 
     private Statement forStatement() {
-        consume(LEFT_PAREN, "Expect '(' after 'for'.");
+        consume(LEFT_PAREN, "expect '(' after 'for'.");
 
         Statement initializer;
         if (match(SEMICOLON)) {
@@ -192,13 +192,13 @@ class RecursiveDescentParser implements Parser {
         if (!check(SEMICOLON)) {
             condition = expression();
         }
-        consume(SEMICOLON, "Expect ';' after loop condition.");
+        consume(SEMICOLON, "expect ';' after loop condition.");
 
         Expression increment = null;
         if (!check(RIGHT_PAREN)) {
             increment = expression();
         }
-        consume(RIGHT_PAREN, "Expect ')' after 'for increment'.");
+        consume(RIGHT_PAREN, "expect ')' after 'for increment'.");
 
         Statement body = statement();
 
@@ -216,9 +216,9 @@ class RecursiveDescentParser implements Parser {
     }
 
     private Statement ifStatement() {
-        consume(LEFT_PAREN, "Expect '(' after 'if'.");
+        consume(LEFT_PAREN, "expect '(' after 'if'.");
         Expression condition = expression();
-        consume(RIGHT_PAREN, "Expect ')' after if condition.");
+        consume(RIGHT_PAREN, "expect ')' after if condition.");
 
         Statement thenBranch = statement();
         Statement elseBranch = null;
@@ -231,14 +231,14 @@ class RecursiveDescentParser implements Parser {
 
     private Statement printStatement() {
         var expression = expression();
-        consume(SEMICOLON, "Expect ';' after value.");
+        consume(SEMICOLON, "expect ';' after value.");
         return new Statement.Print(expression);
     }
 
     private Statement whileStatement() {
-        consume(LEFT_PAREN, "Expect '(' after 'while'.");
+        consume(LEFT_PAREN, "expect '(' after 'while'.");
         Expression condition = expression();
-        consume(RIGHT_PAREN, "Expect ')' after while condition.");
+        consume(RIGHT_PAREN, "expect ')' after while condition.");
         Statement body = statement();
 
         return new Statement.While(condition, body);
@@ -251,13 +251,13 @@ class RecursiveDescentParser implements Parser {
             statements.add(declaration());
         }
 
-        consume(RIGHT_BRACE, "Expect '}' after block.");
+        consume(RIGHT_BRACE, "expect '}' after block.");
         return statements;
     }
 
     private Statement expressionStatement() {
         var expression = expression();
-        consume(SEMICOLON, "Expect ';' after value.");
+        consume(SEMICOLON, "expect ';' after value.");
         return new Statement.Expression(expression);
     }
 
@@ -280,7 +280,7 @@ class RecursiveDescentParser implements Parser {
                 return new Expression.Set(get.object, get.name, value);
             }
 
-            reportError(equals, "Invalid assignment target.");
+            reportError(equals, "invalid assignment target.");
         }
 
         return expression;
@@ -343,7 +343,7 @@ class RecursiveDescentParser implements Parser {
             if (match(LEFT_PAREN)) {
                 expression = finishCall(expression);
             } else if (match(DOT)) {
-                Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+                Token name = consume(IDENTIFIER, "expect property name after '.'.");
                 expression = new Expression.Get(expression, name);
             } else {
                 break;
@@ -359,13 +359,13 @@ class RecursiveDescentParser implements Parser {
         if (!check(RIGHT_PAREN)) {
             do {
                 if (arguments.size() >= 8) {
-                    reportError(peek(), "Cannot have more than 8 arguments.");
+                    reportError(peek(), "cannot have more than 8 arguments.");
                 }
 
                 arguments.add(expression());
             } while (match(COMMA));
         }
-        Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
+        Token paren = consume(RIGHT_PAREN, "expect ')' after arguments.");
 
         return new Expression.Call(callee, paren, arguments);
     }
@@ -379,7 +379,7 @@ class RecursiveDescentParser implements Parser {
 
         if (match(LEFT_PAREN)) {
             var expression = expression();
-            consume(RIGHT_PAREN, "Expect ')' after expression.");
+            consume(RIGHT_PAREN, "expect ')' after expression.");
             return new Expression.Grouping(expression);
         }
 
@@ -387,14 +387,14 @@ class RecursiveDescentParser implements Parser {
 
         if (match(SUPER)) {
             Token keyword = previous();
-            consume(DOT, "Expect '.' after 'super'.");
-            Token method = consume(IDENTIFIER, "Expect superclass method name.");
+            consume(DOT, "expect '.' after 'super'.");
+            Token method = consume(IDENTIFIER, "expect superclass method name.");
             return new Expression.Super(keyword, method);
         }
 
         if (match(IDENTIFIER)) return new Expression.Variable(previous());
 
-        throw error(peek(), "Expect expression.");
+        throw error(peek(), "expect expression.");
     }
 
     private Token consume(Type type, String message) {
@@ -411,9 +411,9 @@ class RecursiveDescentParser implements Parser {
     private void reportError(Token token, String message) {
         for (var errorReporter : errorReporters) {
             if (token.type == EOF) {
-                errorReporter.handle(new Error(token.line, " at end", message));
+                errorReporter.handle(new SyntaxError(token.line, "end", message));
             } else {
-                errorReporter.handle(new Error(token.line, String.format(" at '%s'", token.lexeme), message));
+                errorReporter.handle(new SyntaxError(token.line, token.lexeme, message));
             }
         }
     }

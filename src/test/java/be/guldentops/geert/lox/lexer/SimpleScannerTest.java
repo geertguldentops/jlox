@@ -469,9 +469,7 @@ class SimpleScannerTest {
             assertTokenIsEndOfLine(tokens.get(0));
 
             assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isNull();
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Unexpected character.");
+            assertThat(fakeErrorReporter.getError()).hasToString("[line 1] SyntaxError: at '@' unexpected character.");
         }
 
         @Test
@@ -484,9 +482,7 @@ class SimpleScannerTest {
             assertTokenIsEndOfLine(tokens.get(0));
 
             assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isNull();
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Unterminated string.");
+            assertThat(fakeErrorReporter.getError()).hasToString("[line 1] SyntaxError: Unterminated string.");
         }
     }
 

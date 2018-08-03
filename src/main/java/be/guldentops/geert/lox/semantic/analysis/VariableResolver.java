@@ -1,6 +1,5 @@
 package be.guldentops.geert.lox.semantic.analysis;
 
-import be.guldentops.geert.lox.error.Error;
 import be.guldentops.geert.lox.error.ErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
@@ -101,9 +100,9 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     @Override
     public Void visitSuperExpression(Expression.Super expression) {
         if (currentClass == ClassType.NONE) {
-            reportError(expression.keyword, "Cannot use 'super' outside of a class.");
+            reportError(expression.keyword, "cannot use 'super' outside of a class.");
         } else if (currentClass != ClassType.SUBCLASS) {
-            reportError(expression.keyword, "Cannot use 'super' in a class with no superclass.");
+            reportError(expression.keyword, "cannot use 'super' in a class with no superclass.");
         }
 
         resolveLocal(expression, expression.keyword);
@@ -113,7 +112,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     @Override
     public Void visitThisExpression(Expression.This expression) {
         if (currentClass == ClassType.NONE) {
-            reportError(expression.keyword, "Cannot use 'this' outside of a class.");
+            reportError(expression.keyword, "cannot use 'this' outside of a class.");
         } else {
             resolveLocal(expression, expression.keyword);
         }
@@ -130,7 +129,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     @Override
     public Void visitVariableExpression(Expression.Variable expression) {
         if (!scopes.isEmpty() && scopes.peek().get(expression.name.lexeme) == Boolean.FALSE) {
-            reportError(expression.name, "Cannot read local variable in its own initializer.");
+            reportError(expression.name, "cannot read local variable in its own initializer.");
         }
 
         resolveLocal(expression, expression.name);
@@ -139,7 +138,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     private void reportError(Token token, String message) {
         for (var errorReporter : errorReporters) {
-            errorReporter.handle(new Error(token.line, token.lexeme, message));
+            errorReporter.handle(new SemanticError(token, message));
         }
     }
 
@@ -266,10 +265,10 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     @Override
     public Void visitReturnStatement(Statement.Return statement) {
         if (currentFunction == FunctionType.NONE) {
-            reportError(statement.keyword, "Cannot return from top-level code.");
+            reportError(statement.keyword, "cannot return from top-level code.");
         }
         if (currentFunction == FunctionType.INITIALIZER) {
-            reportError(statement.keyword, "Cannot return a value from an initializer.");
+            reportError(statement.keyword, "cannot return a value from an initializer.");
         }
 
         if (statement.value != null) {
@@ -294,7 +293,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
         Map<String, Boolean> scope = scopes.peek();
         if (scope.containsKey(name.lexeme)) {
-            reportError(name, "Variable with this name already declared in this scope.");
+            reportError(name, "variable with this name already declared in this scope.");
         }
         scope.put(name.lexeme, false);
     }

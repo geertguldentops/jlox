@@ -3,4 +3,4 @@ fun procedure() {
 }
 
 var result = procedure();
-print result; // Expect nil
+print result; // expect nil

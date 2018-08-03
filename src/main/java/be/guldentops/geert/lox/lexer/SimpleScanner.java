@@ -2,6 +2,7 @@ package be.guldentops.geert.lox.lexer;
 
 import be.guldentops.geert.lox.error.Error;
 import be.guldentops.geert.lox.error.ErrorReporter;
+import be.guldentops.geert.lox.error.SyntaxError;
 import be.guldentops.geert.lox.lexer.Token.Type;
 
 import java.util.ArrayList;
@@ -180,7 +181,7 @@ class SimpleScanner implements Scanner {
                 } else if (isAlpha(nextChar)) {
                     scanIdentifier();
                 } else {
-                    reportError(new Error(line, "Unexpected character."));
+                    reportError(new SyntaxError(line, String.valueOf(nextChar), "unexpected character."));
                 }
                 break;
         }
@@ -222,7 +223,7 @@ class SimpleScanner implements Scanner {
 
         // Unterminated string.
         if (isAtEnd()) {
-            reportError(new Error(line, "Unterminated string."));
+            reportError(new SyntaxError(line, "Unterminated string."));
         } else {
             // Consume the closing ".
             advance();

@@ -1,6 +1,5 @@
 package be.guldentops.geert.lox.interpreter;
 
-import be.guldentops.geert.lox.error.RuntimeError;
 import be.guldentops.geert.lox.lexer.Token;
 
 import java.util.HashMap;
@@ -26,7 +25,7 @@ class Environment {
 
     void define(Token name, Object value) {
         if (values.containsKey(name.lexeme))
-            throw new RuntimeError(name, String.format("Variable '%s' is already defined.", name.lexeme));
+            throw new RuntimeError(name, "variable is already defined.");
 
         define(name.lexeme, value);
     }
@@ -43,7 +42,7 @@ class Environment {
         if (values.containsKey(name.lexeme)) {
             values.put(name.lexeme, value);
         } else {
-            throw new RuntimeError(name, String.format("Undefined variable '%s'.", name.lexeme));
+            throw new RuntimeError(name, "undefined variable.");
         }
     }
 
@@ -51,7 +50,7 @@ class Environment {
         if (values.containsKey(name.lexeme)) return values.get(name.lexeme);
         if (enclosing != null) return enclosing.get(name);
 
-        throw new RuntimeError(name, String.format("Undefined variable '%s'.", name.lexeme));
+        throw new RuntimeError(name, "undefined variable.");
     }
 
     Object getAt(Integer distance, String name) {

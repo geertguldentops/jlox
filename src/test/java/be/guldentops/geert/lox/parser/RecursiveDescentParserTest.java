@@ -974,7 +974,6 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).doesNotContainNull();
-//            assertThat(fakeErrorReporter.getError().message).isEqualTo("Foo");
 
             var classStatement = castTo(statements.get(0), Statement.Class.class);
             assertThat(classStatement.name).isEqualToComparingFieldByField(identifier("Circle"));
@@ -993,7 +992,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1023,7 +1022,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1033,7 +1032,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertRightParenMissing();
+            assertError("[line 1] SyntaxError: at ';' expect ')' after expression.");
         }
 
         @Test
@@ -1073,7 +1072,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1083,7 +1082,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1103,7 +1102,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1123,7 +1122,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1143,7 +1142,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1163,7 +1162,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1183,7 +1182,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1203,7 +1202,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1223,7 +1222,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1243,7 +1242,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1263,7 +1262,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1283,7 +1282,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1303,7 +1302,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtSemicolon();
+            assertErrorAtLexeme(";");
         }
 
         @Test
@@ -1313,7 +1312,7 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorAtEOF();
+            assertErrorAtLexeme("end");
         }
 
         @Test
@@ -1338,7 +1337,7 @@ class RecursiveDescentParserTest {
             assertThat(binaryExpression.operator).isEqualToComparingFieldByField(plus());
             assertVariableExpression(binaryExpression.right, identifier("b"));
 
-            assertErrorIsInvalidAssignmentTarget("=");
+            assertError("[line 1] SyntaxError: at '=' invalid assignment target.");
         }
 
         @Test
@@ -1353,7 +1352,7 @@ class RecursiveDescentParserTest {
             List<Statement> statements = parser.parse();
 
             assertThat(statements).hasSize(1).containsOnlyNulls();
-            assertErrorUnclosedBlock();
+            assertError("[line 1] SyntaxError: at 'end' expect '}' after block.");
         }
 
         @Test
@@ -1386,10 +1385,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'print'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ')' after if condition.");
+                assertError("[line 1] SyntaxError: at 'print' expect ')' after if condition.");
             }
 
             @Test
@@ -1421,10 +1417,7 @@ class RecursiveDescentParserTest {
 
                 assertThat(statements).hasSize(2);
                 assertThat(statements.get(0)).isNull();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'true'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '(' after 'if'.");
+                assertError("[line 1] SyntaxError: at 'true' expect '(' after 'if'.");
 
                 assertPrintStatement(statements.get(1), 1.0);
             }
@@ -1441,7 +1434,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertErrorAtEOF();
+                assertErrorAtLexeme("end");
             }
         }
 
@@ -1459,10 +1452,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'print'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ')' after while condition.");
+                assertError("[line 1] SyntaxError: at 'print' expect ')' after while condition.");
             }
 
             @Test
@@ -1494,10 +1484,7 @@ class RecursiveDescentParserTest {
 
                 assertThat(statements).hasSize(2);
                 assertThat(statements.get(0)).isNull();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'true'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '(' after 'while'.");
+                assertError("[line 1] SyntaxError: at 'true' expect '(' after 'while'.");
 
                 assertPrintStatement(statements.get(1), 1.0);
             }
@@ -1517,10 +1504,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'print'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at 'print' expect expression.");
             }
 
             @Test
@@ -1538,10 +1522,7 @@ class RecursiveDescentParserTest {
                 assertThat(statements.get(1)).isNull();
                 assertThat(statements.get(2)).isNull();
                 assertThat(statements.get(3)).isInstanceOf(Statement.Print.class); // Recover to the print statement, this test does not care!
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ')'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at ')' expect expression.");
             }
 
             @Test
@@ -1557,10 +1538,7 @@ class RecursiveDescentParserTest {
                 assertThat(statements).hasSize(2);
                 assertThat(statements.get(0)).isNull();
                 assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Recover to the print statement, this test does not care!
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ')'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at ')' expect expression.");
             }
 
             @Test
@@ -1576,10 +1554,7 @@ class RecursiveDescentParserTest {
                 assertThat(statements).hasSize(2);
                 assertThat(statements.get(0)).isNull();
                 assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Recover to the print statement, this test does not care!
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ')'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ';' after variable declaration.");
+                assertError("[line 1] SyntaxError: at ')' expect ';' after variable declaration.");
             }
         }
 
@@ -1596,10 +1571,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ')'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ';' after value.");
+                assertError("[line 1] SyntaxError: at ')' expect ';' after value.");
             }
 
             @Test
@@ -1612,10 +1584,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ';'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at ';' expect expression.");
             }
 
             @Test
@@ -1628,10 +1597,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '2'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ')' after arguments.");
+                assertError("[line 1] SyntaxError: at '2' expect ')' after arguments.");
             }
 
             @Test
@@ -1655,10 +1621,7 @@ class RecursiveDescentParserTest {
 
                 assertThat(statements).hasSize(1).doesNotContainNull(); // Still parses the call!
                 assertThat(statements.get(0)).isInstanceOf(Statement.Expression.class);
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '1'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot have more than 8 arguments.");
+                assertError("[line 1] SyntaxError: at '1' cannot have more than 8 arguments.");
             }
         }
 
@@ -1675,10 +1638,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '.'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at '.' expect expression.");
             }
 
             @Test
@@ -1691,10 +1651,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ';'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect property name after '.'.");
+                assertError("[line 1] SyntaxError: at ';' expect property name after '.'.");
             }
 
             @Test
@@ -1707,10 +1664,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '.'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at '.' expect expression.");
             }
 
             @Test
@@ -1723,10 +1677,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '='");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect property name after '.'.");
+                assertError("[line 1] SyntaxError: at '=' expect property name after '.'.");
             }
 
             @Test
@@ -1739,10 +1690,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '1'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ';' after value.");
+                assertError("[line 1] SyntaxError: at '1' expect ';' after value.");
             }
 
             @Test
@@ -1755,10 +1703,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ';'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at ';' expect expression.");
             }
         }
 
@@ -1780,10 +1725,7 @@ class RecursiveDescentParserTest {
                 assertThat(statements.get(0)).isNull();
                 assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Still parses some of the code.
                 assertThat(statements.get(2)).isNull();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at '}' expect expression.");
             }
 
             @Test
@@ -1801,10 +1743,7 @@ class RecursiveDescentParserTest {
                 assertThat(statements.get(0)).isNull();
                 assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Still parses some of the code.
                 assertThat(statements.get(2)).isNull();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at '}' expect expression.");
             }
 
             @Test
@@ -1822,10 +1761,7 @@ class RecursiveDescentParserTest {
                 assertThat(statements.get(0)).isNull();
                 assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Still parses some of the code.
                 assertThat(statements.get(2)).isNull();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at '}' expect expression.");
             }
 
             @Test
@@ -1843,10 +1779,7 @@ class RecursiveDescentParserTest {
                 assertThat(statements.get(0)).isNull();
                 assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Still parses some of the code.
                 assertThat(statements.get(2)).isNull();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at '}' expect expression.");
             }
 
             @Test
@@ -1872,10 +1805,7 @@ class RecursiveDescentParserTest {
 
                 assertThat(statements).hasSize(1).doesNotContainNull(); // Still parses the call!
                 assertThat(statements.get(0)).isInstanceOf(Statement.Function.class);
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'a9'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot have more than 8 parameters.");
+                assertError("[line 1] SyntaxError: at 'a9' cannot have more than 8 parameters.");
             }
 
             @Test
@@ -1890,10 +1820,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(2).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at '}' expect expression.");
             }
 
             @Test
@@ -1907,10 +1834,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '}' after block.");
+                assertError("[line 1] SyntaxError: at 'end' expect '}' after block.");
             }
         }
 
@@ -1924,10 +1848,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+                assertError("[line 1] SyntaxError: at 'end' expect expression.");
             }
 
             @Test
@@ -1937,10 +1858,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ';' after return value.");
+                assertError("[line 1] SyntaxError: at 'end' expect ';' after return value.");
             }
         }
 
@@ -1954,10 +1872,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '{' before class body.");
+                assertError("[line 1] SyntaxError: at '}' expect '{' before class body.");
             }
 
             @Test
@@ -1967,10 +1882,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '}' after class body.");
+                assertError("[line 1] SyntaxError: at 'end' expect '}' after class body.");
             }
 
             @Test
@@ -1980,10 +1892,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '{'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expected super class name.");
+                assertError("[line 1] SyntaxError: at '{' expected super class name.");
             }
         }
 
@@ -1997,10 +1906,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'method'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '.' after 'super'.");
+                assertError("[line 1] SyntaxError: at 'method' expect '.' after 'super'.");
             }
 
             @Test
@@ -2010,10 +1916,7 @@ class RecursiveDescentParserTest {
                 var statements = parser.parse();
 
                 assertThat(statements).hasSize(1).containsOnlyNulls();
-                assertThat(fakeErrorReporter.receivedError()).isTrue();
-                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ';'");
-                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect superclass method name.");
+                assertError("[line 1] SyntaxError: at ';' expect superclass method name.");
             }
         }
 
@@ -2193,20 +2096,6 @@ class RecursiveDescentParserTest {
                 assertThat(classStatement.methods).isEmpty();
             }
         }
-
-        private void assertErrorIsInvalidAssignmentTarget(String lexeme) {
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo(String.format(" at '%s'", lexeme));
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Invalid assignment target.");
-        }
-
-        private void assertErrorUnclosedBlock() {
-            assertThat(fakeErrorReporter.receivedError()).isTrue();
-            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-            assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
-            assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '}' after block.");
-        }
     }
 
     private <T> T castTo(Object o, Class<T> clazz) {
@@ -2245,31 +2134,12 @@ class RecursiveDescentParserTest {
     }
 
     private void assertErrorAtLexeme(String lexeme) {
-        assertThat(fakeErrorReporter.receivedError()).isTrue();
-        assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-        assertThat(fakeErrorReporter.getError().location).isEqualTo(String.format(" at '%s'", lexeme));
-        assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+        assertError("[line 1] SyntaxError: at '" + lexeme + "' expect expression.");
     }
 
-    private void assertErrorAtSemicolon() {
+    private void assertError(String message) {
         assertThat(fakeErrorReporter.receivedError()).isTrue();
-        assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-        assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ';'");
-        assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
-    }
-
-    private void assertErrorAtEOF() {
-        assertThat(fakeErrorReporter.receivedError()).isTrue();
-        assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-        assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
-        assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
-    }
-
-    private void assertRightParenMissing() {
-        assertThat(fakeErrorReporter.receivedError()).isTrue();
-        assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
-        assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ';'");
-        assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ')' after expression.");
+        assertThat(fakeErrorReporter.getError()).hasToString(message);
     }
 
     private void assertBinaryExpression(Expression expression, Object left, Token operator, Object right) {

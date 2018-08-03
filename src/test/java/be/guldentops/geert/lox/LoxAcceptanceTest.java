@@ -35,7 +35,7 @@ class LoxAcceptanceTest {
     void setUp() {
         System.setOut(new PrintStream(outContent));
 
-        lox = new Lox(ErrorReporter.console());
+        lox = new Lox(ErrorReporter.console(), ErrorReporter.console(), ErrorReporter.console());
     }
 
     @AfterEach
