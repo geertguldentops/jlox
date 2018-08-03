@@ -1,55 +1,54 @@
-package be.guldentops.geert.lox.parser.impl;
+package be.guldentops.geert.lox.parser;
 
-import be.guldentops.geert.lox.error.api.Error;
-import be.guldentops.geert.lox.error.api.ErrorReporter;
+import be.guldentops.geert.lox.error.Error;
+import be.guldentops.geert.lox.error.ErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.lexer.api.Token;
-import be.guldentops.geert.lox.lexer.api.Token.Type;
-import be.guldentops.geert.lox.parser.api.Parser;
+import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.lexer.Token.Type;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static be.guldentops.geert.lox.lexer.api.Token.Type.AND;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.COMMA;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.ELSE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.FOR;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.FUN;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.IF;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_BRACE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_PAREN;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS_EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.MINUS;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.NIL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.RETURN;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_PAREN;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.SEMICOLON;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.SLASH;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.STAR;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.STRING;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.TRUE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.VAR;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.WHILE;
+import static be.guldentops.geert.lox.lexer.Token.Type.AND;
+import static be.guldentops.geert.lox.lexer.Token.Type.BANG;
+import static be.guldentops.geert.lox.lexer.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.COMMA;
+import static be.guldentops.geert.lox.lexer.Token.Type.ELSE;
+import static be.guldentops.geert.lox.lexer.Token.Type.EOF;
+import static be.guldentops.geert.lox.lexer.Token.Type.EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.EQUAL_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.FALSE;
+import static be.guldentops.geert.lox.lexer.Token.Type.FOR;
+import static be.guldentops.geert.lox.lexer.Token.Type.FUN;
+import static be.guldentops.geert.lox.lexer.Token.Type.GREATER;
+import static be.guldentops.geert.lox.lexer.Token.Type.GREATER_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.IDENTIFIER;
+import static be.guldentops.geert.lox.lexer.Token.Type.IF;
+import static be.guldentops.geert.lox.lexer.Token.Type.LEFT_BRACE;
+import static be.guldentops.geert.lox.lexer.Token.Type.LEFT_PAREN;
+import static be.guldentops.geert.lox.lexer.Token.Type.LESS;
+import static be.guldentops.geert.lox.lexer.Token.Type.LESS_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.MINUS;
+import static be.guldentops.geert.lox.lexer.Token.Type.NIL;
+import static be.guldentops.geert.lox.lexer.Token.Type.NUMBER;
+import static be.guldentops.geert.lox.lexer.Token.Type.OR;
+import static be.guldentops.geert.lox.lexer.Token.Type.PLUS;
+import static be.guldentops.geert.lox.lexer.Token.Type.PRINT;
+import static be.guldentops.geert.lox.lexer.Token.Type.RETURN;
+import static be.guldentops.geert.lox.lexer.Token.Type.RIGHT_BRACE;
+import static be.guldentops.geert.lox.lexer.Token.Type.RIGHT_PAREN;
+import static be.guldentops.geert.lox.lexer.Token.Type.SEMICOLON;
+import static be.guldentops.geert.lox.lexer.Token.Type.SLASH;
+import static be.guldentops.geert.lox.lexer.Token.Type.STAR;
+import static be.guldentops.geert.lox.lexer.Token.Type.STRING;
+import static be.guldentops.geert.lox.lexer.Token.Type.TRUE;
+import static be.guldentops.geert.lox.lexer.Token.Type.VAR;
+import static be.guldentops.geert.lox.lexer.Token.Type.WHILE;
 
-public class RecursiveDescentParser implements Parser {
+class RecursiveDescentParser implements Parser {
 
     private static class ParseError extends RuntimeException {
     }
@@ -59,7 +58,7 @@ public class RecursiveDescentParser implements Parser {
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
-    public RecursiveDescentParser(List<Token> tokens) {
+    RecursiveDescentParser(List<Token> tokens) {
         this.tokens = tokens;
     }
 

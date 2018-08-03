@@ -1,12 +1,9 @@
 package be.guldentops.geert.lox;
 
-import be.guldentops.geert.lox.environment.Environment;
-import be.guldentops.geert.lox.error.api.ErrorReporter;
-import be.guldentops.geert.lox.interpreter.api.Interpreter;
-import be.guldentops.geert.lox.interpreter.api.LoxCallable;
-import be.guldentops.geert.lox.interpreter.impl.PostOrderTraversalInterpreter;
-import be.guldentops.geert.lox.lexer.impl.SimpleScanner;
-import be.guldentops.geert.lox.parser.impl.RecursiveDescentParser;
+import be.guldentops.geert.lox.error.ErrorReporter;
+import be.guldentops.geert.lox.interpreter.Interpreter;
+import be.guldentops.geert.lox.lexer.Scanner;
+import be.guldentops.geert.lox.parser.Parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,37 +11,17 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 
-public class Lox {
+class Lox {
 
     private final ErrorReporter errorReporter;
 
     // MUST be a global variable so REPL sessions can reuse the same interpreter!
     private final Interpreter interpreter;
 
-    public Lox(ErrorReporter errorReporter) {
-        var globals = Environment.createGlobal();
-        globals.defineNativeMethod("clock", new LoxCallable() {
-
-            @Override
-            public int arity() {
-                return 0;
-            }
-
-            @Override
-            public Object call(Interpreter interpreter, List<Object> arguments) {
-                return (double) System.currentTimeMillis() / 1_000.0;
-            }
-
-            @Override
-            public String toString() {
-                return "<native fn>";
-            }
-        });
-
+    Lox(ErrorReporter errorReporter) {
         this.errorReporter = errorReporter;
-        this.interpreter = new PostOrderTraversalInterpreter(globals);
+        this.interpreter = Interpreter.createDefault();
         this.interpreter.addErrorReporter(errorReporter);
     }
 
@@ -64,11 +41,11 @@ public class Lox {
     }
 
     private void run(String sourceCode) {
-        var scanner = new SimpleScanner(sourceCode);
+        var scanner = Scanner.createDefault(sourceCode);
         scanner.addErrorReporter(errorReporter);
         var tokens = scanner.scanTokens();
 
-        var parser = new RecursiveDescentParser(tokens);
+        var parser = Parser.createDefault(tokens);
         parser.addErrorReporter(errorReporter);
         var statements = parser.parse();
 

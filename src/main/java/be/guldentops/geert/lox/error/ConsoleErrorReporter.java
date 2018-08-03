@@ -1,10 +1,6 @@
-package be.guldentops.geert.lox.error.impl;
+package be.guldentops.geert.lox.error;
 
-import be.guldentops.geert.lox.error.api.Error;
-import be.guldentops.geert.lox.error.api.ErrorReporter;
-import be.guldentops.geert.lox.error.api.RuntimeError;
-
-public class ConsoleErrorReporter implements ErrorReporter {
+class ConsoleErrorReporter implements ErrorReporter {
 
     private boolean receivedError = false;
     private boolean receivedRuntimeError = false;

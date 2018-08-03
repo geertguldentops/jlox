@@ -1,27 +1,24 @@
-package be.guldentops.geert.lox.interpreter.impl;
+package be.guldentops.geert.lox.interpreter;
 
-import be.guldentops.geert.lox.environment.Environment;
-import be.guldentops.geert.lox.error.api.ErrorReporter;
-import be.guldentops.geert.lox.error.api.RuntimeError;
+import be.guldentops.geert.lox.error.ErrorReporter;
+import be.guldentops.geert.lox.error.RuntimeError;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.interpreter.api.Interpreter;
-import be.guldentops.geert.lox.interpreter.api.LoxCallable;
-import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.lexer.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
+import static be.guldentops.geert.lox.lexer.Token.Type.OR;
 import static java.util.stream.Collectors.toList;
 
-public class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<Object>, Statement.Visitor<Void> {
+class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<Object>, Statement.Visitor<Void> {
 
     private Environment environment;
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
-    public PostOrderTraversalInterpreter(Environment globals) {
+    PostOrderTraversalInterpreter(Environment globals) {
         this.environment = globals;
     }
 

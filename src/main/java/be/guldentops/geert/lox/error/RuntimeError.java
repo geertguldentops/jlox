@@ -1,6 +1,6 @@
-package be.guldentops.geert.lox.error.api;
+package be.guldentops.geert.lox.error;
 
-import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.lexer.Token;
 
 public class RuntimeError extends RuntimeException {
 

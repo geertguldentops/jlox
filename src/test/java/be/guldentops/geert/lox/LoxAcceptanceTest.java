@@ -1,6 +1,6 @@
 package be.guldentops.geert.lox;
 
-import be.guldentops.geert.lox.error.impl.ConsoleErrorReporter;
+import be.guldentops.geert.lox.error.ErrorReporter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -35,7 +35,7 @@ class LoxAcceptanceTest {
     void setUp() {
         System.setOut(new PrintStream(outContent));
 
-        lox = new Lox(new ConsoleErrorReporter());
+        lox = new Lox(ErrorReporter.console());
     }
 
     @AfterEach

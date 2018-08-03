@@ -1,10 +1,10 @@
-package be.guldentops.geert.lox.lexer.api;
+package be.guldentops.geert.lox.lexer;
 
 import org.junit.jupiter.api.Test;
 
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bang;
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bangEqual;
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.one;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.bang;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.bangEqual;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.one;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TokenTest {

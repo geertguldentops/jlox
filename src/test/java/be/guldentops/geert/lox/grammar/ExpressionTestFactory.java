@@ -1,11 +1,11 @@
 package be.guldentops.geert.lox.grammar;
 
-import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.lexer.Token;
 
 import java.util.List;
 
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.identifier;
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.rightParen;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.identifier;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.rightParen;
 
 public class ExpressionTestFactory {
 

@@ -1,8 +1,4 @@
-package be.guldentops.geert.lox.error.impl;
-
-import be.guldentops.geert.lox.error.api.Error;
-import be.guldentops.geert.lox.error.api.ErrorReporter;
-import be.guldentops.geert.lox.error.api.RuntimeError;
+package be.guldentops.geert.lox.error;
 
 public class FakeErrorReporter implements ErrorReporter {
 

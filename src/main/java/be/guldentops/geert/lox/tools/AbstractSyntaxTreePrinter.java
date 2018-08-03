@@ -2,19 +2,19 @@ package be.guldentops.geert.lox.tools;
 
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.lexer.Token;
 
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement.Visitor<String> {
+class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement.Visitor<String> {
 
-    public String print(Expression expression) {
+    String print(Expression expression) {
         return expression.accept(this);
     }
 
-    public String print(Statement statement) {
+    String print(Statement statement) {
         return statement.accept(this);
     }
 

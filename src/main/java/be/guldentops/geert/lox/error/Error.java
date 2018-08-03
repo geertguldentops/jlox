@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox.error.api;
+package be.guldentops.geert.lox.error;
 
 public class Error {
 

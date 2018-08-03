@@ -1,13 +1,13 @@
 package be.guldentops.geert.lox;
 
-import be.guldentops.geert.lox.error.impl.ConsoleErrorReporter;
+import be.guldentops.geert.lox.error.ErrorReporter;
 
 import java.io.IOException;
 
-public class LoxMain {
+class LoxMain {
 
     public static void main(String[] args) throws IOException {
-        var errorReporter = new ConsoleErrorReporter();
+        var errorReporter = ErrorReporter.console();
         var lox = new Lox(errorReporter);
 
         if (args.length > 1) {

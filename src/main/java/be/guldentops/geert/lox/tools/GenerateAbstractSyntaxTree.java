@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-public class GenerateAbstractSyntaxTree {
+class GenerateAbstractSyntaxTree {
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -56,7 +56,7 @@ public class GenerateAbstractSyntaxTree {
         writer.println("package be.guldentops.geert.lox.grammar;");
         writer.println("");
         writer.println("import java.util.List;");
-        writer.println("import be.guldentops.geert.lox.lexer.api.Token;");
+        writer.println("import be.guldentops.geert.lox.lexer.Token;");
         writer.println("");
         writer.printf("public interface %s {", baseClassName);
         writer.println();

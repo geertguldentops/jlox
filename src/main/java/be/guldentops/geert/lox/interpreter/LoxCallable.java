@@ -1,8 +1,8 @@
-package be.guldentops.geert.lox.interpreter.api;
+package be.guldentops.geert.lox.interpreter;
 
 import java.util.List;
 
-public interface LoxCallable {
+interface LoxCallable {
 
     int arity();
 

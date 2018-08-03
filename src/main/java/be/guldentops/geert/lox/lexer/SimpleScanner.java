@@ -1,57 +1,55 @@
-package be.guldentops.geert.lox.lexer.impl;
+package be.guldentops.geert.lox.lexer;
 
-import be.guldentops.geert.lox.error.api.Error;
-import be.guldentops.geert.lox.error.api.ErrorReporter;
-import be.guldentops.geert.lox.lexer.api.Scanner;
-import be.guldentops.geert.lox.lexer.api.Token;
-import be.guldentops.geert.lox.lexer.api.Token.Type;
+import be.guldentops.geert.lox.error.Error;
+import be.guldentops.geert.lox.error.ErrorReporter;
+import be.guldentops.geert.lox.lexer.Token.Type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static be.guldentops.geert.lox.lexer.api.Token.Type.AND;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.CLASS;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.COMMA;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.DOT;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.ELSE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.FOR;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.FUN;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.IF;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_BRACE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_PAREN;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS_EQUAL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.MINUS;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.NIL;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.RETURN;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_PAREN;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.SEMICOLON;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.SLASH;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.STAR;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.STRING;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.SUPER;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.THIS;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.TRUE;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.VAR;
-import static be.guldentops.geert.lox.lexer.api.Token.Type.WHILE;
+import static be.guldentops.geert.lox.lexer.Token.Type.AND;
+import static be.guldentops.geert.lox.lexer.Token.Type.BANG;
+import static be.guldentops.geert.lox.lexer.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.CLASS;
+import static be.guldentops.geert.lox.lexer.Token.Type.COMMA;
+import static be.guldentops.geert.lox.lexer.Token.Type.DOT;
+import static be.guldentops.geert.lox.lexer.Token.Type.ELSE;
+import static be.guldentops.geert.lox.lexer.Token.Type.EOF;
+import static be.guldentops.geert.lox.lexer.Token.Type.EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.EQUAL_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.FALSE;
+import static be.guldentops.geert.lox.lexer.Token.Type.FOR;
+import static be.guldentops.geert.lox.lexer.Token.Type.FUN;
+import static be.guldentops.geert.lox.lexer.Token.Type.GREATER;
+import static be.guldentops.geert.lox.lexer.Token.Type.GREATER_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.IDENTIFIER;
+import static be.guldentops.geert.lox.lexer.Token.Type.IF;
+import static be.guldentops.geert.lox.lexer.Token.Type.LEFT_BRACE;
+import static be.guldentops.geert.lox.lexer.Token.Type.LEFT_PAREN;
+import static be.guldentops.geert.lox.lexer.Token.Type.LESS;
+import static be.guldentops.geert.lox.lexer.Token.Type.LESS_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.MINUS;
+import static be.guldentops.geert.lox.lexer.Token.Type.NIL;
+import static be.guldentops.geert.lox.lexer.Token.Type.NUMBER;
+import static be.guldentops.geert.lox.lexer.Token.Type.OR;
+import static be.guldentops.geert.lox.lexer.Token.Type.PLUS;
+import static be.guldentops.geert.lox.lexer.Token.Type.PRINT;
+import static be.guldentops.geert.lox.lexer.Token.Type.RETURN;
+import static be.guldentops.geert.lox.lexer.Token.Type.RIGHT_BRACE;
+import static be.guldentops.geert.lox.lexer.Token.Type.RIGHT_PAREN;
+import static be.guldentops.geert.lox.lexer.Token.Type.SEMICOLON;
+import static be.guldentops.geert.lox.lexer.Token.Type.SLASH;
+import static be.guldentops.geert.lox.lexer.Token.Type.STAR;
+import static be.guldentops.geert.lox.lexer.Token.Type.STRING;
+import static be.guldentops.geert.lox.lexer.Token.Type.SUPER;
+import static be.guldentops.geert.lox.lexer.Token.Type.THIS;
+import static be.guldentops.geert.lox.lexer.Token.Type.TRUE;
+import static be.guldentops.geert.lox.lexer.Token.Type.VAR;
+import static be.guldentops.geert.lox.lexer.Token.Type.WHILE;
 
-public class SimpleScanner implements Scanner {
+class SimpleScanner implements Scanner {
 
     private static final Map<String, Type> keywords;
 
@@ -84,7 +82,7 @@ public class SimpleScanner implements Scanner {
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
-    public SimpleScanner(String sourceCode) {
+    SimpleScanner(String sourceCode) {
         if (sourceCode == null) throw new IllegalArgumentException("source code should not be null!");
 
         this.sourceCode = sourceCode;
@@ -115,20 +113,48 @@ public class SimpleScanner implements Scanner {
         var nextChar = advance();
 
         switch (nextChar) {
-            case '(': addToken(LEFT_PAREN); break;
-            case ')': addToken(RIGHT_PAREN); break;
-            case '{': addToken(LEFT_BRACE); break;
-            case '}': addToken(RIGHT_BRACE); break;
-            case ',': addToken(COMMA); break;
-            case '.': addToken(DOT); break;
-            case '-': addToken(MINUS); break;
-            case '+': addToken(PLUS); break;
-            case ';': addToken(SEMICOLON); break;
-            case '*': addToken(STAR); break;
-            case '!': addToken(match('=') ? BANG_EQUAL : BANG); break;
-            case '=': addToken(match('=') ? EQUAL_EQUAL : EQUAL); break;
-            case '<': addToken(match('=') ? LESS_EQUAL : LESS); break;
-            case '>': addToken(match('=') ? GREATER_EQUAL : GREATER); break;
+            case '(':
+                addToken(LEFT_PAREN);
+                break;
+            case ')':
+                addToken(RIGHT_PAREN);
+                break;
+            case '{':
+                addToken(LEFT_BRACE);
+                break;
+            case '}':
+                addToken(RIGHT_BRACE);
+                break;
+            case ',':
+                addToken(COMMA);
+                break;
+            case '.':
+                addToken(DOT);
+                break;
+            case '-':
+                addToken(MINUS);
+                break;
+            case '+':
+                addToken(PLUS);
+                break;
+            case ';':
+                addToken(SEMICOLON);
+                break;
+            case '*':
+                addToken(STAR);
+                break;
+            case '!':
+                addToken(match('=') ? BANG_EQUAL : BANG);
+                break;
+            case '=':
+                addToken(match('=') ? EQUAL_EQUAL : EQUAL);
+                break;
+            case '<':
+                addToken(match('=') ? LESS_EQUAL : LESS);
+                break;
+            case '>':
+                addToken(match('=') ? GREATER_EQUAL : GREATER);
+                break;
             case '/':
                 if (match('/')) {
                     // A comment goes until the end of the line.
@@ -145,7 +171,9 @@ public class SimpleScanner implements Scanner {
             case '\n':
                 line++;
                 break;
-            case '"': scanStringLiteral(); break;
+            case '"':
+                scanStringLiteral();
+                break;
             default:
                 if (isDigit(nextChar)) {
                     scanNumberLiteral();

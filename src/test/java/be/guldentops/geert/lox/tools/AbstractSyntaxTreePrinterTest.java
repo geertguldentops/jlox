@@ -22,11 +22,11 @@ import static be.guldentops.geert.lox.grammar.StatementTestFactory.expressionSta
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.function;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.print;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.variableDeclaration;
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.and;
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.identifier;
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.minus;
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.plus;
-import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.star;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.and;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.identifier;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.minus;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.plus;
+import static be.guldentops.geert.lox.lexer.TokenObjectMother.star;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AbstractSyntaxTreePrinterTest {

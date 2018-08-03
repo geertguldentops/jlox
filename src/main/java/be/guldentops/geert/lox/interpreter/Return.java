@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox.interpreter.impl;
+package be.guldentops.geert.lox.interpreter;
 
 
 /**
