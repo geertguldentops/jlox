@@ -27,7 +27,17 @@ GenerateAbstractSyntaxTree has a main method which accepts exactly 1 program arg
 
 E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/lox/grammar
 
-## Lox Grammar ##
+
+## Lox Lexical Grammar ##
+
+    NUMBER          → DIGIT+ ( "." DIGIT+ )? ;
+    STRING          → '"' <any char except '"'>* '"' ;
+    IDENTIFIER      → ALPHA ( ALPHA | DIGIT )* ;
+    ALPHA           → 'a' ... 'z' | 'A' ... 'Z' | '_' ;
+    DIGIT           → '0' ... '9' ;
+
+
+## Lox Syntax Grammar ##
 
     program         → declaration* EOF ;
     
