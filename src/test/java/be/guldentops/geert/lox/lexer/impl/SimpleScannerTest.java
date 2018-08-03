@@ -1,7 +1,10 @@
-package be.guldentops.geert.lox.lexer;
+package be.guldentops.geert.lox.lexer.impl;
 
-import be.guldentops.geert.lox.error.api.Error;
-import be.guldentops.geert.lox.error.api.ErrorReporter;
+import be.guldentops.geert.lox.error.impl.FakeErrorReporter;
+import be.guldentops.geert.lox.lexer.api.Scanner;
+import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.lexer.api.Token.Type;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,19 +12,55 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
+import static be.guldentops.geert.lox.lexer.api.Token.Type.AND;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.CLASS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.COMMA;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.DOT;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.ELSE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FOR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FUN;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.IF;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_BRACE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_PAREN;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.MINUS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.NIL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RETURN;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_PAREN;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.SEMICOLON;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.SLASH;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.STAR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.STRING;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.SUPER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.THIS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.TRUE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.VAR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.WHILE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ScannerTest {
 
-    class FakeErrorReporter implements ErrorReporter {
+    private FakeErrorReporter fakeErrorReporter;
 
-        Error error;
-
-        @Override
-        public void handle(Error error) {
-            this.error = error;
-        }
+    @BeforeEach
+    void setUp() {
+        fakeErrorReporter = new FakeErrorReporter();
     }
 
     @Nested
@@ -29,7 +68,7 @@ class ScannerTest {
 
         @Test
         void scanNullSourceCode() {
-            assertThatThrownBy(() -> new Scanner(null))
+            assertThatThrownBy(() -> createScanner(null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("source code should not be null!");
         }
@@ -40,97 +79,97 @@ class ScannerTest {
 
         @Test
         void scanLeftParen() {
-            assertSingleTokenScanned("(", Token.Type.LEFT_PAREN);
+            assertSingleTokenScanned("(", LEFT_PAREN);
         }
 
         @Test
         void scanRightParen() {
-            assertSingleTokenScanned(")", Token.Type.RIGHT_PAREN);
+            assertSingleTokenScanned(")", RIGHT_PAREN);
         }
 
         @Test
         void scanLeftBrace() {
-            assertSingleTokenScanned("{", Token.Type.LEFT_BRACE);
+            assertSingleTokenScanned("{", LEFT_BRACE);
         }
 
         @Test
         void scanRightBrace() {
-            assertSingleTokenScanned("}", Token.Type.RIGHT_BRACE);
+            assertSingleTokenScanned("}", RIGHT_BRACE);
         }
 
         @Test
         void scanComma() {
-            assertSingleTokenScanned(",", Token.Type.COMMA);
+            assertSingleTokenScanned(",", COMMA);
         }
 
         @Test
         void scanDot() {
-            assertSingleTokenScanned(".", Token.Type.DOT);
+            assertSingleTokenScanned(".", DOT);
         }
 
         @Test
         void scanMinus() {
-            assertSingleTokenScanned("-", Token.Type.MINUS);
+            assertSingleTokenScanned("-", MINUS);
         }
 
         @Test
         void scanPlus() {
-            assertSingleTokenScanned("+", Token.Type.PLUS);
+            assertSingleTokenScanned("+", PLUS);
         }
 
         @Test
         void scanSemiColon() {
-            assertSingleTokenScanned(";", Token.Type.SEMICOLON);
+            assertSingleTokenScanned(";", SEMICOLON);
         }
 
         @Test
         void scanStar() {
-            assertSingleTokenScanned("*", Token.Type.STAR);
+            assertSingleTokenScanned("*", STAR);
         }
 
         @Test
         void scanBang() {
-            assertSingleTokenScanned("!", Token.Type.BANG);
+            assertSingleTokenScanned("!", BANG);
         }
 
         @Test
         void scanInequalityOperator() {
-            assertSingleTokenScanned("!=", Token.Type.BANG_EQUAL);
+            assertSingleTokenScanned("!=", BANG_EQUAL);
         }
 
         @Test
         void scanEqual() {
-            assertSingleTokenScanned("=", Token.Type.EQUAL);
+            assertSingleTokenScanned("=", EQUAL);
         }
 
         @Test
         void scanEqualityOperator() {
-            assertSingleTokenScanned("==", Token.Type.EQUAL_EQUAL);
+            assertSingleTokenScanned("==", EQUAL_EQUAL);
         }
 
         @Test
         void scanLessThan() {
-            assertSingleTokenScanned("<", Token.Type.LESS);
+            assertSingleTokenScanned("<", LESS);
         }
 
         @Test
         void scanLessThanOrEqualOperator() {
-            assertSingleTokenScanned("<=", Token.Type.LESS_EQUAL);
+            assertSingleTokenScanned("<=", LESS_EQUAL);
         }
 
         @Test
         void scanGreaterThan() {
-            assertSingleTokenScanned(">", Token.Type.GREATER);
+            assertSingleTokenScanned(">", GREATER);
         }
 
         @Test
         void scanGreaterThanOrEqualOperator() {
-            assertSingleTokenScanned(">=", Token.Type.GREATER_EQUAL);
+            assertSingleTokenScanned(">=", GREATER_EQUAL);
         }
 
         @Test
         void scanSlash() {
-            assertSingleTokenScanned("/", Token.Type.SLASH);
+            assertSingleTokenScanned("/", SLASH);
         }
     }
 
@@ -164,34 +203,28 @@ class ScannerTest {
 
         @Test
         void scanNewLineIncreasesLineNumber() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("\n");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("\n");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
-            assertThat(tokens.get(0).type).isEqualTo(Token.Type.EOF);
+            assertThat(tokens.get(0).type).isEqualTo(EOF);
             assertThat(tokens.get(0).lexeme).isEqualTo("");
             assertThat(tokens.get(0).literal).isNull();
             assertThat(tokens.get(0).line).isEqualTo(2);
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
 
         private void assertNoTokensScanned(String sourceCode) {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner(sourceCode);
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner(sourceCode);
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
             assertTokenIsEndOfLine(tokens.get(0));
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
     }
 
@@ -200,62 +233,53 @@ class ScannerTest {
 
         @Test
         void singleCharacterString() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("\"A\"");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("\"A\"");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(Token.Type.STRING);
+            assertThat(tokens.get(0).type).isEqualTo(STRING);
             assertThat(tokens.get(0).lexeme).isEqualTo("\"A\"");
             assertThat(tokens.get(0).literal).isEqualTo("A");
             assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
 
         @Test
         void multipleCharactersString() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("\"Hello\"");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("\"Hello\"");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(Token.Type.STRING);
+            assertThat(tokens.get(0).type).isEqualTo(STRING);
             assertThat(tokens.get(0).lexeme).isEqualTo("\"Hello\"");
             assertThat(tokens.get(0).literal).isEqualTo("Hello");
             assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
 
         @Test
         void multiLineString() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("\"Hello\nWorld\"");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("\"Hello\nWorld\"");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(Token.Type.STRING);
+            assertThat(tokens.get(0).type).isEqualTo(STRING);
             assertThat(tokens.get(0).lexeme).isEqualTo("\"Hello\nWorld\"");
             assertThat(tokens.get(0).literal).isEqualTo("Hello\nWorld");
             assertThat(tokens.get(0).line).isEqualTo(2);
-            assertThat(tokens.get(1).type).isEqualTo(Token.Type.EOF);
+            assertThat(tokens.get(1).type).isEqualTo(EOF);
             assertThat(tokens.get(1).lexeme).isEqualTo("");
             assertThat(tokens.get(1).literal).isNull();
             assertThat(tokens.get(1).line).isEqualTo(2);
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
     }
 
@@ -264,59 +288,50 @@ class ScannerTest {
 
         @Test
         void singleDigitNumber() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("9");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("9");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(Token.Type.NUMBER);
+            assertThat(tokens.get(0).type).isEqualTo(NUMBER);
             assertThat(tokens.get(0).lexeme).isEqualTo("9");
             assertThat(tokens.get(0).literal).isEqualTo(9.0);
             assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
 
         @Test
         void multipleDigitNumber() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("12");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("12");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(Token.Type.NUMBER);
+            assertThat(tokens.get(0).type).isEqualTo(NUMBER);
             assertThat(tokens.get(0).lexeme).isEqualTo("12");
             assertThat(tokens.get(0).literal).isEqualTo(12.0);
             assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
 
         @Test
         void fractionalNumber() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("1.2");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("1.2");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(Token.Type.NUMBER);
+            assertThat(tokens.get(0).type).isEqualTo(NUMBER);
             assertThat(tokens.get(0).lexeme).isEqualTo("1.2");
             assertThat(tokens.get(0).literal).isEqualTo(1.2);
             assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
     }
 
@@ -329,40 +344,34 @@ class ScannerTest {
                 "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
         })
         void singleCharacterIdentifier(String identifier) {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner(identifier);
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner(identifier);
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(Token.Type.IDENTIFIER);
+            assertThat(tokens.get(0).type).isEqualTo(IDENTIFIER);
             assertThat(tokens.get(0).lexeme).isEqualTo(identifier);
             assertThat(tokens.get(0).literal).isNull();
             assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
 
         @Test
         void multipleCharactersIdentifier() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("myIdentifier");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("myIdentifier");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(Token.Type.IDENTIFIER);
+            assertThat(tokens.get(0).type).isEqualTo(IDENTIFIER);
             assertThat(tokens.get(0).lexeme).isEqualTo("myIdentifier");
             assertThat(tokens.get(0).literal).isNull();
             assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
-            assertThat(fakeErrorReporter.error).isNull();
+            assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
     }
 
@@ -371,82 +380,82 @@ class ScannerTest {
 
         @Test
         void scanAnd() {
-            assertSingleTokenScanned("and", Token.Type.AND);
+            assertSingleTokenScanned("and", AND);
         }
 
         @Test
         void scanClass() {
-            assertSingleTokenScanned("class", Token.Type.CLASS);
+            assertSingleTokenScanned("class", CLASS);
         }
 
         @Test
         void scanElse() {
-            assertSingleTokenScanned("else", Token.Type.ELSE);
+            assertSingleTokenScanned("else", ELSE);
         }
 
         @Test
         void scanFalse() {
-            assertSingleTokenScanned("false", Token.Type.FALSE);
+            assertSingleTokenScanned("false", FALSE);
         }
 
         @Test
         void scanFor() {
-            assertSingleTokenScanned("for", Token.Type.FOR);
+            assertSingleTokenScanned("for", FOR);
         }
 
         @Test
         void scanFun() {
-            assertSingleTokenScanned("fun", Token.Type.FUN);
+            assertSingleTokenScanned("fun", FUN);
         }
 
         @Test
         void scanIf() {
-            assertSingleTokenScanned("if", Token.Type.IF);
+            assertSingleTokenScanned("if", IF);
         }
 
         @Test
         void scanNil() {
-            assertSingleTokenScanned("nil", Token.Type.NIL);
+            assertSingleTokenScanned("nil", NIL);
         }
 
         @Test
         void scanOr() {
-            assertSingleTokenScanned("or", Token.Type.OR);
+            assertSingleTokenScanned("or", OR);
         }
 
         @Test
         void scanPrint() {
-            assertSingleTokenScanned("print", Token.Type.PRINT);
+            assertSingleTokenScanned("print", PRINT);
         }
 
         @Test
         void scanReturn() {
-            assertSingleTokenScanned("return", Token.Type.RETURN);
+            assertSingleTokenScanned("return", RETURN);
         }
 
         @Test
         void scanSuper() {
-            assertSingleTokenScanned("super", Token.Type.SUPER);
+            assertSingleTokenScanned("super", SUPER);
         }
 
         @Test
         void scanThis() {
-            assertSingleTokenScanned("this", Token.Type.THIS);
+            assertSingleTokenScanned("this", THIS);
         }
 
         @Test
         void scanTrue() {
-            assertSingleTokenScanned("true", Token.Type.TRUE);
+            assertSingleTokenScanned("true", TRUE);
         }
 
         @Test
         void scanVar() {
-            assertSingleTokenScanned("var", Token.Type.VAR);
+            assertSingleTokenScanned("var", VAR);
         }
 
         @Test
         void scanWhile() {
-            assertSingleTokenScanned("while", Token.Type.WHILE);
+            assertSingleTokenScanned("while", WHILE);
         }
 
     }
@@ -456,46 +465,44 @@ class ScannerTest {
 
         @Test
         void unknownCharacter() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("@");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("@");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
             assertTokenIsEndOfLine(tokens.get(0));
 
-            assertThat(fakeErrorReporter.error).isNotNull();
-            assertThat(fakeErrorReporter.error.getLine()).isEqualTo(1);
-            assertThat(fakeErrorReporter.error.getLocation()).isNull();
-            assertThat(fakeErrorReporter.error.getMessage()).isEqualTo("Unexpected character.");
+            assertThat(fakeErrorReporter.receivedError()).isTrue();
+            assertThat(fakeErrorReporter.getError().getLine()).isEqualTo(1);
+            assertThat(fakeErrorReporter.getError().getLocation()).isNull();
+            assertThat(fakeErrorReporter.getError().getMessage()).isEqualTo("Unexpected character.");
         }
 
         @Test
         void unterminatedString() {
-            FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-            Scanner scanner = new Scanner("\"H");
-            scanner.addErrorReporter(fakeErrorReporter);
+            Scanner scanner = createScanner("\"H");
 
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
             assertTokenIsEndOfLine(tokens.get(0));
 
-            assertThat(fakeErrorReporter.error).isNotNull();
-            assertThat(fakeErrorReporter.error.getLine()).isEqualTo(1);
-            assertThat(fakeErrorReporter.error.getLocation()).isNull();
-            assertThat(fakeErrorReporter.error.getMessage()).isEqualTo("Unterminated string.");
+            assertThat(fakeErrorReporter.receivedError()).isTrue();
+            assertThat(fakeErrorReporter.getError().getLine()).isEqualTo(1);
+            assertThat(fakeErrorReporter.getError().getLocation()).isNull();
+            assertThat(fakeErrorReporter.getError().getMessage()).isEqualTo("Unterminated string.");
         }
     }
 
-    private void assertSingleTokenScanned(String sourceCode, Token.Type type) {
-        FakeErrorReporter fakeErrorReporter = new FakeErrorReporter();
-
-        Scanner scanner = new Scanner(sourceCode);
+    private Scanner createScanner(String sourceCode) {
+        Scanner scanner = new SimpleScanner(sourceCode);
         scanner.addErrorReporter(fakeErrorReporter);
+
+        return scanner;
+    }
+
+    private void assertSingleTokenScanned(String sourceCode, Type type) {
+        Scanner scanner = createScanner(sourceCode);
 
         List<Token> tokens = scanner.scanTokens();
 
@@ -503,10 +510,10 @@ class ScannerTest {
         assertTokenHasTypeAndLexeme(tokens.get(0), type, sourceCode);
         assertTokenIsEndOfLine(tokens.get(1));
 
-        assertThat(fakeErrorReporter.error).isNull();
+        assertThat(fakeErrorReporter.receivedError()).isFalse();
     }
 
-    private void assertTokenHasTypeAndLexeme(Token token, Token.Type type, String lexeme) {
+    private void assertTokenHasTypeAndLexeme(Token token, Type type, String lexeme) {
         assertThat(token.type).isEqualTo(type);
         assertThat(token.lexeme).isEqualTo(lexeme);
         assertThat(token.literal).isNull();
@@ -514,7 +521,7 @@ class ScannerTest {
     }
 
     private void assertTokenIsEndOfLine(Token token) {
-        assertThat(token.type).isEqualTo(Token.Type.EOF);
+        assertThat(token.type).isEqualTo(EOF);
         assertThat(token.lexeme).isEqualTo("");
         assertThat(token.literal).isNull();
         assertThat(token.line).isEqualTo(1);

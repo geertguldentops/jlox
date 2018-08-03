@@ -1,9 +1,12 @@
-package be.guldentops.geert.lox.grammar;
+package be.guldentops.geert.lox.tools;
 
-import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.grammar.Expression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.minus;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.plus;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.star;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AbstractSyntaxTreePrinterTest {
@@ -28,18 +31,16 @@ class AbstractSyntaxTreePrinterTest {
     @Test
     void printBinaryExpressionWithLeftAndRightLiterals() {
         Expression.Literal one = new Expression.Literal("1");
-        Token plus = new Token(Token.Type.PLUS, "+", null, 1);
         Expression.Literal two = new Expression.Literal("2");
 
-        assertThat(astPrinter.print(new Expression.Binary(one, plus, two))).isEqualTo("(+ 1 2)");
+        assertThat(astPrinter.print(new Expression.Binary(one, plus(), two))).isEqualTo("(+ 1 2)");
     }
 
     @Test
     void printUnaryExpression() {
-        Token minus = new Token(Token.Type.MINUS, "-", null, 1);
         Expression.Literal one = new Expression.Literal("1");
 
-        assertThat(astPrinter.print(new Expression.Unary(minus, one))).isEqualTo("(- 1)");
+        assertThat(astPrinter.print(new Expression.Unary(minus(), one))).isEqualTo("(- 1)");
     }
 
     @Test
@@ -51,9 +52,9 @@ class AbstractSyntaxTreePrinterTest {
     void printComplexExpression() {
         Expression complexBinaryExpression = new Expression.Binary(
                 new Expression.Unary(
-                        new Token(Token.Type.MINUS, "-", null, 1),
+                        minus(),
                         new Expression.Literal(123)),
-                new Token(Token.Type.STAR, "*", null, 1),
+                star(),
                 new Expression.Grouping(
                         new Expression.Literal(45.67)));
 

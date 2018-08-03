@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox.tool;
+package be.guldentops.geert.lox.tools;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -40,7 +40,7 @@ public class GenerateAbstractSyntaxTree {
         writer.println("package be.guldentops.geert.lox.grammar;");
         writer.println("");
         writer.println("import java.util.List;");
-        writer.println("import be.guldentops.geert.lox.lexer.Token;");
+        writer.println("import be.guldentops.geert.lox.lexer.api.Token;");
         writer.println("");
         writer.printf("public abstract class %s {", baseClassName);
         writer.println();
@@ -54,7 +54,7 @@ public class GenerateAbstractSyntaxTree {
 
     private static void writeAbstractAcceptMethod(PrintWriter writer) {
         writer.println("");
-        writer.println("  abstract <R> R accept(Visitor<R> visitor);");
+        writer.println("  public abstract <R> R accept(Visitor<R> visitor);");
     }
 
     private static void writeVisitorInterface(PrintWriter writer, String baseClassName, List<String> types) {
@@ -125,7 +125,7 @@ public class GenerateAbstractSyntaxTree {
 
     private static void writeAcceptMethodImplementation(PrintWriter writer, String baseClassName, String className) {
         writer.println();
-        writer.println("    <R> R accept(Visitor<R> visitor) {");
+        writer.println("    public <R> R accept(Visitor<R> visitor) {");
         writer.printf("      return visitor.visit%s%s(this);", className, baseClassName);
         writer.println();
         writer.println("    }");

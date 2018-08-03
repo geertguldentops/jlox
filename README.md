@@ -13,7 +13,11 @@ This is a Java version of the lox interpreter from the book [Crafting Interprete
 
 ### Running a Lox program ###
 
-The Lox class has a main method which accepts exactly 1 program argument, the path to the Lox script you want to run.
+Lox has 2 modes it can run in:
+
+1. REPL mode: Run the main method in the Lox class with exactly 1 program argument, the path to the Lox script you want to run.
+
+2. Script mode: Run the main method in the Lox class with no program arguments.
 
 
 ### Generating the AST ###
@@ -26,14 +30,22 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
 
 ## Lox Grammar ##
 
-    expression → literal
-                | unary
-                | binary
-                | grouping ;
+    expression     → equality ;
+    equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+    comparison     → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
+    addition       → multiplication ( ( "-" | "+" ) multiplication )* ;
+    multiplication → unary ( ( "/" | "*" ) unary )* ;
+    unary          → ( "!" | "-" ) unary
+                   | primary ;
+    primary        → NUMBER | STRING | "false" | "true" | "nil"
+                   | "(" expression ")" ;
+                
+## Lox Precedence Rules ##
 
-    literal    → NUMBER | STRING | "false" | "true" | "nil" ;
-    grouping   → "(" expression ")" ;
-    unary      → ( "-" | "!" ) expression ;
-    binary     → expression operator expression ;
-    operator   → "==" | "!=" | "<" | "<=" | ">" | ">="
-                | "+"  | "-"  | "*" | "/" ;
+Name            |       Operators       | Associates
+:--------------:|:---------------------:|:---------:
+Unary           |   `!` `-`             | Right
+Multiplication  |   `/` `*`             | Left
+Addition        |   `-` `+`             | Left
+Comparison      |   `>` `>=` `<` `<=`   | Left
+Equality        |   `==` `!=`           | Left

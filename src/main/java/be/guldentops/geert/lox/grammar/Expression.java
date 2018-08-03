@@ -1,10 +1,10 @@
 package be.guldentops.geert.lox.grammar;
 
-import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.lexer.api.Token;
 
 public abstract class Expression {
 
-    abstract <R> R accept(Visitor<R> visitor);
+    public abstract <R> R accept(Visitor<R> visitor);
 
     public interface Visitor<R> {
         R visitBinaryExpression(Binary expression);
@@ -28,7 +28,7 @@ public abstract class Expression {
             this.right = right;
         }
 
-        <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(Visitor<R> visitor) {
             return visitor.visitBinaryExpression(this);
         }
     }
@@ -41,7 +41,7 @@ public abstract class Expression {
             this.expression = expression;
         }
 
-        <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(Visitor<R> visitor) {
             return visitor.visitGroupingExpression(this);
         }
     }
@@ -54,7 +54,7 @@ public abstract class Expression {
             this.value = value;
         }
 
-        <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(Visitor<R> visitor) {
             return visitor.visitLiteralExpression(this);
         }
     }
@@ -69,7 +69,7 @@ public abstract class Expression {
             this.right = right;
         }
 
-        <R> R accept(Visitor<R> visitor) {
+        public <R> R accept(Visitor<R> visitor) {
             return visitor.visitUnaryExpression(this);
         }
     }

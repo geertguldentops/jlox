@@ -1,4 +1,6 @@
-package be.guldentops.geert.lox.grammar;
+package be.guldentops.geert.lox.tools;
+
+import be.guldentops.geert.lox.grammar.Expression;
 
 public class AbstractSyntaxTreePrinter implements Expression.Visitor<String> {
 

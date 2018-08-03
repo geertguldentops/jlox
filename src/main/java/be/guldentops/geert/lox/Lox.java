@@ -2,8 +2,13 @@ package be.guldentops.geert.lox;
 
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.error.impl.ConsoleErrorReporter;
-import be.guldentops.geert.lox.lexer.Scanner;
-import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.grammar.Expression;
+import be.guldentops.geert.lox.lexer.api.Scanner;
+import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.lexer.impl.SimpleScanner;
+import be.guldentops.geert.lox.parser.api.Parser;
+import be.guldentops.geert.lox.parser.impl.RecursiveDecentParser;
+import be.guldentops.geert.lox.tools.AbstractSyntaxTreePrinter;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,8 +21,6 @@ import java.util.List;
 public class Lox {
 
     private final ErrorReporter errorReporter = new ConsoleErrorReporter();
-
-    private boolean hadError = false;
 
     public static void main(String[] args) throws IOException {
         new Lox().run(args);
@@ -39,7 +42,7 @@ public class Lox {
         run(new String(bytes, Charset.defaultCharset()));
 
         // Indicate an error in the exit code.
-        if (hadError) System.exit(65);
+        if (errorReporter.receivedError()) System.exit(65);
     }
 
     private void runPrompt() throws IOException {
@@ -49,19 +52,23 @@ public class Lox {
         for (; ; ) {
             System.out.print("> ");
             run(reader.readLine());
-            hadError = false;
+            errorReporter.reset();
         }
     }
 
     private void run(String sourceCode) {
-        Scanner scanner = new Scanner(sourceCode);
+        Scanner scanner = new SimpleScanner(sourceCode);
         scanner.addErrorReporter(errorReporter);
 
         List<Token> tokens = scanner.scanTokens();
 
-        // For now, just print the tokens.
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
+        Parser parser = new RecursiveDecentParser(tokens);
+        parser.addErrorReporter(errorReporter);
+        Expression expression = parser.parse();
+
+        // Stop if there was a syntax error.
+        if (errorReporter.receivedError()) return;
+
+        System.out.println(new AbstractSyntaxTreePrinter().print(expression));
     }
 }
