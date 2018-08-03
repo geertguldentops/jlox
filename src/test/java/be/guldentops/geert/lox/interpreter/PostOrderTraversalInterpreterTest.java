@@ -609,8 +609,9 @@ class PostOrderTraversalInterpreterTest {
     }
 
     /**
-     * To test block statements we would need to get hold of the block statement's local scope. By observing it correctly
-     * manipulates this scope and its outer scopes during variable look-up we can verify that it behaves correctly.
+     * To test block statements we would need to get hold of the block statement's local scope.
+     * By observing it correctly manipulates this scope and its outer scopes during variable look-up
+     * we could verify that it behaves correctly.
      * <p>
      * However, by definition, local scope is local to the block and is not observable from outside!
      * <p>
@@ -924,7 +925,21 @@ class PostOrderTraversalInterpreterTest {
         }
 
         @Test
-        void canCallDefinedFunctionWithNoArguments() {
+        void printFunction() {
+            interpret(
+                    function("printNoArgs", emptyList(),
+                            List.of(
+                                    print(literal(2.0))
+                            )
+                    ),
+                    print(variable("printNoArgs"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("<fn printNoArgs>\n");
+        }
+
+        @Test
+        void callFunctionWithoutArguments() {
             interpret(
                     function("printNoArgs", emptyList(),
                             List.of(
@@ -938,7 +953,7 @@ class PostOrderTraversalInterpreterTest {
         }
 
         @Test
-        void canCallFunctionWithOneArgument() {
+        void callFunctionWithOneArgument() {
             interpret(
                     function("printSingleArgument", List.of(identifier("a")),
                             List.of(
@@ -952,7 +967,7 @@ class PostOrderTraversalInterpreterTest {
         }
 
         @Test
-        void canCallFunctionWithMultipleArguments() {
+        void callFunctionWithMultipleArguments() {
             interpret(
                     function("printSummedArguments", List.of(identifier("a"), identifier("b")),
                             List.of(
@@ -966,7 +981,7 @@ class PostOrderTraversalInterpreterTest {
         }
 
         @Test
-        void canCallFunctionThatClosesOverVariableInOuterBlockScope() {
+        void callFunctionThatClosesOverVariableInOuterBlockScope() {
             interpret(
                     function("makeCounter", emptyList(),
                             List.of(
@@ -989,7 +1004,7 @@ class PostOrderTraversalInterpreterTest {
         }
 
         @Test
-        void functionClosesOverFreeVariablesStatically() {
+        void callFunctionThatClosesOverFreeVariablesStatically() {
             interpret(
                     variableDeclaration("a", literal("foo")),
                     blockStatement(

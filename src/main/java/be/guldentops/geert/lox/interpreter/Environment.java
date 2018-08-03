@@ -28,13 +28,10 @@ class Environment {
         if (values.containsKey(name.lexeme))
             throw new RuntimeError(name, String.format("Variable '%s' is already defined.", name.lexeme));
 
-        values.put(name.lexeme, value);
+        define(name.lexeme, value);
     }
 
     void define(String name, Object value) {
-        if (values.containsKey(name))
-            throw new RuntimeError(null, String.format("Variable '%s' is already defined.", name));
-
         values.put(name, value);
     }
 
@@ -45,8 +42,6 @@ class Environment {
     void assign(Token name, Object value) {
         if (values.containsKey(name.lexeme)) {
             values.put(name.lexeme, value);
-        } else if (enclosing != null) {
-            enclosing.assign(name, value);
         } else {
             throw new RuntimeError(name, String.format("Undefined variable '%s'.", name.lexeme));
         }
