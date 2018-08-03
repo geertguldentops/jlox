@@ -16,12 +16,14 @@ import java.util.function.Supplier;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.AND;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.COMMA;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.ELSE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.FOR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FUN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
@@ -36,6 +38,7 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RETURN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_PAREN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.SEMICOLON;
@@ -83,6 +86,7 @@ public class RecursiveDescentParser implements Parser {
 
     private Statement declaration() {
         try {
+            if (match(FUN)) return function("function");
             if (match(VAR)) return variableDeclaration();
 
             return statement();
@@ -90,6 +94,27 @@ public class RecursiveDescentParser implements Parser {
             synchronize();
             return null;
         }
+    }
+
+    private Statement function(String function) {
+        Token name = consume(IDENTIFIER, "Expect " + function + " name.");
+
+        consume(LEFT_PAREN, "Expect '(' after " + function + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= 8) {
+                    reportError(peek(), "Cannot have more than 8 parameters.");
+                }
+
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+            } while (match(COMMA));
+        }
+        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+
+        consume(LEFT_BRACE, "Expect '{' before " + function + " body.");
+        List<Statement> body = block();
+        return new Statement.Function(name, parameters, body);
     }
 
     private Statement variableDeclaration() {
@@ -108,10 +133,22 @@ public class RecursiveDescentParser implements Parser {
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
+        if (match(RETURN)) return returnStatement();
         if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Statement.Block(block());
 
         return expressionStatement();
+    }
+
+    private Statement returnStatement() {
+        Token keyword = previous();
+        Expression value = null;
+        if (!check(SEMICOLON)) {
+            value = expression();
+        }
+
+        consume(SEMICOLON, "Expect ';' after return value.");
+        return new Statement.Return(keyword, value);
     }
 
     private Statement forStatement() {
@@ -268,7 +305,38 @@ public class RecursiveDescentParser implements Parser {
             return new Expression.Unary(operator, right);
         }
 
-        return primary();
+        return call();
+    }
+
+    private Expression call() {
+        Expression expression = primary();
+
+        while (true) {
+            if (match(LEFT_PAREN)) {
+                expression = finishCall(expression);
+            } else {
+                break;
+            }
+        }
+
+        return expression;
+    }
+
+    private Expression finishCall(Expression callee) {
+        var arguments = new ArrayList<Expression>();
+
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (arguments.size() >= 8) {
+                    reportError(peek(), "Cannot have more than 8 arguments.");
+                }
+
+                arguments.add(expression());
+            } while (match(COMMA));
+        }
+        Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
+
+        return new Expression.Call(callee, paren, arguments);
     }
 
     private Expression primary() {

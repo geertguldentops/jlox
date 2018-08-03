@@ -1,10 +1,13 @@
 package be.guldentops.geert.lox.environment;
 
 import be.guldentops.geert.lox.error.api.RuntimeError;
+import be.guldentops.geert.lox.interpreter.api.LoxCallable;
 import be.guldentops.geert.lox.lexer.api.Token;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
 
 public class Environment {
 
@@ -29,6 +32,10 @@ public class Environment {
             throw new RuntimeError(name, String.format("Variable '%s' is already defined.", name.lexeme));
 
         values.put(name.lexeme, value);
+    }
+
+    public void defineNativeMethod(String name, LoxCallable loxCallable) {
+        define(new Token(IDENTIFIER, name, null, -1), loxCallable);
     }
 
     public void assign(Token name, Object value) {

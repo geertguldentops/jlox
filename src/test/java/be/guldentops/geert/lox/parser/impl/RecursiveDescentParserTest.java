@@ -16,14 +16,17 @@ import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._else;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._false;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._for;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._if;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._return;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._true;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother._while;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.and;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bang;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bangEqual;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.comma;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.eof;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.equal;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.equalEqual;
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.fun;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.greater;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.greaterEqual;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.identifier;
@@ -678,6 +681,173 @@ class RecursiveDescentParserTest {
     }
 
     @Nested
+    class CallFunction {
+
+        @Test
+        void callNoArgumentsFunction() {
+            var parser = createParser(
+                    identifier("get"), leftParen(), rightParen(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+
+            var statementExpression = castTo(statements.get(0), Statement.Expression.class);
+            var call = castTo(statementExpression.expression, Expression.Call.class);
+
+            assertVariableExpression(call.callee, identifier("get"));
+            assertThat(call.paren).isEqualToComparingFieldByField(rightParen());
+            assertThat(call.arguments).isEmpty();
+        }
+
+        @Test
+        void callSingleArgumentFunction() {
+            var parser = createParser(
+                    identifier("set"), leftParen(), one(), rightParen(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+
+            var statementExpression = castTo(statements.get(0), Statement.Expression.class);
+            var call = castTo(statementExpression.expression, Expression.Call.class);
+
+            assertVariableExpression(call.callee, identifier("set"));
+            assertThat(call.paren).isEqualToComparingFieldByField(rightParen());
+            assertThat(call.arguments).hasSize(1);
+            assertLiteralExpression(call.arguments.get(0), 1.0);
+        }
+
+        @Test
+        void callMultiArgumentFunction() {
+            var parser = createParser(
+                    identifier("sum"), leftParen(), one(), comma(), two(), rightParen(), semicolon(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+
+            var statementExpression = castTo(statements.get(0), Statement.Expression.class);
+            var call = castTo(statementExpression.expression, Expression.Call.class);
+
+            assertVariableExpression(call.callee, identifier("sum"));
+            assertThat(call.paren).isEqualToComparingFieldByField(rightParen());
+            assertThat(call.arguments).hasSize(2);
+            assertLiteralExpression(call.arguments.get(0), 1.0);
+            assertLiteralExpression(call.arguments.get(1), 2.0);
+        }
+    }
+
+    @Nested
+    class FunctionDeclaration {
+
+        @Test
+        void noArgumentsFunction() {
+            var parser = createParser(
+                    fun(), identifier("print1"), leftParen(), rightParen(), leftBrace(),
+                    print(), one(), semicolon(),
+                    rightBrace(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+
+            var function = castTo(statements.get(0), Statement.Function.class);
+            assertThat(function.name).isEqualToComparingFieldByField(identifier("print1"));
+
+            assertThat(function.parameters).isEmpty();
+
+            assertThat(function.body).hasSize(1);
+            assertPrintStatement(function.body.get(0), 1.0);
+        }
+
+        @Test
+        void singleArgumentFunction() {
+            var parser = createParser(
+                    fun(), identifier("set"), leftParen(), identifier("a"), rightParen(), leftBrace(),
+                    print(), one(), semicolon(),
+                    rightBrace(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+
+            var function = castTo(statements.get(0), Statement.Function.class);
+            assertThat(function.name).isEqualToComparingFieldByField(identifier("set"));
+
+            assertThat(function.parameters).hasSize(1);
+            assertThat(function.parameters.get(0)).isEqualToComparingFieldByField(identifier("a"));
+
+            assertThat(function.body).hasSize(1);
+            assertPrintStatement(function.body.get(0), 1.0);
+        }
+
+        @Test
+        void multipleArgumentsFunction() {
+            var parser = createParser(
+                    fun(), identifier("set"), leftParen(), identifier("a"), comma(), identifier("b"), rightParen(), leftBrace(),
+                    print(), one(), semicolon(),
+                    rightBrace(),
+                    eof()
+            );
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+
+            var function = castTo(statements.get(0), Statement.Function.class);
+            assertThat(function.name).isEqualToComparingFieldByField(identifier("set"));
+
+            assertThat(function.parameters).hasSize(2);
+            assertThat(function.parameters.get(0)).isEqualToComparingFieldByField(identifier("a"));
+            assertThat(function.parameters.get(1)).isEqualToComparingFieldByField(identifier("b"));
+
+            assertThat(function.body).hasSize(1);
+            assertPrintStatement(function.body.get(0), 1.0);
+        }
+    }
+
+    @Nested
+    class ReturnStatement {
+
+        @Test
+        void emptyReturn() {
+            var parser = createParser(_return(), semicolon(), eof());
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+
+            var returnStatement = castTo(statements.get(0), Statement.Return.class);
+            assertThat(returnStatement.keyword).isEqualToComparingFieldByField(_return());
+            assertThat(returnStatement.value).isNull();
+        }
+
+        @Test
+        void returnValue() {
+            var parser = createParser(_return(), one(), semicolon(), eof());
+
+            var statements = parser.parse();
+
+            assertThat(statements).hasSize(1).doesNotContainNull();
+
+            var returnStatement = castTo(statements.get(0), Statement.Return.class);
+            assertThat(returnStatement.keyword).isEqualToComparingFieldByField(_return());
+            assertLiteralExpression(returnStatement.value, 1.0);
+        }
+    }
+
+    @Nested
     class ErrorCases {
 
         @Test
@@ -1067,7 +1237,7 @@ class RecursiveDescentParserTest {
         }
 
         @Nested
-        class IfCases {
+        class If {
 
             @Test
             void ifWithoutRightParen() {
@@ -1140,7 +1310,7 @@ class RecursiveDescentParserTest {
         }
 
         @Nested
-        class WhileCases {
+        class While {
 
             @Test
             void whileWithoutRightParen() {
@@ -1198,7 +1368,7 @@ class RecursiveDescentParserTest {
         }
 
         @Nested
-        class ForCases {
+        class For {
 
             @Test
             void forWithoutRightParen() {
@@ -1274,6 +1444,267 @@ class RecursiveDescentParserTest {
                 assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
                 assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ')'");
                 assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ';' after variable declaration.");
+            }
+        }
+
+        @Nested
+        class Call {
+
+            @Test
+            void callWithoutLeftParen() {
+                var parser = createParser(
+                        identifier("get"), rightParen(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ')'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ';' after value.");
+            }
+
+            @Test
+            void callWithoutRightParen() {
+                var parser = createParser(
+                        identifier("get"), leftParen(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at ';'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void callWithMissingCommaInArgumentList() {
+                var parser = createParser(
+                        identifier("sum"), leftParen(), one(), two(), rightParen(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '2'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ')' after arguments.");
+            }
+
+            @Test
+            void callWithTooManyArguments() {
+                var parser = createParser(
+                        identifier("sum"), leftParen(),
+                        one(), comma(),
+                        one(), comma(),
+                        one(), comma(),
+                        one(), comma(),
+                        one(), comma(),
+                        one(), comma(),
+                        one(), comma(),
+                        one(), comma(),
+                        one(),
+                        rightParen(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).doesNotContainNull(); // Still parses the call!
+                assertThat(statements.get(0)).isInstanceOf(Statement.Expression.class);
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '1'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot have more than 8 arguments.");
+            }
+        }
+
+        @Nested
+        class Function {
+
+            @Test
+            void functionWithoutIdentifier() {
+                var parser = createParser(
+                        fun(), leftParen(), rightParen(), leftBrace(),
+                        print(), one(), semicolon(),
+                        rightBrace(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(3);
+                assertThat(statements.get(0)).isNull();
+                assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Still parses some of the code.
+                assertThat(statements.get(2)).isNull();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void functionWithoutLeftParen() {
+                var parser = createParser(
+                        fun(), identifier("get"), rightParen(), leftBrace(),
+                        print(), one(), semicolon(),
+                        rightBrace(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(3);
+                assertThat(statements.get(0)).isNull();
+                assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Still parses some of the code.
+                assertThat(statements.get(2)).isNull();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void functionWithoutRightParen() {
+                var parser = createParser(
+                        fun(), identifier("get"), leftParen(), leftBrace(),
+                        print(), one(), semicolon(),
+                        rightBrace(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(3);
+                assertThat(statements.get(0)).isNull();
+                assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Still parses some of the code.
+                assertThat(statements.get(2)).isNull();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void functionWithMissingCommaInParameterList() {
+                var parser = createParser(
+                        fun(), identifier("get"), leftParen(), identifier("a"), identifier("b"), rightParen(), leftBrace(),
+                        print(), one(), semicolon(),
+                        rightBrace(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(3);
+                assertThat(statements.get(0)).isNull();
+                assertThat(statements.get(1)).isInstanceOf(Statement.Print.class); // Still parses some of the code.
+                assertThat(statements.get(2)).isNull();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void functionWithMoreThan8Parameters() {
+                var parser = createParser(
+                        fun(), identifier("get"), leftParen(),
+                        identifier("a1"), comma(),
+                        identifier("a2"), comma(),
+                        identifier("a3"), comma(),
+                        identifier("a4"), comma(),
+                        identifier("a5"), comma(),
+                        identifier("a6"), comma(),
+                        identifier("a7"), comma(),
+                        identifier("a8"), comma(),
+                        identifier("a9"), rightParen(),
+                        leftBrace(),
+                        print(), one(), semicolon(),
+                        rightBrace(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).doesNotContainNull(); // Still parses the call!
+                assertThat(statements.get(0)).isInstanceOf(Statement.Function.class);
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at 'a9'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot have more than 8 parameters.");
+            }
+
+            @Test
+            void functionWithoutLeftBrace() {
+                var parser = createParser(
+                        fun(), identifier("get"), leftParen(), rightParen(),
+                        print(), one(), semicolon(),
+                        rightBrace(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at '}'");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void functionWithoutRightBrace() {
+                var parser = createParser(
+                        fun(), identifier("get"), leftParen(), rightParen(), leftBrace(),
+                        print(), one(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect '}' after block.");
+            }
+        }
+
+        @Nested
+        class Return {
+
+            @Test
+            void emptyReturnWithoutSemicolon() {
+                var parser = createParser(_return(), eof());
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect expression.");
+            }
+
+            @Test
+            void returnValueWithoutSemicolon() {
+                var parser = createParser(_return(), one(), eof());
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(1).containsOnlyNulls();
+                assertThat(fakeErrorReporter.receivedError()).isTrue();
+                assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+                assertThat(fakeErrorReporter.getError().location).isEqualTo(" at end");
+                assertThat(fakeErrorReporter.getError().message).isEqualTo("Expect ';' after return value.");
             }
         }
 
@@ -1390,6 +1821,52 @@ class RecursiveDescentParserTest {
 
                 // "for (;;)" is the same as "while(true)"
                 assertWhileStatementPrints(statements.get(1), true, 1.0);
+            }
+
+            @Test
+            void afterErrorRecoversToNextFunctionDeclarationEvenWhenSemiColonIsMissing() {
+                var parser = createParser(
+                        bangEqual(), two(), // Error: bangEqual without left operand
+                        fun(), identifier("print1"), leftParen(), rightParen(), leftBrace(),
+                        print(), one(), semicolon(),
+                        rightBrace(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+
+                assertThat(statements.get(0)).isNull();
+                assertErrorAtLexeme("!=");
+
+                var function = castTo(statements.get(1), Statement.Function.class);
+                assertThat(function.name).isEqualToComparingFieldByField(identifier("print1"));
+
+                assertThat(function.parameters).isEmpty();
+
+                assertThat(function.body).hasSize(1);
+                assertPrintStatement(function.body.get(0), 1.0);
+            }
+
+            @Test
+            void afterErrorRecoversToNextReturnEvenWhenSemiColonIsMissing() {
+                var parser = createParser(
+                        bangEqual(), two(), // Error: bangEqual without left operand
+                        _return(), semicolon(),
+                        eof()
+                );
+
+                var statements = parser.parse();
+
+                assertThat(statements).hasSize(2);
+
+                assertThat(statements.get(0)).isNull();
+                assertErrorAtLexeme("!=");
+
+                var returnStatement = castTo(statements.get(1), Statement.Return.class);
+                assertThat(returnStatement.keyword).isEqualToComparingFieldByField(_return());
+                assertThat(returnStatement.value).isNull();
             }
         }
 

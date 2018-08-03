@@ -4,19 +4,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.call;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.grouping;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.literal;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.logical;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.unary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.variable;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._if;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory._return;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._while;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.blockStatement;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.expressionStatement;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory.function;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.print;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory.uninitializedVariableDeclaration;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.variableDeclaration;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.and;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.identifier;
@@ -93,17 +97,22 @@ class AbstractSyntaxTreePrinterTest {
 
         @Test
         void printVariableExpression() {
-            assertThat(astPrinter.print(variable(identifier("a")))).isEqualTo("a");
+            assertThat(astPrinter.print(variable("a"))).isEqualTo("a");
         }
 
         @Test
         void printAssignExpression() {
-            assertThat(astPrinter.print(assign(identifier("a"), literal(1.0)))).isEqualTo("( = a 1.0)");
+            assertThat(astPrinter.print(assign("a", literal(1.0)))).isEqualTo("( = a 1.0)");
         }
 
         @Test
         void printLogicalExpression() {
             assertThat(astPrinter.print(logical(literal(true), and(), literal(false)))).isEqualTo("(and true false)");
+        }
+
+        @Test
+        void printCallExpression() {
+            assertThat(astPrinter.print(call("sum", literal(1.0), literal(2.0)))).isEqualTo("call sum (1.0 2.0)");
         }
     }
 
@@ -137,17 +146,39 @@ class AbstractSyntaxTreePrinterTest {
 
         @Test
         void printUninitializedVariableStatement() {
-            assertThat(astPrinter.print(uninitializedVariableDeclaration(identifier("a")))).isEqualTo("(var a)");
+            assertThat(astPrinter.print(variableDeclaration("a"))).isEqualTo("var a");
         }
 
         @Test
         void printInitializedVariableStatement() {
-            assertThat(astPrinter.print(variableDeclaration(identifier("a"), literal(1.0)))).isEqualTo("(var a = 1.0)");
+            assertThat(astPrinter.print(variableDeclaration("a", literal(1.0)))).isEqualTo("var a = 1.0");
         }
 
         @Test
         void printWhile() {
             assertThat(astPrinter.print(_while(literal(true), print(literal(1.0))))).isEqualTo("while true (print 1.0)");
+        }
+
+        @Test
+        void printFunction() {
+            assertThat(astPrinter.print(
+                    function("printTwoArgs", List.of(identifier("a"), identifier("b")),
+                            List.of(
+                                    print(literal("a")),
+                                    print(literal("b"))
+                            )
+                    )
+            )).isEqualTo("(fun printTwoArgs (a b) (print a) (print b))");
+        }
+
+        @Test
+        void printReturnNothing() {
+            assertThat(astPrinter.print(_return(null))).isEqualTo("(return)");
+        }
+
+        @Test
+        void printReturnExpression() {
+            assertThat(astPrinter.print(_return(literal(1.0)))).isEqualTo("(return 1.0)");
         }
     }
 }

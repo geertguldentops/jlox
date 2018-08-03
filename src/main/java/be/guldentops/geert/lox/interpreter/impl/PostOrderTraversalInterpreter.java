@@ -6,12 +6,14 @@ import be.guldentops.geert.lox.error.api.RuntimeError;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.interpreter.api.Interpreter;
+import be.guldentops.geert.lox.interpreter.api.LoxCallable;
 import be.guldentops.geert.lox.lexer.api.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
+import static java.util.stream.Collectors.toList;
 
 public class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<Object>, Statement.Visitor<Void> {
 
@@ -19,8 +21,8 @@ public class PostOrderTraversalInterpreter implements Interpreter, Expression.Vi
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
-    public PostOrderTraversalInterpreter(Environment environment) {
-        this.environment = environment;
+    public PostOrderTraversalInterpreter(Environment globals) {
+        this.environment = globals;
     }
 
     @Override
@@ -64,13 +66,14 @@ public class PostOrderTraversalInterpreter implements Interpreter, Expression.Vi
         return null;
     }
 
-    private void executeBlock(List<Statement> statements, Environment localEnvironment) {
+    @Override
+    public void executeBlock(List<Statement> statements, Environment localEnvironment) {
         Environment previous = this.environment;
 
         try {
             this.environment = localEnvironment;
 
-            for (Statement statement : statements) {
+            for (var statement : statements) {
                 execute(statement);
             }
         } finally {
@@ -81,6 +84,13 @@ public class PostOrderTraversalInterpreter implements Interpreter, Expression.Vi
     @Override
     public Void visitExpressionStatement(Statement.Expression statement) {
         evaluate(statement.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitFunctionStatement(Statement.Function statement) {
+        var function = new LoxFunction(statement, environment);
+        environment.define(statement.name, function);
         return null;
     }
 
@@ -100,6 +110,14 @@ public class PostOrderTraversalInterpreter implements Interpreter, Expression.Vi
         var value = evaluate(statement.expression);
         System.out.println(stringify(value));
         return null;
+    }
+
+    @Override
+    public Void visitReturnStatement(Statement.Return statement) {
+        Object value = null;
+        if (statement.value != null) value = evaluate(statement.value);
+
+        throw new Return(value);
     }
 
     @Override
@@ -190,6 +208,30 @@ public class PostOrderTraversalInterpreter implements Interpreter, Expression.Vi
         }
 
         return null;
+    }
+
+    @Override
+    public Object visitCallExpression(Expression.Call expression) {
+        var callee = evaluate(expression.callee);
+
+        if (!(callee instanceof LoxCallable)) {
+            throw new RuntimeError(expression.paren, "Can only call functions and classes.");
+        }
+
+        var arguments = expression.arguments.stream()
+                .map(this::evaluate)
+                .collect(toList());
+
+        LoxCallable function = (LoxCallable) callee;
+
+        if (arguments.size() != function.arity()) {
+            throw new RuntimeError(
+                    expression.paren,
+                    String.format("Expected %d argument(s) but got %d.", function.arity(), arguments.size())
+            );
+        }
+
+        return function.call(this, arguments);
     }
 
     @Override

@@ -3,12 +3,14 @@ package be.guldentops.geert.lox.lexer.api;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.AND;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.COMMA;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.ELSE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.FOR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FUN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
@@ -23,6 +25,7 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RETURN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_PAREN;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.SEMICOLON;
@@ -45,12 +48,20 @@ public class TokenObjectMother {
         return new Token(RIGHT_BRACE, "}", null, 1);
     }
 
+    public static Token comma() {
+        return new Token(COMMA, ",", null, 1);
+    }
+
     public static Token print() {
         return new Token(PRINT, "print", null, 1);
     }
 
     public static Token var() {
         return new Token(VAR, "var", null, 1);
+    }
+
+    public static Token fun() {
+        return new Token(FUN, "fun", null, 1);
     }
 
     public static Token identifier(String lexeme) {
@@ -163,6 +174,10 @@ public class TokenObjectMother {
 
     public static Token pi() {
         return new Token(NUMBER, "3.14", 3.14, 1);
+    }
+
+    public static Token _return() {
+        return new Token(RETURN, "return", null, 1);
     }
 
     public static Token semicolon() {

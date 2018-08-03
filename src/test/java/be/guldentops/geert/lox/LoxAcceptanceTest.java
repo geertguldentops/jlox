@@ -94,14 +94,14 @@ class LoxAcceptanceTest {
 
             assertThat(outContent.toString()).isEqualTo(
                     "inner a\n" +
-                    "outer b\n" +
-                    "global c\n" +
-                    "outer a\n" +
-                    "outer b\n" +
-                    "global c\n" +
-                    "global a\n" +
-                    "global b\n" +
-                    "global c\n"
+                            "outer b\n" +
+                            "global c\n" +
+                            "outer a\n" +
+                            "outer b\n" +
+                            "global c\n" +
+                            "global a\n" +
+                            "global b\n" +
+                            "global c\n"
             );
         }
 
@@ -131,6 +131,74 @@ class LoxAcceptanceTest {
             lox.runFile(getAbsoluteFilePathOf("lox/src/loops/ForLoop.lox"));
 
             assertThat(outContent.toString()).isEqualTo("0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n");
+        }
+
+        @Test
+        void canRunCallFunctionWithReturnScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/functions/FunctionWithReturn.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("3\n");
+        }
+
+        @Test
+        void canRunRecursiveFunctionScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/functions/RecursiveFunction.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("1\n2\n3\n");
+        }
+
+        @Test
+        void canRunPrintFunctionScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/functions/PrintFunction.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("<fn add>\n");
+        }
+
+        @Test
+        void canRunPrintResultOfFunctionWithoutReturnScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/functions/PrintResultOfFunctionWithoutReturn.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("don't return anything\nnil\n");
+        }
+
+        @Test
+        void canRunReturnFromNestedBlocksScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/functions/ReturnFromNestedBlocks.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("3\n");
+        }
+
+        @Test
+        void canRunFibonacciScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/functions/Fibonacci.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("0\n" +
+                    "1\n" +
+                    "1\n" +
+                    "2\n" +
+                    "3\n" +
+                    "5\n" +
+                    "8\n" +
+                    "13\n" +
+                    "21\n" +
+                    "34\n" +
+                    "55\n" +
+                    "89\n" +
+                    "144\n" +
+                    "233\n" +
+                    "377\n" +
+                    "610\n" +
+                    "987\n" +
+                    "1597\n" +
+                    "2584\n" +
+                    "4181\n");
+        }
+
+        @Test
+        void canRunNestedFunctionsScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/functions/NestedFunctions.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("1\n2\n");
         }
     }
 

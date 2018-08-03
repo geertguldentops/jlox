@@ -2,6 +2,11 @@ package be.guldentops.geert.lox.tools;
 
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
+import be.guldentops.geert.lox.lexer.api.Token;
+
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.joining;
 
 public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement.Visitor<String> {
 
@@ -21,6 +26,11 @@ public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, St
     @Override
     public String visitBinaryExpression(Expression.Binary expression) {
         return parenthesize(expression.operator.lexeme, expression.left, expression.right);
+    }
+
+    @Override
+    public String visitCallExpression(Expression.Call expression) {
+        return "call " + expression.callee.accept(this) + " (" + toSpaceSeparatedText(expression.arguments.toArray(new Expression[]{})) + ")";
     }
 
     @Override
@@ -53,7 +63,7 @@ public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, St
     public String visitBlockStatement(Statement.Block block) {
         StringBuilder sb = new StringBuilder("(block ");
 
-        for (Statement statement : block.statements) {
+        for (var statement : block.statements) {
             sb.append(print(statement));
         }
 
@@ -65,6 +75,13 @@ public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, St
     @Override
     public String visitExpressionStatement(Statement.Expression statement) {
         return parenthesize(";", statement.expression);
+    }
+
+    @Override
+    public String visitFunctionStatement(Statement.Function statement) {
+        return "(fun " + statement.name.lexeme + " (" + toSpaceSeparatedText(statement.parameters.toArray(new Token[]{})) + ") "
+                + toSpaceSeparatedText(statement.body.toArray(new Statement[]{}))
+                + ")";
     }
 
     @Override
@@ -82,10 +99,16 @@ public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, St
     }
 
     @Override
-    public String visitVariableStatement(Statement.Variable statement) {
-        if (statement.initializer == null) return parenthesize("var " + statement.name.lexeme);
+    public String visitReturnStatement(Statement.Return statement) {
+        if (statement.value == null) return "(return)";
+        return parenthesize("return", statement.value);
+    }
 
-        return parenthesize("var " + statement.name.lexeme + " =", statement.initializer);
+    @Override
+    public String visitVariableStatement(Statement.Variable statement) {
+        if (statement.initializer == null) return "var " + statement.name.lexeme;
+
+        return "var " + statement.name.lexeme + " = " + statement.initializer.accept(this);
     }
 
     @Override
@@ -94,15 +117,24 @@ public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, St
     }
 
     private String parenthesize(String name, Expression... expressions) {
-        var builder = new StringBuilder();
+        return "(" + name + " " + toSpaceSeparatedText(expressions) + ")";
+    }
 
-        builder.append("(").append(name);
-        for (var expression : expressions) {
-            builder.append(" ");
-            builder.append(expression.accept(this));
-        }
-        builder.append(")");
+    private String toSpaceSeparatedText(Token... tokens) {
+        return Stream.of(tokens)
+                .map(token -> token.lexeme)
+                .collect(joining(" "));
+    }
 
-        return builder.toString();
+    private String toSpaceSeparatedText(Expression... expressions) {
+        return Stream.of(expressions)
+                .map(argument -> argument.accept(this))
+                .collect(joining(" "));
+    }
+
+    private String toSpaceSeparatedText(Statement... statements) {
+        return Stream.of(statements)
+                .map(statement -> statement.accept(this))
+                .collect(joining(" "));
     }
 }

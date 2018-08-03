@@ -14,9 +14,13 @@ public interface Statement {
 
         R visitExpressionStatement(Expression statement);
 
+        R visitFunctionStatement(Function statement);
+
         R visitIfStatement(If statement);
 
         R visitPrintStatement(Print statement);
+
+        R visitReturnStatement(Return statement);
 
         R visitVariableStatement(Variable statement);
 
@@ -49,6 +53,23 @@ public interface Statement {
         }
     }
 
+    class Function implements Statement {
+
+        public final Token name;
+        public final List<Token> parameters;
+        public final List<Statement> body;
+
+        public Function(Token name, List<Token> parameters, List<Statement> body) {
+            this.name = name;
+            this.parameters = parameters;
+            this.body = body;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitFunctionStatement(this);
+        }
+    }
+
     class If implements Statement {
 
         public final be.guldentops.geert.lox.grammar.Expression condition;
@@ -76,6 +97,21 @@ public interface Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitPrintStatement(this);
+        }
+    }
+
+    class Return implements Statement {
+
+        public final Token keyword;
+        public final be.guldentops.geert.lox.grammar.Expression value;
+
+        public Return(Token keyword, be.guldentops.geert.lox.grammar.Expression value) {
+            this.keyword = keyword;
+            this.value = value;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitReturnStatement(this);
         }
     }
 

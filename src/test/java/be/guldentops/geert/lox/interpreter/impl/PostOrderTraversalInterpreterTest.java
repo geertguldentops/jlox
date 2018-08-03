@@ -18,17 +18,19 @@ import java.util.List;
 
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.call;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.grouping;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.literal;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.logical;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.unary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.variable;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._if;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory._return;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._while;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.blockStatement;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.expressionStatement;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory.function;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.print;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory.uninitializedVariableDeclaration;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory.variableDeclaration;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.and;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.bang;
@@ -45,6 +47,7 @@ import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.or;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.plus;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.slash;
 import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.star;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PostOrderTraversalInterpreterTest {
@@ -185,21 +188,21 @@ class PostOrderTraversalInterpreterTest {
         void nonInitializedVariableExpression() {
             environment.define(identifier("a"), null);
 
-            assertThat(interpreter.interpret(variable(identifier("a")))).isNull();
+            assertThat(interpreter.interpret(variable("a"))).isNull();
         }
 
         @Test
         void initializedVariableExpression() {
             environment.define(identifier("a"), "2.1");
 
-            assertThat(interpreter.interpret(variable(identifier("a")))).isEqualTo("2.1");
+            assertThat(interpreter.interpret(variable("a"))).isEqualTo("2.1");
         }
 
         @Test
         void assignmentExpression() {
             environment.define(identifier("a"), null);
 
-            assertThat(interpreter.interpret(assign(identifier("a"), literal(1.0)))).isEqualTo(1.0);
+            assertThat(interpreter.interpret(assign("a", literal(1.0)))).isEqualTo(1.0);
 
             assertThat(environment.get(identifier("a"))).isEqualTo(1.0);
         }
@@ -208,7 +211,7 @@ class PostOrderTraversalInterpreterTest {
         void reassignExpression() {
             environment.define(identifier("a"), 2.0);
 
-            assertThat(interpreter.interpret(assign(identifier("a"), literal(3.0)))).isEqualTo(3.0);
+            assertThat(interpreter.interpret(assign("a", literal(3.0)))).isEqualTo(3.0);
 
             assertThat(environment.get(identifier("a"))).isEqualTo(3.0);
         }
@@ -382,7 +385,7 @@ class PostOrderTraversalInterpreterTest {
 
         @Test
         void variableExpressionWithoutVariableDefined() {
-            assertThat(interpreter.interpret(variable(identifier("a")))).isNull();
+            assertThat(interpreter.interpret(variable("a"))).isNull();
 
             assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
             assertThat(fakeErrorReporter.getRuntimeError())
@@ -394,7 +397,7 @@ class PostOrderTraversalInterpreterTest {
         void variableStatementWithVariableAlreadyDefined() {
             environment.define(identifier("a"), 1.0);
 
-            interpret(variableDeclaration(identifier("a"), literal(2.0)));
+            interpret(variableDeclaration("a", literal(2.0)));
 
             assertThat(environment.get(identifier("a"))).isEqualTo(1.0);
 
@@ -406,7 +409,7 @@ class PostOrderTraversalInterpreterTest {
 
         @Test
         void assignmentExpressionWithoutVariableDefined() {
-            assertThat(interpreter.interpret(assign(identifier("a"), literal(1.0)))).isNull();
+            assertThat(interpreter.interpret(assign("a", literal(1.0)))).isNull();
 
             assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
             assertThat(fakeErrorReporter.getRuntimeError())
@@ -415,10 +418,10 @@ class PostOrderTraversalInterpreterTest {
         }
 
         @Test
-        void canAssignVariableFromOuterScope() {
+        void cannotAssignToNonExistingVariable() {
             interpret(
                     blockStatement(
-                            expressionStatement(assign(identifier("a"), literal(1.0)))
+                            expressionStatement(assign("a", literal(1.0)))
                     )
             );
 
@@ -426,6 +429,65 @@ class PostOrderTraversalInterpreterTest {
             assertThat(fakeErrorReporter.getRuntimeError())
                     .isInstanceOf(RuntimeError.class)
                     .hasMessage("Undefined variable 'a'.");
+        }
+
+        @Test
+        void cannotCallNonExistingFunction() {
+            interpret(
+                    expressionStatement(call("function that does not exist"))
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Undefined variable 'function that does not exist'.");
+        }
+
+        @Test
+        void cannotCallNonFunction() {
+            interpret(
+                    variableDeclaration("totally not a function", literal(true)),
+                    expressionStatement(call("totally not a function"))
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Can only call functions and classes.");
+        }
+
+        @Test
+        void cannotCallFunctionWithNotEnoughArguments() {
+            interpret(
+                    function("twoArgumentsFunction", List.of(identifier("a"), identifier("b")),
+                            List.of(
+                                    print(literal("Hello world"))
+                            )
+                    ),
+                    expressionStatement(call("twoArgumentsFunction", literal(1.0)))
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Expected 2 argument(s) but got 1.");
+        }
+
+        @Test
+        void cannotCallFunctionWithTooManyArguments() {
+            interpret(
+                    function("singleArgumentsFunction", List.of(identifier("a")),
+                            List.of(
+                                    print(literal("Hello world"))
+                            )
+                    ),
+                    expressionStatement(call("singleArgumentsFunction", literal(1.0), literal(2.0)))
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Expected 1 argument(s) but got 2.");
         }
 
         private void assertBinaryExpressionCanOnlyOperateOnNumbersOrStrings(Expression expression1, Token operator, Expression expression2) {
@@ -483,8 +545,8 @@ class PostOrderTraversalInterpreterTest {
         void resolveVariableInLocalScope() {
             interpret(
                     blockStatement(
-                            variableDeclaration(identifier("a"), literal(1.0)),
-                            print(variable(identifier("a")))
+                            variableDeclaration("a", literal(1.0)),
+                            print(variable("a"))
                     )
             );
 
@@ -494,10 +556,10 @@ class PostOrderTraversalInterpreterTest {
         @Test
         void canAssignVariableFromGlobalScope() {
             interpret(
-                    uninitializedVariableDeclaration(identifier("a")),
+                    variableDeclaration("a"),
                     blockStatement(
-                            expressionStatement(assign(identifier("a"), literal(1.0))),
-                            print(variable(identifier("a")))
+                            expressionStatement(assign("a", literal(1.0))),
+                            print(variable("a"))
                     )
             );
 
@@ -508,10 +570,10 @@ class PostOrderTraversalInterpreterTest {
         void canAssignVariableFromOuterScope() {
             interpret(
                     blockStatement(
-                            uninitializedVariableDeclaration(identifier("a")),
+                            variableDeclaration("a"),
                             blockStatement(
-                                    expressionStatement(assign(identifier("a"), literal(1.0))),
-                                    print(variable(identifier("a")))
+                                    expressionStatement(assign("a", literal(1.0))),
+                                    print(variable("a"))
                             )
                     )
             );
@@ -522,9 +584,9 @@ class PostOrderTraversalInterpreterTest {
         @Test
         void resolveVariableInGlobalScope() {
             interpret(
-                    variableDeclaration(identifier("a"), literal(1.0)),
+                    variableDeclaration("a", literal(1.0)),
                     blockStatement(
-                            print(variable(identifier("a")))
+                            print(variable("a"))
                     )
             );
 
@@ -535,9 +597,9 @@ class PostOrderTraversalInterpreterTest {
         void resolveVariableInOuterBlockScope() {
             interpret(
                     blockStatement(
-                            variableDeclaration(identifier("a"), literal(1.0)),
+                            variableDeclaration("a", literal(1.0)),
                             blockStatement(
-                                    print(variable(identifier("a")))
+                                    print(variable("a"))
                             )
                     )
             );
@@ -548,10 +610,10 @@ class PostOrderTraversalInterpreterTest {
         @Test
         void localVariableShadowsOuterVariable() {
             interpret(
-                    variableDeclaration(identifier("a"), literal(2.0)),
+                    variableDeclaration("a", literal(2.0)),
                     blockStatement(
-                            variableDeclaration(identifier("a"), literal(1.0)),
-                            print(variable(identifier("a")))
+                            variableDeclaration("a", literal(1.0)),
+                            print(variable("a"))
                     )
             );
 
@@ -561,11 +623,11 @@ class PostOrderTraversalInterpreterTest {
         @Test
         void ignoreVariableFromOutOfScopeBlock() {
             interpret(
-                    variableDeclaration(identifier("a"), literal(2.0)),
+                    variableDeclaration("a", literal(2.0)),
                     blockStatement(
-                            variableDeclaration(identifier("a"), literal(1.0))
+                            variableDeclaration("a", literal(1.0))
                     ),
-                    print(variable(identifier("a")))
+                    print(variable("a"))
             );
 
             assertThat(outContent.toString()).isEqualTo("2\n");
@@ -649,14 +711,14 @@ class PostOrderTraversalInterpreterTest {
 
         @Test
         void defineVariableWithoutInitializer() {
-            interpret(uninitializedVariableDeclaration(identifier("a")));
+            interpret(variableDeclaration("a"));
 
             assertThat(environment.get(identifier("a"))).isNull();
         }
 
         @Test
         void defineVariableWithInitializer() {
-            interpret(variableDeclaration(identifier("a"), literal(1.0)));
+            interpret(variableDeclaration("a", literal(1.0)));
 
             assertThat(environment.get(identifier("a"))).isEqualTo(1.0);
         }
@@ -730,11 +792,11 @@ class PostOrderTraversalInterpreterTest {
         @Test
         void whileTruthyThenExecuteBody() {
             interpret(
-                    variableDeclaration(identifier("a"), literal(1.0)),
-                    _while(binary(variable(identifier("a")), equalEqual(), literal(1.0)),
+                    variableDeclaration("a", literal(1.0)),
+                    _while(binary(variable("a"), equalEqual(), literal(1.0)),
                             blockStatement(
-                                    print(variable(identifier("a"))),
-                                    expressionStatement(assign(identifier("a"), literal(2.0)))
+                                    print(variable("a")),
+                                    expressionStatement(assign("a", literal(2.0)))
                             )
                     )
             );
@@ -747,6 +809,169 @@ class PostOrderTraversalInterpreterTest {
             interpret(_while(literal(false), print(literal(1.0))));
 
             assertThat(outContent.toString()).isBlank();
+        }
+    }
+
+    @Nested
+    class CallFunctionCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void canCallDefinedFunctionWithNoArguments() {
+            interpret(
+                    function("printNoArgs", emptyList(),
+                            List.of(
+                                    print(literal(2.0))
+                            )
+                    ),
+                    expressionStatement(call("printNoArgs"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("2\n");
+        }
+
+        @Test
+        void canCallFunctionWithOneArgument() {
+            interpret(
+                    function("printSingleArgument", List.of(identifier("a")),
+                            List.of(
+                                    print(variable("a"))
+                            )
+                    ),
+                    expressionStatement(call("printSingleArgument", literal(5.0)))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("5\n");
+        }
+
+        @Test
+        void canCallFunctionWithMultipleArguments() {
+            interpret(
+                    function("printSummedArguments", List.of(identifier("a"), identifier("b")),
+                            List.of(
+                                    print(binary(variable("a"), plus(), variable("b")))
+                            )
+                    ),
+                    expressionStatement(call("printSummedArguments", literal(2.0), literal(4.0)))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("6\n");
+        }
+
+        @Test
+        void canCallFunctionThatClosesOverVariableInOuterBlockScope() {
+            interpret(
+                    function("makeCounter", emptyList(),
+                            List.of(
+                                    variableDeclaration("i", literal(0.0)),
+                                    function("count", emptyList(),
+                                            List.of(
+                                                    expressionStatement(assign("i", binary(variable("i"), plus(), literal(1.0)))),
+                                                    print(variable("i"))
+                                            )
+                                    ),
+                                    _return(variable("count"))
+                            )
+                    ),
+                    variableDeclaration("counter", call("makeCounter")),
+                    expressionStatement(call("counter")),
+                    expressionStatement(call("counter"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("1\n2\n");
+        }
+    }
+
+    @Nested
+    class ReturnStatementCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void canCallFunctionThatReturnsValue() {
+            interpret(
+                    function("returnTwo", emptyList(),
+                            List.of(
+                                    _return(literal(2.0))
+                            )
+                    ),
+                    print(call("returnTwo"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("2\n");
+        }
+
+        @Test
+        void canCallFunctionThatReturnsNothing() {
+            interpret(
+                    function("returnNothing", emptyList(),
+                            List.of(
+                                    _return(null)
+                            )
+                    ),
+                    print(call("returnNothing"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("nil\n");
+        }
+
+        @Test
+        void canCallFunctionThatDoesNotReturn() {
+            interpret(
+                    function("noReturn", emptyList(),
+                            emptyList()
+                    ),
+                    print(call("noReturn"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("nil\n");
+        }
+
+        @Test
+        void canReturnFromNestedBlockWithinFunction() {
+            interpret(
+                    function("aFunction", emptyList(),
+                            List.of(
+                                    variableDeclaration("a", literal(1.0)),
+                                    _while(binary(variable("a"), equalEqual(), literal(1.0)),
+                                            blockStatement(
+                                                    _if(literal(true), _return(literal(42.0)), null),
+                                                    expressionStatement(assign("a", literal(2.0)))
+                                            )
+                                    )
+                            )
+                    ),
+                    print(call("aFunction"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("42\n");
         }
     }
 

@@ -2,6 +2,8 @@ package be.guldentops.geert.lox.grammar;
 
 import be.guldentops.geert.lox.lexer.api.Token;
 
+import java.util.List;
+
 public interface Expression {
 
     <R> R accept(Visitor<R> visitor);
@@ -11,6 +13,8 @@ public interface Expression {
         R visitAssignExpression(Assign expression);
 
         R visitBinaryExpression(Binary expression);
+
+        R visitCallExpression(Call expression);
 
         R visitGroupingExpression(Grouping expression);
 
@@ -52,6 +56,23 @@ public interface Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitBinaryExpression(this);
+        }
+    }
+
+    class Call implements Expression {
+
+        public final Expression callee;
+        public final Token paren;
+        public final List<Expression> arguments;
+
+        public Call(Expression callee, Token paren, List<Expression> arguments) {
+            this.callee = callee;
+            this.paren = paren;
+            this.arguments = arguments;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitCallExpression(this);
         }
     }
 

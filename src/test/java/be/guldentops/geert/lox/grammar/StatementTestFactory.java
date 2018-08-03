@@ -1,8 +1,11 @@
 package be.guldentops.geert.lox.grammar;
 
 import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.lexer.api.TokenObjectMother;
 
 import java.util.List;
+
+import static be.guldentops.geert.lox.lexer.api.TokenObjectMother.identifier;
 
 public class StatementTestFactory {
 
@@ -17,6 +20,10 @@ public class StatementTestFactory {
         return new Statement.Expression(expression);
     }
 
+    public static Statement.Function function(String name, List<Token> parameters, List<Statement> body) {
+        return new Statement.Function(identifier(name), parameters, body);
+    }
+
     public static Statement.If _if(Expression condition, Statement thenBranch, Statement elseBranch) {
         return new Statement.If(condition, thenBranch, elseBranch);
     }
@@ -25,12 +32,16 @@ public class StatementTestFactory {
         return new Statement.Print(expression);
     }
 
-    public static Statement.Variable uninitializedVariableDeclaration(Token name) {
-        return new Statement.Variable(name, null);
+    public static Statement.Variable variableDeclaration(String name) {
+        return new Statement.Variable(identifier(name), null);
     }
 
-    public static Statement.Variable variableDeclaration(Token name, Expression initializer) {
-        return new Statement.Variable(name, initializer);
+    public static Statement.Return _return(Expression value) {
+        return new Statement.Return(TokenObjectMother._return(), value);
+    }
+
+    public static Statement.Variable variableDeclaration(String name, Expression initializer) {
+        return new Statement.Variable(identifier(name), initializer);
     }
 
     public static Statement.While _while(Expression condition, Statement body) {
