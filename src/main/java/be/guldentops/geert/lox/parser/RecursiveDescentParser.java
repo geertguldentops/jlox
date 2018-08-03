@@ -15,7 +15,9 @@ import java.util.function.Supplier;
 import static be.guldentops.geert.lox.lexer.Token.Type.AND;
 import static be.guldentops.geert.lox.lexer.Token.Type.BANG;
 import static be.guldentops.geert.lox.lexer.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.CLASS;
 import static be.guldentops.geert.lox.lexer.Token.Type.COMMA;
+import static be.guldentops.geert.lox.lexer.Token.Type.DOT;
 import static be.guldentops.geert.lox.lexer.Token.Type.ELSE;
 import static be.guldentops.geert.lox.lexer.Token.Type.EOF;
 import static be.guldentops.geert.lox.lexer.Token.Type.EQUAL;
@@ -44,6 +46,7 @@ import static be.guldentops.geert.lox.lexer.Token.Type.SEMICOLON;
 import static be.guldentops.geert.lox.lexer.Token.Type.SLASH;
 import static be.guldentops.geert.lox.lexer.Token.Type.STAR;
 import static be.guldentops.geert.lox.lexer.Token.Type.STRING;
+import static be.guldentops.geert.lox.lexer.Token.Type.THIS;
 import static be.guldentops.geert.lox.lexer.Token.Type.TRUE;
 import static be.guldentops.geert.lox.lexer.Token.Type.VAR;
 import static be.guldentops.geert.lox.lexer.Token.Type.WHILE;
@@ -85,6 +88,7 @@ class RecursiveDescentParser implements Parser {
 
     private Statement declaration() {
         try {
+            if (match(CLASS)) return classDeclaration();
             if (match(FUN)) return function("function");
             if (match(VAR)) return variableDeclaration();
 
@@ -95,7 +99,21 @@ class RecursiveDescentParser implements Parser {
         }
     }
 
-    private Statement function(String function) {
+    private Statement classDeclaration() {
+        Token name = consume(IDENTIFIER, "Expect class name.");
+        consume(LEFT_BRACE, "Expect '{' before class body.");
+
+        List<Statement.Function> methods = new ArrayList<>();
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(function("method"));
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+        return new Statement.Class(name, methods);
+    }
+
+    private Statement.Function function(String function) {
         Token name = consume(IDENTIFIER, "Expect " + function + " name.");
 
         consume(LEFT_PAREN, "Expect '(' after " + function + " name.");
@@ -249,6 +267,9 @@ class RecursiveDescentParser implements Parser {
             if (expression instanceof Expression.Variable) {
                 Token name = ((Expression.Variable) expression).name;
                 return new Expression.Assign(name, value);
+            } else if (expression instanceof Expression.Get) {
+                Expression.Get get = (Expression.Get) expression;
+                return new Expression.Set(get.object, get.name, value);
             }
 
             reportError(equals, "Invalid assignment target.");
@@ -308,11 +329,14 @@ class RecursiveDescentParser implements Parser {
     }
 
     private Expression call() {
-        Expression expression = primary();
+        var expression = primary();
 
         while (true) {
             if (match(LEFT_PAREN)) {
                 expression = finishCall(expression);
+            } else if (match(DOT)) {
+                Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+                expression = new Expression.Get(expression, name);
             } else {
                 break;
             }
@@ -343,9 +367,7 @@ class RecursiveDescentParser implements Parser {
         if (match(FALSE)) return new Expression.Literal(false);
         if (match(NIL)) return new Expression.Literal(null);
 
-        if (match(NUMBER, STRING)) {
-            return new Expression.Literal(previous().literal);
-        }
+        if (match(NUMBER, STRING)) return new Expression.Literal(previous().literal);
 
         if (match(LEFT_PAREN)) {
             var expression = expression();
@@ -353,9 +375,9 @@ class RecursiveDescentParser implements Parser {
             return new Expression.Grouping(expression);
         }
 
-        if (match(IDENTIFIER)) {
-            return new Expression.Variable(previous());
-        }
+        if (match(THIS)) return new Expression.This(previous());
+
+        if (match(IDENTIFIER)) return new Expression.Variable(previous());
 
         throw error(peek(), "Expect expression.");
     }

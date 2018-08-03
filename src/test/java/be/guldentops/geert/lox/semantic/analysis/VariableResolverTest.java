@@ -9,14 +9,18 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._this;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.call;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.get;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.grouping;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.literal;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.logical;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.set;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.unary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.variable;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory._class;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._if;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._return;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._while;
@@ -128,6 +132,20 @@ class VariableResolverTest {
 
             assertResolvedToNothing();
         }
+
+        @Test
+        void getExpressionsResolve() {
+            resolve(expressionStatement(get(variable("point"), identifier("x"))));
+
+            assertResolvedToNothing();
+        }
+
+        @Test
+        void setExpressionsResolve() {
+            resolve(expressionStatement(set(variable("point"), identifier("x"), literal(1.0))));
+
+            assertResolvedToNothing();
+        }
     }
 
     @Nested
@@ -236,6 +254,66 @@ class VariableResolverTest {
             assertThat(fakeResolutionAnalyzer.depthPerExpression)
                     .hasSize(1)
                     .contains(entry(variable, 0));
+        }
+    }
+
+    @Nested
+    class ThisExpression {
+
+        @Test
+        void addsThisToImplicitScopeAroundClassMethods() {
+            var _this = _this();
+
+            resolve(
+                    _class("Point", List.of(
+                            function("printX", emptyList(),
+                                    List.of(
+                                            print(get(_this, identifier("x")))
+                                    )
+                            )
+                    )),
+                    expressionStatement(call(get(call(variable("Point")), identifier("printX"))))
+            );
+
+            assertNoErrors();
+
+            assertThat(fakeResolutionAnalyzer.depthPerExpression)
+                    .hasSize(1)
+                    .contains(
+                            entry(_this, 1)
+                    );
+        }
+
+        @Test
+        void canNotResolveThisWithoutClassInGlobalScope() {
+            resolve(
+                    print(_this())
+            );
+
+            assertThat(fakeErrorReporter.receivedError()).isTrue();
+            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+            assertThat(fakeErrorReporter.getError().location).isEqualTo("this");
+            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot use 'this' outside of a class.");
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
+        }
+
+        @Test
+        void canNotResolveThisFromFunctionOutsideOfClass() {
+            resolve(
+                    function("notAMethod", emptyList(),
+                            List.of(
+                                    print(_this())
+                            )
+                    )
+            );
+
+            assertThat(fakeErrorReporter.receivedError()).isTrue();
+            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+            assertThat(fakeErrorReporter.getError().location).isEqualTo("this");
+            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot use 'this' outside of a class.");
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
         }
     }
 
@@ -576,7 +654,7 @@ class VariableResolverTest {
     @Nested
     class VariableStatement {
 
-        // visitVariableStatement is largely tested indirectly by variable and assign expression!
+        // visitVariableStatement is mostly tested indirectly by variable and assign expression!
 
         @Test
         void canNotDeclareLocalVariableTwice() {
@@ -607,6 +685,34 @@ class VariableResolverTest {
     }
 
     // visitFunctionStatement is indirectly tested by call!
+
+    @Nested
+    class ClassStatement {
+
+        // visitClassStatement is mostly tested by the "this expression"!
+
+        @Test
+        void canNotReturnAnythingFromClassInitMethod() {
+            resolve(
+                    _class("Foo",
+                            List.of(
+                                    function("init", emptyList(),
+                                            List.of(
+                                                    _return(literal("can not return anything from init()!"))
+                                            )
+                                    )
+                            )
+                    )
+            );
+
+            assertThat(fakeErrorReporter.receivedError()).isTrue();
+            assertThat(fakeErrorReporter.getError().line).isEqualTo(1);
+            assertThat(fakeErrorReporter.getError().location).isEqualTo("return");
+            assertThat(fakeErrorReporter.getError().message).isEqualTo("Cannot return a value from an initializer.");
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isFalse();
+            assertThat(fakeResolutionAnalyzer.depthPerExpression).isEmpty();
+        }
+    }
 
     private void resolve(Statement... statements) {
         resolver.resolve(List.of(statements));

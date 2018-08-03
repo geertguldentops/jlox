@@ -1,6 +1,7 @@
 package be.guldentops.geert.lox.grammar;
 
 import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.lexer.TokenObjectMother;
 
 import java.util.List;
 
@@ -44,7 +45,19 @@ public class ExpressionTestFactory {
         return call(variable(functionName), arguments);
     }
 
-    public static Expression.Call call(Expression.Variable callee, Expression... arguments) {
+    public static Expression.Call call(Expression callee, Expression... arguments) {
         return new Expression.Call(callee, rightParen(), List.of(arguments));
+    }
+
+    public static Expression.Get get(Expression object, Token name) {
+        return new Expression.Get(object, name);
+    }
+
+    public static Expression.Set set(Expression object, Token name, Expression value) {
+        return new Expression.Set(object, name, value);
+    }
+
+    public static Expression.This _this() {
+        return new Expression.This(TokenObjectMother._this());
     }
 }

@@ -16,11 +16,17 @@ public interface Expression {
 
         R visitCallExpression(Call expression);
 
+        R visitGetExpression(Get expression);
+
         R visitGroupingExpression(Grouping expression);
 
         R visitLiteralExpression(Literal expression);
 
         R visitLogicalExpression(Logical expression);
+
+        R visitSetExpression(Set expression);
+
+        R visitThisExpression(This expression);
 
         R visitUnaryExpression(Unary expression);
 
@@ -76,6 +82,21 @@ public interface Expression {
         }
     }
 
+    class Get implements Expression {
+
+        public final Expression object;
+        public final Token name;
+
+        public Get(Expression object, Token name) {
+            this.object = object;
+            this.name = name;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitGetExpression(this);
+        }
+    }
+
     class Grouping implements Expression {
 
         public final Expression expression;
@@ -116,6 +137,36 @@ public interface Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitLogicalExpression(this);
+        }
+    }
+
+    class Set implements Expression {
+
+        public final Expression object;
+        public final Token name;
+        public final Expression value;
+
+        public Set(Expression object, Token name, Expression value) {
+            this.object = object;
+            this.name = name;
+            this.value = value;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitSetExpression(this);
+        }
+    }
+
+    class This implements Expression {
+
+        public final Token keyword;
+
+        public This(Token keyword) {
+            this.keyword = keyword;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitThisExpression(this);
         }
     }
 

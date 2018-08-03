@@ -1,0 +1,5 @@
+class Breakfast {}
+
+var bagel = Breakfast();
+
+print bagel;

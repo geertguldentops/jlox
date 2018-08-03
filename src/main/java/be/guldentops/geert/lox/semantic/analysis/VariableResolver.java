@@ -14,9 +14,13 @@ import java.util.Stack;
 
 class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.Visitor<Void> {
 
-    private final ResolutionAnalyzer resolutionAnalyzer;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+
     private FunctionType currentFunction = FunctionType.NONE;
+    private ClassType currentClass = ClassType.NONE;
+
+    private final ResolutionAnalyzer resolutionAnalyzer;
+
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
     VariableResolver(ResolutionAnalyzer resolutionAnalyzer) {
@@ -63,6 +67,12 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     }
 
     @Override
+    public Void visitGetExpression(Expression.Get expression) {
+        resolve(expression.object);
+        return null;
+    }
+
+    @Override
     public Void visitGroupingExpression(Expression.Grouping expression) {
         resolve(expression.expression);
         return null;
@@ -77,6 +87,25 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     public Void visitLogicalExpression(Expression.Logical expression) {
         resolve(expression.left);
         resolve(expression.right);
+        return null;
+    }
+
+    @Override
+    public Void visitSetExpression(Expression.Set expression) {
+        resolve(expression.value);
+        resolve(expression.object);
+
+        return null;
+    }
+
+    @Override
+    public Void visitThisExpression(Expression.This expression) {
+        if (currentClass == ClassType.NONE) {
+            reportError(expression.keyword, "Cannot use 'this' outside of a class.");
+        } else {
+            resolveLocal(expression, expression.keyword);
+        }
+
         return null;
     }
 
@@ -119,6 +148,37 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
         resolve(statement.statements);
         endScope();
         return null;
+    }
+
+    @Override
+    public Void visitClassStatement(Statement.Class statement) {
+        ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+
+        declare(statement.name);
+
+        beginScope();
+        scopes.peek().put("this", true);
+
+        for (Statement.Function method : statement.methods) {
+            var declaration = analyseDeclaration(method);
+            resolveFunction(method, declaration);
+        }
+
+        endScope();
+
+        define(statement.name);
+
+        currentClass = enclosingClass;
+        return null;
+    }
+
+    private FunctionType analyseDeclaration(Statement.Function method) {
+        if (method.name.lexeme.equals("init")) {
+            return FunctionType.INITIALIZER;
+        } else {
+            return FunctionType.METHOD;
+        }
     }
 
     private void beginScope() {
@@ -182,6 +242,9 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
         if (currentFunction == FunctionType.NONE) {
             reportError(statement.keyword, "Cannot return from top-level code.");
         }
+        if (currentFunction == FunctionType.INITIALIZER) {
+            reportError(statement.keyword, "Cannot return a value from an initializer.");
+        }
 
         if (statement.value != null) {
             resolve(statement.value);
@@ -228,6 +291,13 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     private enum FunctionType {
         NONE,
-        FUNCTION
+        FUNCTION,
+        METHOD,
+        INITIALIZER,
+    }
+
+    private enum ClassType {
+        NONE,
+        CLASS
     }
 }

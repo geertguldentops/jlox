@@ -30,7 +30,12 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
 
     @Override
     public String visitCallExpression(Expression.Call expression) {
-        return "call " + expression.callee.accept(this) + " (" + toSpaceSeparatedText(expression.arguments.toArray(new Expression[]{})) + ")";
+        return "(call " + expression.callee.accept(this) + " (" + toSpaceSeparatedText(expression.arguments.toArray(new Expression[]{})) + "))";
+    }
+
+    @Override
+    public String visitGetExpression(Expression.Get expression) {
+        return "(. " + print(expression.object) + " " + expression.name.lexeme + ")";
     }
 
     @Override
@@ -47,6 +52,16 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
     @Override
     public String visitLogicalExpression(Expression.Logical expression) {
         return parenthesize(expression.operator.lexeme, expression.left, expression.right);
+    }
+
+    @Override
+    public String visitSetExpression(Expression.Set expression) {
+        return "(. " + print(expression.object) + " " + expression.name.lexeme + " " + print(expression.value) + ")";
+    }
+
+    @Override
+    public String visitThisExpression(Expression.This expression) {
+        return expression.keyword.lexeme;
     }
 
     @Override
@@ -70,6 +85,19 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
         sb.append(")");
 
         return sb.toString();
+    }
+
+    @Override
+    public String visitClassStatement(Statement.Class statement) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(class ").append(statement.name.lexeme);
+
+        for (Statement.Function method : statement.methods) {
+            builder.append(" ").append(print(method));
+        }
+
+        builder.append(")");
+        return builder.toString();
     }
 
     @Override

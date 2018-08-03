@@ -15,14 +15,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._this;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.call;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.get;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.grouping;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.literal;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.logical;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.set;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.unary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.variable;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory._class;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._if;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._return;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._while;
@@ -487,6 +491,60 @@ class PostOrderTraversalInterpreterTest {
             assertThat(fakeErrorReporter.getRuntimeError())
                     .isInstanceOf(RuntimeError.class)
                     .hasMessage("Expected 1 argument(s) but got 2.");
+        }
+
+        @Test
+        void propertyNotFound() {
+            interpret(
+                    _class("Point", emptyList()),
+                    variableDeclaration("p", call("Point")),
+                    print(get(variable("p"), identifier("x")))
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Undefined property 'x'.");
+        }
+
+        @Test
+        void canNotGetOnNonInstance() {
+            interpret(
+                    variableDeclaration("p", literal(1.0)),
+                    print(get(variable("p"), identifier("x")))
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Only instances have properties.");
+        }
+
+        @Test
+        void canNotSetOnNonInstance() {
+            interpret(
+                    variableDeclaration("p", literal(3.14)),
+                    print(set(variable("p"), identifier("x"), literal(2.0)))
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Only instances have fields.");
+        }
+
+        @Test
+        void callUnknownMethodOnClass() {
+            interpret(
+                    _class("Breakfast", emptyList()),
+                    variableDeclaration("favouriteBreakfast", call("Breakfast")),
+                    expressionStatement(call(get(variable("favouriteBreakfast"), identifier("beacon"))))
+            );
+
+            assertThat(fakeErrorReporter.receivedRuntimeError()).isTrue();
+            assertThat(fakeErrorReporter.getRuntimeError())
+                    .isInstanceOf(RuntimeError.class)
+                    .hasMessage("Undefined property 'beacon'.");
         }
 
         private void assertBinaryExpressionCanOnlyOperateOnNumbersOrStrings(Expression expression1, Token operator, Expression expression2) {
@@ -990,6 +1048,247 @@ class PostOrderTraversalInterpreterTest {
             );
 
             assertThat(outContent.toString()).isEqualTo("42\n");
+        }
+    }
+
+    @Nested
+    class ClassStatementCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void printClass() {
+            interpret(
+                    _class("Foo", emptyList()),
+                    print(variable("Foo"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("Foo\n");
+        }
+
+        @Test
+        void createNewInstance() {
+            interpret(
+                    _class("Breakfast", emptyList()),
+                    variableDeclaration("bagel", call("Breakfast")),
+                    print(variable("bagel"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("Breakfast instance\n");
+        }
+
+        @Test
+        void createNewInstanceWithInit() {
+            interpret(
+                    _class("Customer",
+                            List.of(
+                                    function("init", List.of(identifier("name")),
+                                            List.of(
+                                                    expressionStatement(set(_this(), identifier("name"), variable("name")))
+                                            )
+                                    ),
+                                    function("printName", emptyList(),
+                                            List.of(
+                                                    print(get(variable("this"), identifier("name"))
+                                                    )
+                                            )
+                                    )
+                            )
+                    ),
+                    variableDeclaration("joske", call("Customer", literal("Geert"))),
+                    expressionStatement(call(get(variable("joske"), identifier("printName"))))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("Geert\n");
+        }
+
+        @Test
+        void earlyReturnFromInit() {
+            interpret(
+                    _class("Customer",
+                            List.of(
+                                    function("init", emptyList(),
+                                            List.of(
+                                                    _return(null)
+                                            )
+                                    )
+                            )
+                    ),
+                    print(call("Customer"))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("Customer instance\n");
+        }
+
+        @Test
+        void callMethodOnClass() {
+            interpret(
+                    _class("Breakfast", List.of(
+                            function("beacon", emptyList(),
+                                    List.of(
+                                            print(literal("I love beacon!"))
+                                    )
+                            )
+                    )),
+                    variableDeclaration("favouriteBreakfast", call("Breakfast")),
+                    expressionStatement(call(get(variable("favouriteBreakfast"), identifier("beacon"))))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("I love beacon!\n");
+        }
+
+        @Test
+        void callMethodWithLocalVariableOnClass() {
+            interpret(
+                    _class("NamePrinter", List.of(
+                            function("printName", emptyList(),
+                                    List.of(
+                                            variableDeclaration("name", literal("Geert")),
+                                            print(variable("name"))
+                                    )
+                            )
+                    )),
+                    variableDeclaration("namePrinter", call("NamePrinter")),
+                    expressionStatement(call(get(variable("namePrinter"), identifier("printName"))))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("Geert\n");
+        }
+    }
+
+    @Nested
+    class ThisCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void printThis() {
+            interpret(
+                    _class("Egotist", List.of(
+                            function("speak", emptyList(),
+                                    List.of(
+                                            print(_this())
+                                    )
+                            )
+                    )),
+                    expressionStatement(call(get(call(variable("Egotist")), identifier("speak"))))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("Egotist instance\n");
+        }
+
+        @Test
+        void classCanAccessFieldsInMethodsThroughThis() {
+            interpret(
+                    _class("Rectangle", List.of(
+                            function("calculateSurface", emptyList(),
+                                    List.of(
+                                            // return this.b * this.h;
+                                            _return(
+                                                    binary(
+                                                            get(variable("this"), identifier("b")),
+                                                            star(),
+                                                            get(variable("this"), identifier("h"))
+                                                    )
+                                            )
+                                    )
+                            )
+                    )),
+                    variableDeclaration("r", call(variable("Rectangle"))),
+                    expressionStatement(set(variable("r"), identifier("b"), literal(2.0))),
+                    expressionStatement(set(variable("r"), identifier("h"), literal(5.0))),
+                    print(call(get(variable("r"), identifier("calculateSurface"))))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("10\n");
+        }
+    }
+
+    @Nested
+    class PropertyCases {
+
+        private PrintStream originalOut;
+        private ByteArrayOutputStream outContent;
+
+        @BeforeEach
+        void setUp() {
+            originalOut = System.out;
+            outContent = new ByteArrayOutputStream();
+            System.setOut(new PrintStream(outContent));
+        }
+
+        @AfterEach
+        void tearDown() {
+            System.setOut(originalOut);
+        }
+
+        @Test
+        void accessPropertyOnInstance() {
+            interpret(
+                    _class("Point", emptyList()),
+                    variableDeclaration("p", call("Point")),
+                    expressionStatement(set(variable("p"), identifier("x"), literal(3.14))),
+                    print(get(variable("p"), identifier("x")))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("3.14\n");
+        }
+
+        @Test
+        void accessNestedPropertyOnInstance() {
+            interpret(
+                    _class("Point", emptyList()),
+                    variableDeclaration("p", call("Point")),
+                    expressionStatement(set(variable("p"), identifier("x"), literal(3.14))),
+
+                    _class("Rectangle", emptyList()),
+                    variableDeclaration("r", call("Rectangle")),
+                    expressionStatement(set(variable("r"), identifier("point"), variable("p"))),
+
+                    print(get(get(variable("r"), identifier("point")), identifier("x")))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("3.14\n");
+        }
+
+        @Test
+        void overwritePropertyAlreadySet() {
+            interpret(
+                    _class("Point", emptyList()),
+                    variableDeclaration("p", call("Point")),
+                    expressionStatement(set(variable("p"), identifier("x"), literal(3.14))),
+                    print(get(variable("p"), identifier("x"))),
+                    expressionStatement(set(variable("p"), identifier("x"), literal(2.72))),
+                    print(get(variable("p"), identifier("x")))
+            );
+
+            assertThat(outContent.toString()).isEqualTo("3.14\n2.72\n");
         }
     }
 

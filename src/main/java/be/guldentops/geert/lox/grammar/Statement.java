@@ -12,6 +12,8 @@ public interface Statement {
 
         R visitBlockStatement(Block statement);
 
+        R visitClassStatement(Class statement);
+
         R visitExpressionStatement(Expression statement);
 
         R visitFunctionStatement(Function statement);
@@ -37,6 +39,21 @@ public interface Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitBlockStatement(this);
+        }
+    }
+
+    class Class implements Statement {
+
+        public final Token name;
+        public final List<Statement.Function> methods;
+
+        public Class(Token name, List<Statement.Function> methods) {
+            this.name = name;
+            this.methods = methods;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitClassStatement(this);
         }
     }
 

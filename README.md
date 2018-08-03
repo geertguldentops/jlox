@@ -30,9 +30,11 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
 ## Lox Grammar ##
 
     program         → declaration* EOF ;
-    declaration     → funDecl
+    declaration     → classDecl
+                    | funDecl
                     | varDecl
                     | statement ;
+    classDecl       → "class" IDENTIFIER "{" function* "}" ;
     funDecl         → "fun" function ;
     function        → IDENTIFIER "(" parameters? ")" block ;
     parameters      → IDENTIFIER ( "," IDENTIFIER )* ;
@@ -53,7 +55,7 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
     exprStmt        → expression ";" ;
     printStmt       → "print" expression ";" ; 
     expression      → assignment ;
-    assignment      → identifier "=" assignment
+    assignment      → ( call "." )? IDENTIFIER "=" assignment
                     | logic_or ;
     logic_or        → logic_and ( "or" logic_and )* ;
     logic_and       → equality ( "and" equality )* ;
@@ -62,7 +64,7 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
     addition        → multiplication ( ( "-" | "+" ) multiplication )* ;
     multiplication  → unary ( ( "/" | "*" ) unary )* ;
     unary           → ( "!" | "-" ) unary | call ;
-    call            → primary ( "(" arguments? ")" )* ;
+    call            → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
     arguments       → expression ( "," expression )* ;
     primary         → "true" | "false" | "nil" | "this"
                     | NUMBER | STRING

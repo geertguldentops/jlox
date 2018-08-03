@@ -6,14 +6,18 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._this;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.call;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.get;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.grouping;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.literal;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.logical;
+import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.set;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.unary;
 import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.variable;
+import static be.guldentops.geert.lox.grammar.StatementTestFactory._class;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._if;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._return;
 import static be.guldentops.geert.lox.grammar.StatementTestFactory._while;
@@ -27,6 +31,7 @@ import static be.guldentops.geert.lox.lexer.TokenObjectMother.identifier;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother.minus;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother.plus;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother.star;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AbstractSyntaxTreePrinterTest {
@@ -112,7 +117,28 @@ class AbstractSyntaxTreePrinterTest {
 
         @Test
         void printCallExpression() {
-            assertThat(astPrinter.print(call("sum", literal(1.0), literal(2.0)))).isEqualTo("call sum (1.0 2.0)");
+            assertThat(astPrinter.print(call("sum", literal(1.0), literal(2.0)))).isEqualTo("(call sum (1.0 2.0))");
+        }
+
+        @Test
+        void printReturnExpression() {
+            assertThat(astPrinter.print(_return(literal(1.0)))).isEqualTo("(return 1.0)");
+        }
+
+
+        @Test
+        void printGetExpression() {
+            assertThat(astPrinter.print(get(literal("point"), identifier("x")))).isEqualTo("(. point x)");
+        }
+
+        @Test
+        void printSetExpression() {
+            assertThat(astPrinter.print(set(literal("point"), identifier("x"), literal(1.0)))).isEqualTo("(. point x 1.0)");
+        }
+
+        @Test
+        void printThisExpression() {
+            assertThat(astPrinter.print(_this())).isEqualTo("this");
         }
     }
 
@@ -177,8 +203,12 @@ class AbstractSyntaxTreePrinterTest {
         }
 
         @Test
-        void printReturnExpression() {
-            assertThat(astPrinter.print(_return(literal(1.0)))).isEqualTo("(return 1.0)");
+        void printClassStatement() {
+            assertThat(astPrinter.print(
+                    _class("Provider", List.of(
+                            function("provide", emptyList(), emptyList())
+                    ))
+            )).isEqualTo("(class Provider (fun provide () ))");
         }
     }
 }

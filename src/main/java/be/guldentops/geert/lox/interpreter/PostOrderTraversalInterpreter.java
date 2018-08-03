@@ -69,6 +69,30 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     }
 
     @Override
+    public Void visitClassStatement(Statement.Class statement) {
+        environment.define(statement.name, null);
+
+        var methods = new HashMap<String, LoxFunction>();
+        for (var method : statement.methods) {
+            var function = createFunction(method);
+            methods.put(method.name.lexeme, function);
+        }
+
+        LoxClass clazz = new LoxClass(statement.name.lexeme, methods);
+        environment.assign(statement.name, clazz);
+
+        return null;
+    }
+
+    private LoxFunction createFunction(Statement.Function method) {
+        if (method.name.lexeme.equals("init")) {
+            return LoxFunction.createInitFunction(method, environment);
+        } else {
+            return LoxFunction.createFunction(method, environment);
+        }
+    }
+
+    @Override
     public void executeBlock(List<Statement> statements, Environment localEnvironment) {
         Environment previous = this.environment;
 
@@ -96,7 +120,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Void visitFunctionStatement(Statement.Function statement) {
-        var function = new LoxFunction(statement, environment);
+        var function = LoxFunction.createFunction(statement, environment);
         environment.define(statement.name, function);
         return null;
     }
@@ -248,6 +272,16 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     }
 
     @Override
+    public Object visitGetExpression(Expression.Get expression) {
+        Object object = evaluate(expression.object);
+        if (object instanceof LoxInstance) {
+            return ((LoxInstance) object).get(expression.name);
+        }
+
+        throw new RuntimeError(expression.name, "Only instances have properties.");
+    }
+
+    @Override
     public Object visitGroupingExpression(Expression.Grouping expression) {
         return evaluate(expression.expression);
     }
@@ -271,6 +305,24 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     }
 
     @Override
+    public Object visitSetExpression(Expression.Set expression) {
+        Object object = evaluate(expression.object);
+
+        if (object instanceof LoxInstance) {
+            Object value = evaluate(expression.value);
+            ((LoxInstance) object).set(expression.name, value);
+            return value;
+        }
+
+        throw new RuntimeError(expression.name, "Only instances have fields.");
+    }
+
+    @Override
+    public Object visitThisExpression(Expression.This expression) {
+        return lookUpVariable(expression.keyword, expression);
+    }
+
+    @Override
     public Object visitUnaryExpression(Expression.Unary expression) {
         var right = evaluate(expression.right);
 
@@ -291,7 +343,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     }
 
     private Object lookUpVariable(Token name, Expression expression) {
-        Integer distance = locals.get(expression);
+        var distance = locals.get(expression);
 
         if (distance != null) {
             return environment.getAt(distance, name.lexeme);

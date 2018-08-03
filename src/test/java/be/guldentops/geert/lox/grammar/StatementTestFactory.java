@@ -47,4 +47,8 @@ public class StatementTestFactory {
     public static Statement.While _while(Expression condition, Statement body) {
         return new Statement.While(condition, body);
     }
+
+    public static Statement.Class _class(String name, List<Statement.Function> methods) {
+        return new Statement.Class(identifier(name), methods);
+    }
 }

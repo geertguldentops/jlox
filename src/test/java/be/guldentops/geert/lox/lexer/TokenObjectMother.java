@@ -3,7 +3,9 @@ package be.guldentops.geert.lox.lexer;
 import static be.guldentops.geert.lox.lexer.Token.Type.AND;
 import static be.guldentops.geert.lox.lexer.Token.Type.BANG;
 import static be.guldentops.geert.lox.lexer.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.Token.Type.CLASS;
 import static be.guldentops.geert.lox.lexer.Token.Type.COMMA;
+import static be.guldentops.geert.lox.lexer.Token.Type.DOT;
 import static be.guldentops.geert.lox.lexer.Token.Type.ELSE;
 import static be.guldentops.geert.lox.lexer.Token.Type.EOF;
 import static be.guldentops.geert.lox.lexer.Token.Type.EQUAL;
@@ -31,6 +33,7 @@ import static be.guldentops.geert.lox.lexer.Token.Type.RIGHT_PAREN;
 import static be.guldentops.geert.lox.lexer.Token.Type.SEMICOLON;
 import static be.guldentops.geert.lox.lexer.Token.Type.SLASH;
 import static be.guldentops.geert.lox.lexer.Token.Type.STAR;
+import static be.guldentops.geert.lox.lexer.Token.Type.THIS;
 import static be.guldentops.geert.lox.lexer.Token.Type.TRUE;
 import static be.guldentops.geert.lox.lexer.Token.Type.VAR;
 import static be.guldentops.geert.lox.lexer.Token.Type.WHILE;
@@ -178,6 +181,18 @@ public class TokenObjectMother {
 
     public static Token _return() {
         return new Token(RETURN, "return", null, 1);
+    }
+
+    public static Token _class() {
+        return new Token(CLASS, "class", null, 1);
+    }
+
+    public static Token _this() {
+        return new Token(THIS, "this", null, 1);
+    }
+
+    public static Token dot() {
+        return new Token(DOT, ".", null, 1);
     }
 
     public static Token semicolon() {

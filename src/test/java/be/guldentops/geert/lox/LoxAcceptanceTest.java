@@ -207,6 +207,62 @@ class LoxAcceptanceTest {
 
             assertThat(outContent.toString()).isEqualTo("global\nglobal\n");
         }
+
+        @Test
+        void canRunPrintClassScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/PrintClass.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("Foo\n");
+        }
+
+        @Test
+        void canRunPrintInstanceScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/PrintInstance.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("Breakfast instance\n");
+        }
+
+        @Test
+        void canRunInstanceWithPropertiesScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/InstanceWithProperties.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("3.14\n15.2\n");
+        }
+
+        @Test
+        void canRunClassMethodCallScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/ClassMethodCall.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("Crunch crunch crunch!\n");
+        }
+
+        @Test
+        void canRunPrintThisScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/PrintThis.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("Egotist instance\n");
+        }
+
+        @Test
+        void canRunInstanceCanAccessItsStateFromItsMethodsScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/InstanceCanAccessItsStateFromItsMethods.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("The German chocolate cake is delicious!\n");
+        }
+
+        @Test
+        void canRunComplicatedThisResolutionScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/ComplicatedThisResolution.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("Thing instance\n");
+        }
+
+        @Test
+        void canRunClassWithInitScript() throws Exception {
+            lox.runFile(getAbsoluteFilePathOf("lox/src/class/ClassWithInit.lox"));
+
+            assertThat(outContent.toString()).isEqualTo("50.265482448\n");
+        }
     }
 
     @Nested

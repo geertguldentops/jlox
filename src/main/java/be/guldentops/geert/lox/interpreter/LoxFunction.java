@@ -1,17 +1,36 @@
 package be.guldentops.geert.lox.interpreter;
 
 import be.guldentops.geert.lox.grammar.Statement;
+import be.guldentops.geert.lox.lexer.Token;
 
 import java.util.List;
+
+import static be.guldentops.geert.lox.lexer.Token.Type.THIS;
 
 class LoxFunction implements LoxCallable {
 
     private final Statement.Function declaration;
     private final Environment closure;
+    private final boolean isInitializer;
 
-    LoxFunction(Statement.Function declaration, Environment closure) {
+    static LoxFunction createInitFunction(Statement.Function method, Environment environment) {
+        return new LoxFunction(method, environment, true);
+    }
+
+    static LoxFunction createFunction(Statement.Function method, Environment environment) {
+        return new LoxFunction(method, environment, false);
+    }
+
+    private LoxFunction(Statement.Function declaration, Environment closure, boolean isInitializer) {
         this.declaration = declaration;
         this.closure = closure;
+        this.isInitializer = isInitializer;
+    }
+
+    LoxFunction bind(LoxInstance instance) {
+        var environment = Environment.createLocal(closure);
+        environment.define(new Token(THIS, "this", null, 1), instance);
+        return LoxFunction.createFunction(declaration, environment);
     }
 
     @Override
@@ -30,9 +49,12 @@ class LoxFunction implements LoxCallable {
         try {
             interpreter.executeBlock(declaration.body, environment);
         } catch (Return r) {
+            if (isInitializer) return closure.getAt(0, "this");
+
             return r.value;
         }
 
+        if (isInitializer) return closure.getAt(0, "this");
         return null;
     }
 
