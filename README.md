@@ -30,6 +30,7 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
 ## Lox Grammar ##
 
     program         → declaration* EOF ;
+    
     declaration     → classDecl
                     | funDecl
                     | varDecl
@@ -40,6 +41,7 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
     function        → IDENTIFIER "(" parameters? ")" block ;
     parameters      → IDENTIFIER ( "," IDENTIFIER )* ;
     varDecl         → "var" IDENTIFIER ( "=" expression )? ";" ;
+    
     statement       → exprStmt
                     | forStmt
                     | ifStmt
@@ -47,23 +49,29 @@ E.g.: /Users/geertguldentops/IdeaProjects/lox/src/main/java/be/guldentops/geert/
                     | returnStmt
                     | whileStmt
                     | block ;
-    returnStmt      → "return" expression? ";" ;
+                    
+    exprStmt        → expression ";" ;                    
     forStmt         → "for" "(" ( varDecl | exprStmt | ";" )
                                 expression? ";"
                                 expression? ")" statement ;
     ifStmt          → "if" "(" expression ")" statement ( "else" statement )? ;
+    printStmt       → "print" expression ";" ;
+    returnStmt      → "return" expression? ";" ;
+    whileStmt       → "while" "(" expression ")" statement ; 
     block           → "{" declaration* "}" ;
-    exprStmt        → expression ";" ;
-    printStmt       → "print" expression ";" ; 
+    
     expression      → assignment ;
+    
     assignment      → ( call "." )? IDENTIFIER "=" assignment
                     | logic_or ;
+                    
     logic_or        → logic_and ( "or" logic_and )* ;
     logic_and       → equality ( "and" equality )* ;
     equality        → comparison ( ( "!=" | "==" ) comparison )* ;
     comparison      → addition ( ( ">" | ">=" | "<" | "<=" ) addition )* ;
     addition        → multiplication ( ( "-" | "+" ) multiplication )* ;
     multiplication  → unary ( ( "/" | "*" ) unary )* ;
+    
     unary           → ( "!" | "-" ) unary | call ;
     call            → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
     arguments       → expression ( "," expression )* ;
