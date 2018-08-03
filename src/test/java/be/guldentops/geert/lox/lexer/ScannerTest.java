@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox;
+package be.guldentops.geert.lox.lexer;
 
 import be.guldentops.geert.lox.error.api.Error;
 import be.guldentops.geert.lox.error.api.ErrorReporter;
@@ -25,7 +25,7 @@ class ScannerTest {
     }
 
     @Nested
-    class Degenerate {
+    class DegenerateCases {
 
         @Test
         void scanNullSourceCode() {
@@ -172,10 +172,10 @@ class ScannerTest {
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
-            assertThat(tokens.get(0).getType()).isEqualTo(Token.Type.EOF);
-            assertThat(tokens.get(0).getLexeme()).isEqualTo("");
-            assertThat(tokens.get(0).getLiteral()).isNull();
-            assertThat(tokens.get(0).getLine()).isEqualTo(2);
+            assertThat(tokens.get(0).type).isEqualTo(Token.Type.EOF);
+            assertThat(tokens.get(0).lexeme).isEqualTo("");
+            assertThat(tokens.get(0).literal).isNull();
+            assertThat(tokens.get(0).line).isEqualTo(2);
 
             assertThat(fakeErrorReporter.error).isNull();
         }
@@ -208,10 +208,10 @@ class ScannerTest {
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).getType()).isEqualTo(Token.Type.STRING);
-            assertThat(tokens.get(0).getLexeme()).isEqualTo("\"A\"");
-            assertThat(tokens.get(0).getLiteral()).isEqualTo("A");
-            assertThat(tokens.get(0).getLine()).isEqualTo(1);
+            assertThat(tokens.get(0).type).isEqualTo(Token.Type.STRING);
+            assertThat(tokens.get(0).lexeme).isEqualTo("\"A\"");
+            assertThat(tokens.get(0).literal).isEqualTo("A");
+            assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.error).isNull();
@@ -227,10 +227,10 @@ class ScannerTest {
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).getType()).isEqualTo(Token.Type.STRING);
-            assertThat(tokens.get(0).getLexeme()).isEqualTo("\"Hello\"");
-            assertThat(tokens.get(0).getLiteral()).isEqualTo("Hello");
-            assertThat(tokens.get(0).getLine()).isEqualTo(1);
+            assertThat(tokens.get(0).type).isEqualTo(Token.Type.STRING);
+            assertThat(tokens.get(0).lexeme).isEqualTo("\"Hello\"");
+            assertThat(tokens.get(0).literal).isEqualTo("Hello");
+            assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.error).isNull();
@@ -246,14 +246,14 @@ class ScannerTest {
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).getType()).isEqualTo(Token.Type.STRING);
-            assertThat(tokens.get(0).getLexeme()).isEqualTo("\"Hello\nWorld\"");
-            assertThat(tokens.get(0).getLiteral()).isEqualTo("Hello\nWorld");
-            assertThat(tokens.get(0).getLine()).isEqualTo(2);
-            assertThat(tokens.get(1).getType()).isEqualTo(Token.Type.EOF);
-            assertThat(tokens.get(1).getLexeme()).isEqualTo("");
-            assertThat(tokens.get(1).getLiteral()).isNull();
-            assertThat(tokens.get(1).getLine()).isEqualTo(2);
+            assertThat(tokens.get(0).type).isEqualTo(Token.Type.STRING);
+            assertThat(tokens.get(0).lexeme).isEqualTo("\"Hello\nWorld\"");
+            assertThat(tokens.get(0).literal).isEqualTo("Hello\nWorld");
+            assertThat(tokens.get(0).line).isEqualTo(2);
+            assertThat(tokens.get(1).type).isEqualTo(Token.Type.EOF);
+            assertThat(tokens.get(1).lexeme).isEqualTo("");
+            assertThat(tokens.get(1).literal).isNull();
+            assertThat(tokens.get(1).line).isEqualTo(2);
 
             assertThat(fakeErrorReporter.error).isNull();
         }
@@ -272,10 +272,10 @@ class ScannerTest {
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).getType()).isEqualTo(Token.Type.NUMBER);
-            assertThat(tokens.get(0).getLexeme()).isEqualTo("9");
-            assertThat(tokens.get(0).getLiteral()).isEqualTo(9.0);
-            assertThat(tokens.get(0).getLine()).isEqualTo(1);
+            assertThat(tokens.get(0).type).isEqualTo(Token.Type.NUMBER);
+            assertThat(tokens.get(0).lexeme).isEqualTo("9");
+            assertThat(tokens.get(0).literal).isEqualTo(9.0);
+            assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.error).isNull();
@@ -291,10 +291,10 @@ class ScannerTest {
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).getType()).isEqualTo(Token.Type.NUMBER);
-            assertThat(tokens.get(0).getLexeme()).isEqualTo("12");
-            assertThat(tokens.get(0).getLiteral()).isEqualTo(12.0);
-            assertThat(tokens.get(0).getLine()).isEqualTo(1);
+            assertThat(tokens.get(0).type).isEqualTo(Token.Type.NUMBER);
+            assertThat(tokens.get(0).lexeme).isEqualTo("12");
+            assertThat(tokens.get(0).literal).isEqualTo(12.0);
+            assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.error).isNull();
@@ -310,10 +310,10 @@ class ScannerTest {
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).getType()).isEqualTo(Token.Type.NUMBER);
-            assertThat(tokens.get(0).getLexeme()).isEqualTo("1.2");
-            assertThat(tokens.get(0).getLiteral()).isEqualTo(1.2);
-            assertThat(tokens.get(0).getLine()).isEqualTo(1);
+            assertThat(tokens.get(0).type).isEqualTo(Token.Type.NUMBER);
+            assertThat(tokens.get(0).lexeme).isEqualTo("1.2");
+            assertThat(tokens.get(0).literal).isEqualTo(1.2);
+            assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.error).isNull();
@@ -337,10 +337,10 @@ class ScannerTest {
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).getType()).isEqualTo(Token.Type.IDENTIFIER);
-            assertThat(tokens.get(0).getLexeme()).isEqualTo(identifier);
-            assertThat(tokens.get(0).getLiteral()).isNull();
-            assertThat(tokens.get(0).getLine()).isEqualTo(1);
+            assertThat(tokens.get(0).type).isEqualTo(Token.Type.IDENTIFIER);
+            assertThat(tokens.get(0).lexeme).isEqualTo(identifier);
+            assertThat(tokens.get(0).literal).isNull();
+            assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.error).isNull();
@@ -356,10 +356,10 @@ class ScannerTest {
             List<Token> tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).getType()).isEqualTo(Token.Type.IDENTIFIER);
-            assertThat(tokens.get(0).getLexeme()).isEqualTo("myIdentifier");
-            assertThat(tokens.get(0).getLiteral()).isNull();
-            assertThat(tokens.get(0).getLine()).isEqualTo(1);
+            assertThat(tokens.get(0).type).isEqualTo(Token.Type.IDENTIFIER);
+            assertThat(tokens.get(0).lexeme).isEqualTo("myIdentifier");
+            assertThat(tokens.get(0).literal).isNull();
+            assertThat(tokens.get(0).line).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.error).isNull();
@@ -507,16 +507,16 @@ class ScannerTest {
     }
 
     private void assertTokenHasTypeAndLexeme(Token token, Token.Type type, String lexeme) {
-        assertThat(token.getType()).isEqualTo(type);
-        assertThat(token.getLexeme()).isEqualTo(lexeme);
-        assertThat(token.getLiteral()).isNull();
-        assertThat(token.getLine()).isEqualTo(1);
+        assertThat(token.type).isEqualTo(type);
+        assertThat(token.lexeme).isEqualTo(lexeme);
+        assertThat(token.literal).isNull();
+        assertThat(token.line).isEqualTo(1);
     }
 
     private void assertTokenIsEndOfLine(Token token) {
-        assertThat(token.getType()).isEqualTo(Token.Type.EOF);
-        assertThat(token.getLexeme()).isEqualTo("");
-        assertThat(token.getLiteral()).isNull();
-        assertThat(token.getLine()).isEqualTo(1);
+        assertThat(token.type).isEqualTo(Token.Type.EOF);
+        assertThat(token.lexeme).isEqualTo("");
+        assertThat(token.literal).isNull();
+        assertThat(token.line).isEqualTo(1);
     }
 }

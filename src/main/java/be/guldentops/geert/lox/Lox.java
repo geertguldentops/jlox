@@ -2,6 +2,8 @@ package be.guldentops.geert.lox;
 
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.error.impl.ConsoleErrorReporter;
+import be.guldentops.geert.lox.lexer.Scanner;
+import be.guldentops.geert.lox.lexer.Token;
 
 import java.io.BufferedReader;
 import java.io.IOException;
