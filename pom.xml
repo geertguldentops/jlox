@@ -114,6 +114,7 @@
                         <!--https://stackoverflow.com/questions/50334742/how-to-get-junit5-with-jdk10-jigsaw-and-maven3-to-work-->
                         <argLine>
                             --add-opens be.guldentops.geert.lox.error/be.guldentops.geert.lox.error=ALL-UNNAMED
+                            --add-opens be.guldentops.geert.lox.lexer/be.guldentops.geert.lox.lexer=ALL-UNNAMED
                         </argLine>
                     </configuration>
                 </plugin>

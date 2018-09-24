@@ -1,6 +1,5 @@
 package be.guldentops.geert.lox.lexer;
 
-import be.guldentops.geert.lox.error.FakeErrorReporter;
 import be.guldentops.geert.lox.lexer.Token.Type;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
