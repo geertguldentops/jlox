@@ -11,6 +11,7 @@
     <modules>
         <module>error</module>
         <module>lexer</module>
+        <module>grammar</module>
         <module>main</module>
     </modules>
 

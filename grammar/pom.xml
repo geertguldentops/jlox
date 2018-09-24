@@ -10,37 +10,40 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
+    <artifactId>grammar</artifactId>
+
+    <packaging>jar</packaging>
+
     <dependencies>
-
         <dependency>
             <groupId>be.guldentops.geert</groupId>
-            <artifactId>grammar</artifactId>
+            <artifactId>lexer</artifactId>
             <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>be.guldentops.geert</groupId>
-            <artifactId>grammar</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>be.guldentops.geert</groupId>
-            <artifactId>error</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>be.guldentops.geert</groupId>
-            <artifactId>error</artifactId>
+            <artifactId>lexer</artifactId>
             <version>1.0.0-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
-    <artifactId>main</artifactId>
-
-    <packaging>jar</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
