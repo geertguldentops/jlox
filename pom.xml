@@ -12,6 +12,7 @@
         <module>error</module>
         <module>lexer</module>
         <module>grammar</module>
+        <module>parser</module>
         <module>main</module>
     </modules>
 
