@@ -110,6 +110,12 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.22.0</version>
+                    <configuration>
+                        <!--https://stackoverflow.com/questions/50334742/how-to-get-junit5-with-jdk10-jigsaw-and-maven3-to-work-->
+                        <argLine>
+                            --add-opens be.guldentops.geert.lox.error/be.guldentops.geert.lox.error=ALL-UNNAMED
+                        </argLine>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
