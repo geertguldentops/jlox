@@ -13,6 +13,7 @@
         <module>lexer</module>
         <module>grammar</module>
         <module>parser</module>
+        <module>semantic-analyser</module>
         <module>main</module>
     </modules>
 

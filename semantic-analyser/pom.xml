@@ -10,9 +10,26 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
+    <artifactId>semantic-analyser</artifactId>
+
+    <packaging>jar</packaging>
+
     <dependencies>
         <dependency>
             <groupId>be.guldentops.geert</groupId>
+            <artifactId>error</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>be.guldentops.geert</groupId>
+            <artifactId>error</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>be.guldentops.geert</groupId>
             <artifactId>lexer</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
@@ -35,36 +52,7 @@
             <version>1.0.0-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>be.guldentops.geert</groupId>
-            <artifactId>error</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>be.guldentops.geert</groupId>
-            <artifactId>error</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>be.guldentops.geert</groupId>
-            <artifactId>parser</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>be.guldentops.geert</groupId>
-            <artifactId>semantic-analyser</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
-    <artifactId>main</artifactId>
-
-    <packaging>jar</packaging>
 
 </project>
