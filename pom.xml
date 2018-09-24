@@ -10,6 +10,7 @@
 
     <modules>
         <module>error</module>
+        <module>lexer</module>
         <module>main</module>
     </modules>
 
