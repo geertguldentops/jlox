@@ -14,6 +14,7 @@
         <module>grammar</module>
         <module>parser</module>
         <module>semantic-analyser</module>
+        <module>interpreter</module>
         <module>main</module>
     </modules>
 
