@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox.parser;
+package be.guldentops.geert.lox.parser.impl;
 
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.error.api.SyntaxError;
@@ -6,6 +6,7 @@ import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.api.Token;
 import be.guldentops.geert.lox.lexer.api.Token.Type;
+import be.guldentops.geert.lox.parser.api.Parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +53,7 @@ import static be.guldentops.geert.lox.lexer.api.Token.Type.TRUE;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.VAR;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.WHILE;
 
-class RecursiveDescentParser implements Parser {
+public class RecursiveDescentParser implements Parser {
 
     private static class ParseError extends RuntimeException {
     }
@@ -62,7 +63,7 @@ class RecursiveDescentParser implements Parser {
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
-    RecursiveDescentParser(List<Token> tokens) {
+    public RecursiveDescentParser(List<Token> tokens) {
         this.tokens = tokens;
     }
 

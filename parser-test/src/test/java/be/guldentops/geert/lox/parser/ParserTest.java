@@ -1,61 +1,62 @@
 package be.guldentops.geert.lox.parser;
 
-import be.guldentops.geert.lox.error.FakeErrorReporter;
+import be.guldentops.geert.lox.error.test.api.FakeErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.parser.api.Parser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._class;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._else;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._false;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._for;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._if;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._return;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._super;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._this;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._true;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother._while;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.and;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.bang;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.bangEqual;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.comma;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.dot;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.eof;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.equal;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.equalEqual;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.fun;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.greater;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.greaterEqual;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.identifier;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.integer;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.leftBrace;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.leftParen;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.less;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.lessEqual;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.minus;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.nil;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.one;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.or;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.pi;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.plus;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.print;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.rightBrace;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.rightParen;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.semicolon;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.slash;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.star;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.two;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.var;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.STRING;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._class;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._else;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._false;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._for;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._if;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._return;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._super;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._this;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._true;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother._while;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.and;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.bang;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.bangEqual;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.comma;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.dot;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.eof;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.equal;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.equalEqual;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.fun;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.greater;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.greaterEqual;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.identifier;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.integer;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.leftBrace;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.leftParen;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.less;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.lessEqual;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.minus;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.nil;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.one;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.or;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.pi;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.plus;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.print;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.rightBrace;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.rightParen;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.semicolon;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.slash;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.star;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.two;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.var;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RecursiveDescentParserTest {
+class ParserTest {
 
     private FakeErrorReporter fakeErrorReporter;
 
@@ -2109,7 +2110,7 @@ class RecursiveDescentParserTest {
     }
 
     private Parser createParser(List<Token> tokens) {
-        var parser = new RecursiveDescentParser(tokens);
+        var parser = Parser.createDefault(tokens);
         parser.addErrorReporter(fakeErrorReporter);
 
         return parser;

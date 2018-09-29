@@ -16,6 +16,7 @@
         <module>grammar</module>
         <module>grammar-test</module>
         <module>parser</module>
+        <module>parser-test</module>
         <module>semantic-analyser</module>
         <module>interpreter</module>
         <module>tools</module>

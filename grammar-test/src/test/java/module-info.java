@@ -5,6 +5,7 @@ module be.guldentops.geert.lox.grammar.test {
     requires be.guldentops.geert.lox.lexer.test;
 
     requires org.junit.jupiter.api;
+
     requires org.assertj.core;
 
     /**

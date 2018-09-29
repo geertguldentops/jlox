@@ -3,7 +3,7 @@ package be.guldentops.geert.lox;
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.interpreter.Interpreter;
 import be.guldentops.geert.lox.lexer.api.Scanner;
-import be.guldentops.geert.lox.parser.Parser;
+import be.guldentops.geert.lox.parser.api.Parser;
 import be.guldentops.geert.lox.semantic.analysis.Resolver;
 
 import java.io.BufferedReader;
