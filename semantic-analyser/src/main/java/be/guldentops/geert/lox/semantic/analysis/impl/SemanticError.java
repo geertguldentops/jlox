@@ -1,9 +1,9 @@
-package be.guldentops.geert.lox.semantic.analysis;
+package be.guldentops.geert.lox.semantic.analysis.impl;
 
 import be.guldentops.geert.lox.error.api.Error;
 import be.guldentops.geert.lox.lexer.api.Token;
 
-class SemanticError implements Error {
+public class SemanticError implements Error {
 
     private final Token token;
     private final String message;

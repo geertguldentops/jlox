@@ -3,7 +3,7 @@ package be.guldentops.geert.lox.interpreter;
 import be.guldentops.geert.lox.error.api.CanReportErrors;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.semantic.analysis.ResolutionAnalyzer;
+import be.guldentops.geert.lox.semantic.analysis.api.ResolutionAnalyzer;
 
 import java.util.List;
 

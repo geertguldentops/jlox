@@ -1,9 +1,11 @@
-package be.guldentops.geert.lox.semantic.analysis;
+package be.guldentops.geert.lox.semantic.analysis.impl;
 
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.semantic.analysis.api.ResolutionAnalyzer;
+import be.guldentops.geert.lox.semantic.analysis.api.Resolver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.Visitor<Void> {
+public class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
 
@@ -22,7 +24,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
-    VariableResolver(ResolutionAnalyzer resolutionAnalyzer) {
+    public VariableResolver(ResolutionAnalyzer resolutionAnalyzer) {
         this.resolutionAnalyzer = resolutionAnalyzer;
     }
 

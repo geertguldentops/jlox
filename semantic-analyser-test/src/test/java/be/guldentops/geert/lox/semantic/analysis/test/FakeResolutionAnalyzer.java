@@ -1,6 +1,7 @@
-package be.guldentops.geert.lox.semantic.analysis;
+package be.guldentops.geert.lox.semantic.analysis.test;
 
 import be.guldentops.geert.lox.grammar.Expression;
+import be.guldentops.geert.lox.semantic.analysis.api.ResolutionAnalyzer;
 
 import java.util.HashMap;
 import java.util.Map;

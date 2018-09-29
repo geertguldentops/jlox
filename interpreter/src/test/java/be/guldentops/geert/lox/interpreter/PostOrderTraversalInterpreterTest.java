@@ -4,7 +4,7 @@ import be.guldentops.geert.lox.error.FakeErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.api.Token;
-import be.guldentops.geert.lox.semantic.analysis.Resolver;
+import be.guldentops.geert.lox.semantic.analysis.api.Resolver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox.semantic.analysis;
+package be.guldentops.geert.lox.semantic.analysis.api;
 
 import be.guldentops.geert.lox.grammar.Expression;
 

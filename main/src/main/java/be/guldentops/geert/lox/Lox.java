@@ -4,7 +4,7 @@ import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.interpreter.Interpreter;
 import be.guldentops.geert.lox.lexer.api.Scanner;
 import be.guldentops.geert.lox.parser.api.Parser;
-import be.guldentops.geert.lox.semantic.analysis.Resolver;
+import be.guldentops.geert.lox.semantic.analysis.api.Resolver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
