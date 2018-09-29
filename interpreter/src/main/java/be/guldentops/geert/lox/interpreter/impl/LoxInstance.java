@@ -1,5 +1,6 @@
-package be.guldentops.geert.lox.interpreter;
+package be.guldentops.geert.lox.interpreter.impl;
 
+import be.guldentops.geert.lox.interpreter.api.RuntimeError;
 import be.guldentops.geert.lox.lexer.api.Token;
 
 import java.util.HashMap;

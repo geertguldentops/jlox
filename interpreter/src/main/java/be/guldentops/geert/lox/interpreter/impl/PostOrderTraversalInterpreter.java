@@ -1,8 +1,11 @@
-package be.guldentops.geert.lox.interpreter;
+package be.guldentops.geert.lox.interpreter.impl;
 
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
+import be.guldentops.geert.lox.interpreter.api.Environment;
+import be.guldentops.geert.lox.interpreter.api.Interpreter;
+import be.guldentops.geert.lox.interpreter.api.RuntimeError;
 import be.guldentops.geert.lox.lexer.api.Token;
 
 import java.util.ArrayList;
@@ -13,7 +16,7 @@ import java.util.Map;
 import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
 import static java.util.stream.Collectors.toList;
 
-class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<Object>, Statement.Visitor<Void> {
+public class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<Object>, Statement.Visitor<Void> {
 
     private final Environment globals;
     private final Map<Expression, Integer> locals = new HashMap<>();
@@ -21,7 +24,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
-    PostOrderTraversalInterpreter(Environment globals) {
+    public PostOrderTraversalInterpreter(Environment globals) {
         this.globals = globals;
         this.environment = globals;
     }

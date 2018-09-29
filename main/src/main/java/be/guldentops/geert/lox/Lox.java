@@ -1,7 +1,8 @@
 package be.guldentops.geert.lox;
 
 import be.guldentops.geert.lox.error.api.ErrorReporter;
-import be.guldentops.geert.lox.interpreter.Interpreter;
+import be.guldentops.geert.lox.interpreter.api.Environment;
+import be.guldentops.geert.lox.interpreter.api.Interpreter;
 import be.guldentops.geert.lox.lexer.api.Scanner;
 import be.guldentops.geert.lox.parser.api.Parser;
 import be.guldentops.geert.lox.semantic.analysis.api.Resolver;
@@ -26,7 +27,7 @@ class Lox {
         this.syntaxErrorReporter = syntaxErrorReporter;
         this.semanticErrorReporter = semanticErrorReporter;
         this.runtimeErrorReporter = runtimeErrorReporter;
-        this.interpreter = Interpreter.createDefault();
+        this.interpreter = Interpreter.createDefault(Environment.createGlobal());
         this.interpreter.addErrorReporter(runtimeErrorReporter);
     }
 

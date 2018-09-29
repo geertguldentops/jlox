@@ -1,8 +1,11 @@
 package be.guldentops.geert.lox.interpreter;
 
-import be.guldentops.geert.lox.error.FakeErrorReporter;
+import be.guldentops.geert.lox.error.test.api.FakeErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
+import be.guldentops.geert.lox.interpreter.api.Environment;
+import be.guldentops.geert.lox.interpreter.api.Interpreter;
+import be.guldentops.geert.lox.interpreter.api.RuntimeError;
 import be.guldentops.geert.lox.lexer.api.Token;
 import be.guldentops.geert.lox.semantic.analysis.api.Resolver;
 import org.junit.jupiter.api.AfterEach;
@@ -14,46 +17,46 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._super;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory._this;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.assign;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.binary;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.call;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.get;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.grouping;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.literal;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.logical;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.set;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.unary;
-import static be.guldentops.geert.lox.grammar.ExpressionTestFactory.variable;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory._class;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory._if;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory._return;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory._while;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory.blockStatement;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory.expressionStatement;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory.function;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory.print;
-import static be.guldentops.geert.lox.grammar.StatementTestFactory.variableDeclaration;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.and;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.bang;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.bangEqual;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.equalEqual;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.greater;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.greaterEqual;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.identifier;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.less;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.lessEqual;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.minus;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.nil;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.or;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.plus;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.slash;
-import static be.guldentops.geert.lox.lexer.TokenObjectMother.star;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory._super;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory._this;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.assign;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.binary;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.call;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.get;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.grouping;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.literal;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.logical;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.set;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.unary;
+import static be.guldentops.geert.lox.grammar.test.ExpressionTestFactory.variable;
+import static be.guldentops.geert.lox.grammar.test.StatementTestFactory._class;
+import static be.guldentops.geert.lox.grammar.test.StatementTestFactory._if;
+import static be.guldentops.geert.lox.grammar.test.StatementTestFactory._return;
+import static be.guldentops.geert.lox.grammar.test.StatementTestFactory._while;
+import static be.guldentops.geert.lox.grammar.test.StatementTestFactory.blockStatement;
+import static be.guldentops.geert.lox.grammar.test.StatementTestFactory.expressionStatement;
+import static be.guldentops.geert.lox.grammar.test.StatementTestFactory.function;
+import static be.guldentops.geert.lox.grammar.test.StatementTestFactory.print;
+import static be.guldentops.geert.lox.grammar.test.StatementTestFactory.variableDeclaration;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.and;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.bang;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.bangEqual;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.equalEqual;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.greater;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.greaterEqual;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.identifier;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.less;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.lessEqual;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.minus;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.nil;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.or;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.plus;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.slash;
+import static be.guldentops.geert.lox.lexer.test.api.TokenObjectMother.star;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PostOrderTraversalInterpreterTest {
+class InterpreterTest {
 
     private Environment environment;
     private FakeErrorReporter fakeErrorReporter;
@@ -65,7 +68,7 @@ class PostOrderTraversalInterpreterTest {
         environment = Environment.createGlobal();
         fakeErrorReporter = new FakeErrorReporter();
 
-        interpreter = new PostOrderTraversalInterpreter(environment);
+        interpreter = Interpreter.createDefault(environment);
         interpreter.addErrorReporter(fakeErrorReporter);
     }
 

@@ -20,6 +20,7 @@
         <module>semantic-analyser</module>
         <module>semantic-analyser-test</module>
         <module>interpreter</module>
+        <module>interpreter-test</module>
         <module>tools</module>
         <module>main</module>
     </modules>

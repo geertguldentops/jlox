@@ -1,6 +1,8 @@
-package be.guldentops.geert.lox.interpreter;
+package be.guldentops.geert.lox.interpreter.impl;
 
 import be.guldentops.geert.lox.grammar.Statement;
+import be.guldentops.geert.lox.interpreter.api.Environment;
+import be.guldentops.geert.lox.interpreter.api.Interpreter;
 
 import java.util.List;
 
