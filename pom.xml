@@ -24,6 +24,7 @@
         <module>tools</module>
         <module>tools-test</module>
         <module>main</module>
+        <module>main-test</module>
     </modules>
 
     <packaging>pom</packaging>

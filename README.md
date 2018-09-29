@@ -13,7 +13,7 @@ I tried to unit test as many scenarios as is reasonably possible since I felt th
 
 This is also the reason why this implementation contains relatively little acceptance tests.
 
-be.guldentops.geert.lox.LoxMain and be.guldentops.geert.lox.tools.GenerateAbstractSyntaxTree are not tested by design, see their respective Javadocs why.
+be.guldentops.geert.lox.main.LoxMain and be.guldentops.geert.lox.tools.GenerateAbstractSyntaxTree are not tested by design, see their respective Javadocs why.
 
 
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
@@ -57,11 +57,11 @@ Using an IDE, for instance IntelliJ IDEA: Run all JUnit tests in package be.guld
 
 ### Running all the unit tests ###
 
-Run all the tests **except** the acceptance tests which are located in the be.guldentops.geert.lox.LoxAcceptanceTest class
+Run all the tests **except** the acceptance tests which are located in the be.guldentops.geert.lox.main.test.LoxAcceptanceTest class
 
 ### Running all the acceptance tests ###
 
-Run all the tests in the be.guldentops.geert.lox.LoxAcceptanceTest class
+Run all the tests in the be.guldentops.geert.lox.main.test.LoxAcceptanceTest class
 
 
 ## Lox Lexical Grammar ##

@@ -1,6 +1,7 @@
-package be.guldentops.geert.lox;
+package be.guldentops.geert.lox.main.test;
 
 import be.guldentops.geert.lox.error.api.ErrorReporter;
+import be.guldentops.geert.lox.main.Lox;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

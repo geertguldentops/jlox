@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox;
+package be.guldentops.geert.lox.main;
 
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 

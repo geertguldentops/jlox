@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox;
+package be.guldentops.geert.lox.main;
 
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.interpreter.api.Environment;
@@ -14,7 +14,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-class Lox {
+public class Lox {
 
     private final ErrorReporter syntaxErrorReporter;
     private final ErrorReporter semanticErrorReporter;
@@ -23,7 +23,7 @@ class Lox {
     // MUST be a global variable so REPL sessions can reuse the same interpreter!
     private final Interpreter interpreter;
 
-    Lox(ErrorReporter syntaxErrorReporter, ErrorReporter semanticErrorReporter, ErrorReporter runtimeErrorReporter) {
+    public Lox(ErrorReporter syntaxErrorReporter, ErrorReporter semanticErrorReporter, ErrorReporter runtimeErrorReporter) {
         this.syntaxErrorReporter = syntaxErrorReporter;
         this.semanticErrorReporter = semanticErrorReporter;
         this.runtimeErrorReporter = runtimeErrorReporter;
@@ -31,7 +31,7 @@ class Lox {
         this.interpreter.addErrorReporter(runtimeErrorReporter);
     }
 
-    void runFile(String path) throws IOException {
+    public void runFile(String path) throws IOException {
         var bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
     }
