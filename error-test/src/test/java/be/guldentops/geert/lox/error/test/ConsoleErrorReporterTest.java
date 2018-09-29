@@ -1,5 +1,7 @@
-package be.guldentops.geert.lox.error;
+package be.guldentops.geert.lox.error.test;
 
+import be.guldentops.geert.lox.error.ErrorReporter;
+import be.guldentops.geert.lox.error.SyntaxError;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,7 @@ class ConsoleErrorReporterTest {
     @BeforeEach
     void setUp() {
         originalErr = System.err;
-        consoleErrorReporter = new ConsoleErrorReporter();
+        consoleErrorReporter = ErrorReporter.console();
         errContent = new ByteArrayOutputStream();
 
         System.setErr(new PrintStream(errContent));
