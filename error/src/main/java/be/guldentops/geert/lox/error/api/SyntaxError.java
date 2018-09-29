@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox.error;
+package be.guldentops.geert.lox.error.api;
 
 public class SyntaxError implements Error {
 

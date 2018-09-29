@@ -1,7 +1,7 @@
-package be.guldentops.geert.lox.error.test;
+package be.guldentops.geert.lox.error.test.impl;
 
-import be.guldentops.geert.lox.error.ErrorReporter;
-import be.guldentops.geert.lox.error.SyntaxError;
+import be.guldentops.geert.lox.error.api.ErrorReporter;
+import be.guldentops.geert.lox.error.api.SyntaxError;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

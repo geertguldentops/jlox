@@ -1,6 +1,6 @@
 package be.guldentops.geert.lox.semantic.analysis;
 
-import be.guldentops.geert.lox.error.Error;
+import be.guldentops.geert.lox.error.api.Error;
 import be.guldentops.geert.lox.lexer.Token;
 
 class SemanticError implements Error {

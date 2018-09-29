@@ -1,6 +1,6 @@
 package be.guldentops.geert.lox.lexer.test;
 
-import be.guldentops.geert.lox.error.test.FakeErrorReporter;
+import be.guldentops.geert.lox.error.test.api.FakeErrorReporter;
 import be.guldentops.geert.lox.lexer.Scanner;
 import be.guldentops.geert.lox.lexer.Token;
 import be.guldentops.geert.lox.lexer.Token.Type;

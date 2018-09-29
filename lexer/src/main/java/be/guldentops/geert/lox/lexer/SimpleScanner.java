@@ -1,8 +1,7 @@
 package be.guldentops.geert.lox.lexer;
 
-import be.guldentops.geert.lox.error.Error;
-import be.guldentops.geert.lox.error.ErrorReporter;
-import be.guldentops.geert.lox.error.SyntaxError;
+import be.guldentops.geert.lox.error.api.ErrorReporter;
+import be.guldentops.geert.lox.error.api.SyntaxError;
 import be.guldentops.geert.lox.lexer.Token.Type;
 
 import java.util.ArrayList;

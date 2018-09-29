@@ -1,6 +1,6 @@
 package be.guldentops.geert.lox.semantic.analysis;
 
-import be.guldentops.geert.lox.error.CanReportErrors;
+import be.guldentops.geert.lox.error.api.CanReportErrors;
 import be.guldentops.geert.lox.grammar.Statement;
 
 import java.util.List;

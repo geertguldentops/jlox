@@ -1,6 +1,6 @@
 package be.guldentops.geert.lox;
 
-import be.guldentops.geert.lox.error.ErrorReporter;
+import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.interpreter.Interpreter;
 import be.guldentops.geert.lox.lexer.Scanner;
 import be.guldentops.geert.lox.parser.Parser;

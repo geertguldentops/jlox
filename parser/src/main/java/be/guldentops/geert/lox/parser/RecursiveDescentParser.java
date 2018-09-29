@@ -1,7 +1,7 @@
 package be.guldentops.geert.lox.parser;
 
-import be.guldentops.geert.lox.error.ErrorReporter;
-import be.guldentops.geert.lox.error.SyntaxError;
+import be.guldentops.geert.lox.error.api.ErrorReporter;
+import be.guldentops.geert.lox.error.api.SyntaxError;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
 import be.guldentops.geert.lox.lexer.Token;

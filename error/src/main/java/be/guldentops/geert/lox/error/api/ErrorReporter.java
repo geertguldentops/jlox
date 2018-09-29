@@ -1,4 +1,6 @@
-package be.guldentops.geert.lox.error;
+package be.guldentops.geert.lox.error.api;
+
+import be.guldentops.geert.lox.error.impl.ConsoleErrorReporter;
 
 public interface ErrorReporter {
 
