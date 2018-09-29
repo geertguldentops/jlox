@@ -8,13 +8,13 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement.Visitor<String> {
+public class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement.Visitor<String> {
 
-    String print(Expression expression) {
+    public String print(Expression expression) {
         return expression.accept(this);
     }
 
-    String print(Statement statement) {
+    public String print(Statement statement) {
         return statement.accept(this);
     }
 

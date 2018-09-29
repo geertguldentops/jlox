@@ -22,6 +22,7 @@
         <module>interpreter</module>
         <module>interpreter-test</module>
         <module>tools</module>
+        <module>tools-test</module>
         <module>main</module>
     </modules>
 
