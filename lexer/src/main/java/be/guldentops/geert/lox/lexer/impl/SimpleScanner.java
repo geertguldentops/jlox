@@ -1,55 +1,58 @@
-package be.guldentops.geert.lox.lexer;
+package be.guldentops.geert.lox.lexer.impl;
 
+import be.guldentops.geert.lox.error.api.Error;
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.error.api.SyntaxError;
-import be.guldentops.geert.lox.lexer.Token.Type;
+import be.guldentops.geert.lox.lexer.api.Scanner;
+import be.guldentops.geert.lox.lexer.api.Token;
+import be.guldentops.geert.lox.lexer.api.Token.Type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static be.guldentops.geert.lox.lexer.Token.Type.AND;
-import static be.guldentops.geert.lox.lexer.Token.Type.BANG;
-import static be.guldentops.geert.lox.lexer.Token.Type.BANG_EQUAL;
-import static be.guldentops.geert.lox.lexer.Token.Type.CLASS;
-import static be.guldentops.geert.lox.lexer.Token.Type.COMMA;
-import static be.guldentops.geert.lox.lexer.Token.Type.DOT;
-import static be.guldentops.geert.lox.lexer.Token.Type.ELSE;
-import static be.guldentops.geert.lox.lexer.Token.Type.EOF;
-import static be.guldentops.geert.lox.lexer.Token.Type.EQUAL;
-import static be.guldentops.geert.lox.lexer.Token.Type.EQUAL_EQUAL;
-import static be.guldentops.geert.lox.lexer.Token.Type.FALSE;
-import static be.guldentops.geert.lox.lexer.Token.Type.FOR;
-import static be.guldentops.geert.lox.lexer.Token.Type.FUN;
-import static be.guldentops.geert.lox.lexer.Token.Type.GREATER;
-import static be.guldentops.geert.lox.lexer.Token.Type.GREATER_EQUAL;
-import static be.guldentops.geert.lox.lexer.Token.Type.IDENTIFIER;
-import static be.guldentops.geert.lox.lexer.Token.Type.IF;
-import static be.guldentops.geert.lox.lexer.Token.Type.LEFT_BRACE;
-import static be.guldentops.geert.lox.lexer.Token.Type.LEFT_PAREN;
-import static be.guldentops.geert.lox.lexer.Token.Type.LESS;
-import static be.guldentops.geert.lox.lexer.Token.Type.LESS_EQUAL;
-import static be.guldentops.geert.lox.lexer.Token.Type.MINUS;
-import static be.guldentops.geert.lox.lexer.Token.Type.NIL;
-import static be.guldentops.geert.lox.lexer.Token.Type.NUMBER;
-import static be.guldentops.geert.lox.lexer.Token.Type.OR;
-import static be.guldentops.geert.lox.lexer.Token.Type.PLUS;
-import static be.guldentops.geert.lox.lexer.Token.Type.PRINT;
-import static be.guldentops.geert.lox.lexer.Token.Type.RETURN;
-import static be.guldentops.geert.lox.lexer.Token.Type.RIGHT_BRACE;
-import static be.guldentops.geert.lox.lexer.Token.Type.RIGHT_PAREN;
-import static be.guldentops.geert.lox.lexer.Token.Type.SEMICOLON;
-import static be.guldentops.geert.lox.lexer.Token.Type.SLASH;
-import static be.guldentops.geert.lox.lexer.Token.Type.STAR;
-import static be.guldentops.geert.lox.lexer.Token.Type.STRING;
-import static be.guldentops.geert.lox.lexer.Token.Type.SUPER;
-import static be.guldentops.geert.lox.lexer.Token.Type.THIS;
-import static be.guldentops.geert.lox.lexer.Token.Type.TRUE;
-import static be.guldentops.geert.lox.lexer.Token.Type.VAR;
-import static be.guldentops.geert.lox.lexer.Token.Type.WHILE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.AND;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.BANG_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.CLASS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.COMMA;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.DOT;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.ELSE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.EOF;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.EQUAL_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FALSE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FOR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.FUN;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.GREATER_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.IDENTIFIER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.IF;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_BRACE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LEFT_PAREN;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.LESS_EQUAL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.MINUS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.NIL;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.NUMBER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.PLUS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.PRINT;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RETURN;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_BRACE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.RIGHT_PAREN;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.SEMICOLON;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.SLASH;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.STAR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.STRING;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.SUPER;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.THIS;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.TRUE;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.VAR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.WHILE;
 
-class SimpleScanner implements Scanner {
+public class SimpleScanner implements Scanner {
 
     private static final Map<String, Type> keywords;
 
@@ -82,7 +85,7 @@ class SimpleScanner implements Scanner {
 
     private final List<ErrorReporter> errorReporters = new ArrayList<>();
 
-    SimpleScanner(String sourceCode) {
+    public SimpleScanner(String sourceCode) {
         if (sourceCode == null) throw new IllegalArgumentException("source code should not be null!");
 
         this.sourceCode = sourceCode;

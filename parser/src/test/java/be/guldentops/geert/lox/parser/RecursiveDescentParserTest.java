@@ -3,14 +3,13 @@ package be.guldentops.geert.lox.parser;
 import be.guldentops.geert.lox.error.FakeErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.lexer.api.Token;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static be.guldentops.geert.lox.lexer.Token.Type.STRING;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother._class;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother._else;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother._false;
@@ -52,6 +51,7 @@ import static be.guldentops.geert.lox.lexer.TokenObjectMother.slash;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother.star;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother.two;
 import static be.guldentops.geert.lox.lexer.TokenObjectMother.var;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.STRING;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 

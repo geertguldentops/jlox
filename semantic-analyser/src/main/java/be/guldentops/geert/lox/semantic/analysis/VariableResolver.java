@@ -3,7 +3,7 @@ package be.guldentops.geert.lox.semantic.analysis;
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.lexer.api.Token;
 
 import java.util.ArrayList;
 import java.util.HashMap;

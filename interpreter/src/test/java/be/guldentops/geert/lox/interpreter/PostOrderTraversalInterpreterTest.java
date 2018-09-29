@@ -3,7 +3,7 @@ package be.guldentops.geert.lox.interpreter;
 import be.guldentops.geert.lox.error.FakeErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.lexer.api.Token;
 import be.guldentops.geert.lox.semantic.analysis.Resolver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

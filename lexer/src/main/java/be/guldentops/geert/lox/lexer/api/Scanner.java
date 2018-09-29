@@ -1,6 +1,7 @@
-package be.guldentops.geert.lox.lexer;
+package be.guldentops.geert.lox.lexer.api;
 
 import be.guldentops.geert.lox.error.api.CanReportErrors;
+import be.guldentops.geert.lox.lexer.impl.SimpleScanner;
 
 import java.util.List;
 

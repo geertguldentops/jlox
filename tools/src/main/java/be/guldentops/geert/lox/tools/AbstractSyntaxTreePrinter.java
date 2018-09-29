@@ -2,7 +2,7 @@ package be.guldentops.geert.lox.tools;
 
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.lexer.api.Token;
 
 import java.util.stream.Stream;
 

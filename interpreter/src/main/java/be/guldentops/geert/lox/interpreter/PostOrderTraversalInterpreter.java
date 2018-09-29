@@ -3,14 +3,14 @@ package be.guldentops.geert.lox.interpreter;
 import be.guldentops.geert.lox.error.api.ErrorReporter;
 import be.guldentops.geert.lox.grammar.Expression;
 import be.guldentops.geert.lox.grammar.Statement;
-import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.lexer.api.Token;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static be.guldentops.geert.lox.lexer.Token.Type.OR;
+import static be.guldentops.geert.lox.lexer.api.Token.Type.OR;
 import static java.util.stream.Collectors.toList;
 
 class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<Object>, Statement.Visitor<Void> {

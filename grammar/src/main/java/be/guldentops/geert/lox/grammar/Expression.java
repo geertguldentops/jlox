@@ -1,6 +1,6 @@
 package be.guldentops.geert.lox.grammar;
 
-import be.guldentops.geert.lox.lexer.Token;
+import be.guldentops.geert.lox.lexer.api.Token;
 
 import java.util.List;
 

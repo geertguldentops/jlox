@@ -1,4 +1,4 @@
-package be.guldentops.geert.lox.lexer;
+package be.guldentops.geert.lox.lexer.api;
 
 public class Token {
 
