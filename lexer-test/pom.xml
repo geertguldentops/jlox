@@ -10,32 +10,25 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>error-test</artifactId>
+    <artifactId>lexer-test</artifactId>
 
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>be.guldentops.geert</groupId>
-            <artifactId>error</artifactId>
+            <artifactId>lexer</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
-    </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+        <dependency>
+            <groupId>be.guldentops.geert</groupId>
+            <artifactId>error-test</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
 
 </project>

@@ -12,6 +12,7 @@
         <module>error</module>
         <module>error-test</module>
         <module>lexer</module>
+        <module>lexer-test</module>
         <module>grammar</module>
         <module>parser</module>
         <module>semantic-analyser</module>
@@ -111,12 +112,6 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.22.0</version>
-                    <configuration>
-                        <!--https://stackoverflow.com/questions/50334742/how-to-get-junit5-with-jdk10-jigsaw-and-maven3-to-work-->
-                        <argLine>
-                            --add-opens be.guldentops.geert.lox.lexer/be.guldentops.geert.lox.lexer=ALL-UNNAMED
-                        </argLine>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
