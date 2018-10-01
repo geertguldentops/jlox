@@ -6,7 +6,7 @@
 
 This is a Java version of the lox interpreter from the wonderful book [Crafting Interpreters](http://www.craftinginterpreters.com/introduction.html)
 
-It is written in pure Java 10, using only 2 external Java libraries for testing: JUnit 5 and AssertJ.
+It is written in pure Java 11, using only 2 external Java libraries for testing: JUnit 5 and AssertJ.
 
 This implementation is heavily focused on unit testing. 
 I tried to unit test as many scenarios as is reasonably possible since I felt this really deepened my understanding of how exactly the interpreter works.  
