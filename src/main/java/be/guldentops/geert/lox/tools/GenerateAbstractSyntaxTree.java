@@ -2,6 +2,7 @@ package be.guldentops.geert.lox.tools;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,7 +52,7 @@ class GenerateAbstractSyntaxTree {
                                                  List<String> types) {
         var path = outputDir + "/" + baseClassName + ".java";
 
-        try (var writer = new PrintWriter(path, "UTF-8")) {
+        try (var writer = new PrintWriter(path, StandardCharsets.UTF_8)) {
             writeBaseClassHeader(baseClassName, writer);
             writeBaseClassBody(baseClassName, types, writer);
             writeBaseClassFooter(writer);
