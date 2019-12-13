@@ -9,7 +9,6 @@ import be.guldentops.geert.lox.semantic.analysis.Resolver;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -31,8 +30,7 @@ class Lox {
     }
 
     void runFile(String path) throws IOException {
-        var bytes = Files.readAllBytes(Paths.get(path));
-        run(new String(bytes, Charset.defaultCharset()));
+        run(Files.readString(Paths.get(path)));
     }
 
     void runPrompt() throws IOException {
