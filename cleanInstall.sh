@@ -13,6 +13,6 @@ function doCleanInstall() {
 }
 
 setMavenOpts
-downgradeToJDK12
+setJavaHome
 
 doCleanInstall
