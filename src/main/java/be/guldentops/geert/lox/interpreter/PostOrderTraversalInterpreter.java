@@ -63,22 +63,22 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Void visitBlockStatement(Statement.Block statement) {
-        executeBlock(statement.statements, Environment.createLocal(environment));
+        executeBlock(statement.statements(), Environment.createLocal(environment));
         return null;
     }
 
     @Override
     public Void visitClassStatement(Statement.Class statement) {
         Object superclass = null;
-        if (statement.superclass != null) {
-            superclass = evaluate(statement.superclass);
+        if (statement.superclass() != null) {
+            superclass = evaluate(statement.superclass());
 
             if (!(superclass instanceof LoxClass)) {
-                throw new RuntimeError(statement.superclass.name, "superclass must be a class.");
+                throw new RuntimeError(statement.superclass().name(), "superclass must be a class.");
             }
         }
 
-        environment.define(statement.name, null);
+        environment.define(statement.name(), null);
 
         if (superclass != null) {
             environment = Environment.createLocal(environment);
@@ -86,24 +86,24 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         }
 
         var methods = new HashMap<String, LoxFunction>();
-        for (var method : statement.methods) {
+        for (var method : statement.methods()) {
             var function = createFunction(method);
-            methods.put(method.name.lexeme, function);
+            methods.put(method.name().lexeme, function);
         }
 
-        LoxClass clazz = new LoxClass(statement.name.lexeme, (LoxClass) superclass, methods);
+        LoxClass clazz = new LoxClass(statement.name().lexeme, (LoxClass) superclass, methods);
 
         if (superclass != null) {
             environment = environment.enclosing;
         }
 
-        environment.assign(statement.name, clazz);
+        environment.assign(statement.name(), clazz);
 
         return null;
     }
 
     private LoxFunction createFunction(Statement.Function method) {
-        if (method.name.lexeme.equals("init")) {
+        if (method.name().lexeme.equals("init")) {
             return LoxFunction.createInitFunction(method, environment);
         } else {
             return LoxFunction.createFunction(method, environment);
@@ -132,23 +132,23 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Void visitExpressionStatement(Statement.Expression statement) {
-        evaluate(statement.expression);
+        evaluate(statement.expression());
         return null;
     }
 
     @Override
     public Void visitFunctionStatement(Statement.Function statement) {
         var function = LoxFunction.createFunction(statement, environment);
-        environment.define(statement.name, function);
+        environment.define(statement.name(), function);
         return null;
     }
 
     @Override
     public Void visitIfStatement(Statement.If statement) {
-        if (isTruthy(evaluate(statement.condition))) {
-            execute(statement.thenBranch);
-        } else if (statement.elseBranch != null) {
-            execute(statement.elseBranch);
+        if (isTruthy(evaluate(statement.condition()))) {
+            execute(statement.thenBranch());
+        } else if (statement.elseBranch() != null) {
+            execute(statement.elseBranch());
         }
 
         return null;
@@ -156,7 +156,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Void visitPrintStatement(Statement.Print statement) {
-        var value = evaluate(statement.expression);
+        var value = evaluate(statement.expression());
         System.out.println(stringify(value));
         return null;
     }
@@ -164,7 +164,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     @Override
     public Void visitReturnStatement(Statement.Return statement) {
         Object value = null;
-        if (statement.value != null) value = evaluate(statement.value);
+        if (statement.value() != null) value = evaluate(statement.value());
 
         throw new Return(value);
     }
@@ -172,18 +172,18 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     @Override
     public Void visitVariableStatement(Statement.Variable statement) {
         Object value = null;
-        if (statement.initializer != null) {
-            value = evaluate(statement.initializer);
+        if (statement.initializer() != null) {
+            value = evaluate(statement.initializer());
         }
 
-        environment.define(statement.name, value);
+        environment.define(statement.name(), value);
         return null;
     }
 
     @Override
     public Void visitWhileStatement(Statement.While statement) {
-        while (isTruthy(evaluate(statement.condition))) {
-            execute(statement.body);
+        while (isTruthy(evaluate(statement.condition()))) {
+            execute(statement.body());
         }
 
         return null;
@@ -206,13 +206,13 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Object visitAssignExpression(Expression.Assign expression) {
-        Object value = evaluate(expression.value);
+        Object value = evaluate(expression.value());
 
         Integer distance = locals.get(expression);
         if (distance != null) {
-            environment.assignAt(distance, expression.name, value);
+            environment.assignAt(distance, expression.name(), value);
         } else {
-            globals.assign(expression.name, value);
+            globals.assign(expression.name(), value);
         }
 
         return value;
@@ -220,24 +220,24 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
-        var left = evaluate(expression.left);
-        var right = evaluate(expression.right);
+        var left = evaluate(expression.left());
+        var right = evaluate(expression.right());
 
-        switch (expression.operator.type) {
+        switch (expression.operator().type) {
             case GREATER:
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expression.operator(), left, right);
                 return (double) left > (double) right;
             case GREATER_EQUAL:
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expression.operator(), left, right);
                 return (double) left >= (double) right;
             case LESS:
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expression.operator(), left, right);
                 return (double) left < (double) right;
             case LESS_EQUAL:
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expression.operator(), left, right);
                 return (double) left <= (double) right;
             case MINUS:
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expression.operator(), left, right);
                 return (double) left - (double) right;
             case PLUS:
                 if (left instanceof Double && right instanceof Double) {
@@ -248,13 +248,13 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
                     return (String) left + (String) right;
                 }
 
-                throw new RuntimeError(expression.operator, "operands must be two numbers or two strings.");
+                throw new RuntimeError(expression.operator(), "operands must be two numbers or two strings.");
             case SLASH:
-                checkNumberOperands(expression.operator, left, right);
-                checkNull(expression.operator, (double) right);
+                checkNumberOperands(expression.operator(), left, right);
+                checkNull(expression.operator(), (double) right);
                 return (double) left / (double) right;
             case STAR:
-                checkNumberOperands(expression.operator, left, right);
+                checkNumberOperands(expression.operator(), left, right);
                 return (double) left * (double) right;
             case BANG_EQUAL:
                 return !isEqual(left, right);
@@ -267,13 +267,13 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Object visitCallExpression(Expression.Call expression) {
-        var callee = evaluate(expression.callee);
+        var callee = evaluate(expression.callee());
 
         if (!(callee instanceof LoxCallable)) {
-            throw new RuntimeError(expression.paren, "can only call functions and classes.");
+            throw new RuntimeError(expression.paren(), "can only call functions and classes.");
         }
 
-        var arguments = expression.arguments.stream()
+        var arguments = expression.arguments().stream()
                 .map(this::evaluate)
                 .collect(toList());
 
@@ -281,7 +281,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
         if (arguments.size() != function.arity()) {
             throw new RuntimeError(
-                    expression.paren,
+                    expression.paren(),
                     String.format("expected %d argument(s) but got %d.", function.arity(), arguments.size())
             );
         }
@@ -291,48 +291,48 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Object visitGetExpression(Expression.Get expression) {
-        Object object = evaluate(expression.object);
+        Object object = evaluate(expression.object());
         if (object instanceof LoxInstance) {
-            return ((LoxInstance) object).get(expression.name);
+            return ((LoxInstance) object).get(expression.name());
         }
 
-        throw new RuntimeError(expression.name, "only instances have properties.");
+        throw new RuntimeError(expression.name(), "only instances have properties.");
     }
 
     @Override
     public Object visitGroupingExpression(Expression.Grouping expression) {
-        return evaluate(expression.expression);
+        return evaluate(expression.expression());
     }
 
     @Override
     public Object visitLiteralExpression(Expression.Literal expression) {
-        return expression.value;
+        return expression.value();
     }
 
     @Override
     public Object visitLogicalExpression(Expression.Logical expression) {
-        var left = evaluate(expression.left);
+        var left = evaluate(expression.left());
 
-        if (expression.operator.type == OR) {
+        if (expression.operator().type == OR) {
             if (isTruthy(left)) return left;
         } else {
             if (!isTruthy(left)) return left;
         }
 
-        return evaluate(expression.right);
+        return evaluate(expression.right());
     }
 
     @Override
     public Object visitSetExpression(Expression.Set expression) {
-        Object object = evaluate(expression.object);
+        Object object = evaluate(expression.object());
 
         if (object instanceof LoxInstance) {
-            Object value = evaluate(expression.value);
-            ((LoxInstance) object).set(expression.name, value);
+            Object value = evaluate(expression.value());
+            ((LoxInstance) object).set(expression.name(), value);
             return value;
         }
 
-        throw new RuntimeError(expression.name, "only instances have fields.");
+        throw new RuntimeError(expression.name(), "only instances have fields.");
     }
 
     @Override
@@ -344,10 +344,10 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         // "this" is always one level nearer than "super"'s environment.
         var object = (LoxInstance) environment.getAt(distance - 1, "this");
 
-        LoxFunction method = superclass.findMethod(object, expression.method.lexeme);
+        LoxFunction method = superclass.findMethod(object, expression.method().lexeme);
 
         if (method == null) {
-            throw new RuntimeError(expression.method, "undefined property.");
+            throw new RuntimeError(expression.method(), "undefined property.");
         }
 
         return method;
@@ -355,18 +355,18 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Object visitThisExpression(Expression.This expression) {
-        return lookUpVariable(expression.keyword, expression);
+        return lookUpVariable(expression.keyword(), expression);
     }
 
     @Override
     public Object visitUnaryExpression(Expression.Unary expression) {
-        var right = evaluate(expression.right);
+        var right = evaluate(expression.right());
 
-        switch (expression.operator.type) {
+        switch (expression.operator().type) {
             case BANG:
                 return !isTruthy(right);
             case MINUS:
-                checkNumberOperand(expression.operator, right);
+                checkNumberOperand(expression.operator(), right);
                 return -(double) right;
         }
 
@@ -375,7 +375,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     @Override
     public Object visitVariableExpression(Expression.Variable expression) {
-        return lookUpVariable(expression.name, expression);
+        return lookUpVariable(expression.name(), expression);
     }
 
     private Object lookUpVariable(Token name, Expression expression) {

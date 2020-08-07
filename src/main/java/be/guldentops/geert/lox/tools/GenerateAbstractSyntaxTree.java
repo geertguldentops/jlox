@@ -109,43 +109,15 @@ class GenerateAbstractSyntaxTree {
                                    String fieldList) {
         String[] fields = fieldList.split(", ");
 
-        writeClassHeader(writer, baseClassName, className);
-        writeFields(writer, fields);
-        writeConstructor(writer, className, fieldList, fields);
+        writeRecordHeader(writer, baseClassName, fields, className);
         writeAcceptMethodImplementation(writer, baseClassName, className);
         writeClassFooter(writer);
     }
 
-    private static void writeClassHeader(PrintWriter writer, String baseClassName, String className) {
+    private static void writeRecordHeader(PrintWriter writer, String baseClassName, String[] fields, String className) {
         writer.println();
-        writer.printf("class %s implements %s {", className, baseClassName);
+        writer.printf("record %s(%s) implements %s {", className, String.join(", ", fields), baseClassName);
         writer.println();
-    }
-
-    private static void writeFields(PrintWriter writer, String[] fieldsArray) {
-        writer.println();
-
-        for (var field : fieldsArray) {
-            writer.printf("    public final %s;", field);
-            writer.println();
-        }
-    }
-
-    private static void writeConstructor(PrintWriter writer,
-                                         String className,
-                                         String fieldList,
-                                         String[] fields) {
-        writer.println();
-        writer.printf("    public %s(%s) {", className, fieldList);
-        writer.println();
-
-        for (var field : fields) {
-            var name = field.split(" ")[1];
-            writer.printf("      this.%s = %s;", name, name);
-            writer.println();
-        }
-
-        writer.println("    }");
     }
 
     private static void writeAcceptMethodImplementation(PrintWriter writer, String baseClassName, String className) {

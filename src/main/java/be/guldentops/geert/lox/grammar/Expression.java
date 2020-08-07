@@ -35,180 +35,84 @@ public interface Expression {
         R visitVariableExpression(Variable expression);
     }
 
-    class Assign implements Expression {
-
-        public final Token name;
-        public final Expression value;
-
-        public Assign(Token name, Expression value) {
-            this.name = name;
-            this.value = value;
-        }
+    record Assign(Token name, Expression value) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitAssignExpression(this);
         }
     }
 
-    class Binary implements Expression {
-
-        public final Expression left;
-        public final Token operator;
-        public final Expression right;
-
-        public Binary(Expression left, Token operator, Expression right) {
-            this.left = left;
-            this.operator = operator;
-            this.right = right;
-        }
+    record Binary(Expression left, Token operator, Expression right) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitBinaryExpression(this);
         }
     }
 
-    class Call implements Expression {
-
-        public final Expression callee;
-        public final Token paren;
-        public final List<Expression> arguments;
-
-        public Call(Expression callee, Token paren, List<Expression> arguments) {
-            this.callee = callee;
-            this.paren = paren;
-            this.arguments = arguments;
-        }
+    record Call(Expression callee, Token paren, List<Expression> arguments) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitCallExpression(this);
         }
     }
 
-    class Get implements Expression {
-
-        public final Expression object;
-        public final Token name;
-
-        public Get(Expression object, Token name) {
-            this.object = object;
-            this.name = name;
-        }
+    record Get(Expression object, Token name) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitGetExpression(this);
         }
     }
 
-    class Grouping implements Expression {
-
-        public final Expression expression;
-
-        public Grouping(Expression expression) {
-            this.expression = expression;
-        }
+    record Grouping(Expression expression) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitGroupingExpression(this);
         }
     }
 
-    class Literal implements Expression {
-
-        public final Object value;
-
-        public Literal(Object value) {
-            this.value = value;
-        }
+    record Literal(Object value) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitLiteralExpression(this);
         }
     }
 
-    class Logical implements Expression {
-
-        public final Expression left;
-        public final Token operator;
-        public final Expression right;
-
-        public Logical(Expression left, Token operator, Expression right) {
-            this.left = left;
-            this.operator = operator;
-            this.right = right;
-        }
+    record Logical(Expression left, Token operator, Expression right) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitLogicalExpression(this);
         }
     }
 
-    class Set implements Expression {
-
-        public final Expression object;
-        public final Token name;
-        public final Expression value;
-
-        public Set(Expression object, Token name, Expression value) {
-            this.object = object;
-            this.name = name;
-            this.value = value;
-        }
+    record Set(Expression object, Token name, Expression value) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitSetExpression(this);
         }
     }
 
-    class Super implements Expression {
-
-        public final Token keyword;
-        public final Token method;
-
-        public Super(Token keyword, Token method) {
-            this.keyword = keyword;
-            this.method = method;
-        }
+    record Super(Token keyword, Token method) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitSuperExpression(this);
         }
     }
 
-    class This implements Expression {
-
-        public final Token keyword;
-
-        public This(Token keyword) {
-            this.keyword = keyword;
-        }
+    record This(Token keyword) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitThisExpression(this);
         }
     }
 
-    class Unary implements Expression {
-
-        public final Token operator;
-        public final Expression right;
-
-        public Unary(Token operator, Expression right) {
-            this.operator = operator;
-            this.right = right;
-        }
+    record Unary(Token operator, Expression right) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitUnaryExpression(this);
         }
     }
 
-    class Variable implements Expression {
-
-        public final Token name;
-
-        public Variable(Token name) {
-            this.name = name;
-        }
+    record Variable(Token name) implements Expression {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitVariableExpression(this);

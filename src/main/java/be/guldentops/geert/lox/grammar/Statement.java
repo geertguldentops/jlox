@@ -29,135 +29,65 @@ public interface Statement {
         R visitWhileStatement(While statement);
     }
 
-    class Block implements Statement {
-
-        public final List<Statement> statements;
-
-        public Block(List<Statement> statements) {
-            this.statements = statements;
-        }
+    record Block(List<Statement> statements) implements Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitBlockStatement(this);
         }
     }
 
-    class Class implements Statement {
-
-        public final Token name;
-        public final be.guldentops.geert.lox.grammar.Expression.Variable superclass;
-        public final List<Statement.Function> methods;
-
-        public Class(Token name, be.guldentops.geert.lox.grammar.Expression.Variable superclass, List<Statement.Function> methods) {
-            this.name = name;
-            this.superclass = superclass;
-            this.methods = methods;
-        }
+    record Class(Token name, be.guldentops.geert.lox.grammar.Expression.Variable superclass,
+                 List<Statement.Function> methods) implements Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitClassStatement(this);
         }
     }
 
-    class Expression implements Statement {
-
-        public final be.guldentops.geert.lox.grammar.Expression expression;
-
-        public Expression(be.guldentops.geert.lox.grammar.Expression expression) {
-            this.expression = expression;
-        }
+    record Expression(be.guldentops.geert.lox.grammar.Expression expression) implements Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitExpressionStatement(this);
         }
     }
 
-    class Function implements Statement {
-
-        public final Token name;
-        public final List<Token> parameters;
-        public final List<Statement> body;
-
-        public Function(Token name, List<Token> parameters, List<Statement> body) {
-            this.name = name;
-            this.parameters = parameters;
-            this.body = body;
-        }
+    record Function(Token name, List<Token> parameters, List<Statement> body) implements Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitFunctionStatement(this);
         }
     }
 
-    class If implements Statement {
-
-        public final be.guldentops.geert.lox.grammar.Expression condition;
-        public final Statement thenBranch;
-        public final Statement elseBranch;
-
-        public If(be.guldentops.geert.lox.grammar.Expression condition, Statement thenBranch, Statement elseBranch) {
-            this.condition = condition;
-            this.thenBranch = thenBranch;
-            this.elseBranch = elseBranch;
-        }
+    record If(be.guldentops.geert.lox.grammar.Expression condition, Statement thenBranch,
+              Statement elseBranch) implements Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitIfStatement(this);
         }
     }
 
-    class Print implements Statement {
-
-        public final be.guldentops.geert.lox.grammar.Expression expression;
-
-        public Print(be.guldentops.geert.lox.grammar.Expression expression) {
-            this.expression = expression;
-        }
+    record Print(be.guldentops.geert.lox.grammar.Expression expression) implements Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitPrintStatement(this);
         }
     }
 
-    class Return implements Statement {
-
-        public final Token keyword;
-        public final be.guldentops.geert.lox.grammar.Expression value;
-
-        public Return(Token keyword, be.guldentops.geert.lox.grammar.Expression value) {
-            this.keyword = keyword;
-            this.value = value;
-        }
+    record Return(Token keyword, be.guldentops.geert.lox.grammar.Expression value) implements Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitReturnStatement(this);
         }
     }
 
-    class Variable implements Statement {
-
-        public final Token name;
-        public final be.guldentops.geert.lox.grammar.Expression initializer;
-
-        public Variable(Token name, be.guldentops.geert.lox.grammar.Expression initializer) {
-            this.name = name;
-            this.initializer = initializer;
-        }
+    record Variable(Token name, be.guldentops.geert.lox.grammar.Expression initializer) implements Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitVariableStatement(this);
         }
     }
 
-    class While implements Statement {
-
-        public final be.guldentops.geert.lox.grammar.Expression condition;
-        public final Statement body;
-
-        public While(be.guldentops.geert.lox.grammar.Expression condition, Statement body) {
-            this.condition = condition;
-            this.body = body;
-        }
+    record While(be.guldentops.geert.lox.grammar.Expression condition, Statement body) implements Statement {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitWhileStatement(this);

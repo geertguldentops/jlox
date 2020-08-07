@@ -157,8 +157,8 @@ class RecursiveDescentParserTest {
 
             var groupingExpression = castTo(expression, Expression.Grouping.class);
 
-            assertThat(groupingExpression.expression).isNotNull();
-            assertLiteralExpression(groupingExpression.expression, 1.0);
+            assertThat(groupingExpression.expression()).isNotNull();
+            assertLiteralExpression(groupingExpression.expression(), 1.0);
         }
     }
 
@@ -186,8 +186,8 @@ class RecursiveDescentParserTest {
 
             var unaryExpression = castTo(expression, Expression.Unary.class);
 
-            assertThat(unaryExpression.operator).isEqualToComparingFieldByField(bang());
-            assertLiteralExpression(unaryExpression.right, false);
+            assertThat(unaryExpression.operator()).isEqualToComparingFieldByField(bang());
+            assertLiteralExpression(unaryExpression.right(), false);
         }
 
         @Test
@@ -198,8 +198,8 @@ class RecursiveDescentParserTest {
 
             var unaryExpression = castTo(expression, Expression.Unary.class);
 
-            assertThat(unaryExpression.operator).isEqualToComparingFieldByField(minus());
-            assertLiteralExpression(unaryExpression.right, 1.0);
+            assertThat(unaryExpression.operator()).isEqualToComparingFieldByField(minus());
+            assertLiteralExpression(unaryExpression.right(), 1.0);
         }
 
         @Test
@@ -209,14 +209,14 @@ class RecursiveDescentParserTest {
             var expression = extractOnlyExpressionFrom(parser.parse());
 
             var farLeftUnaryExpression = castTo(expression, Expression.Unary.class);
-            assertThat(farLeftUnaryExpression.operator).isEqualToComparingFieldByField(bang());
+            assertThat(farLeftUnaryExpression.operator()).isEqualToComparingFieldByField(bang());
 
-            var leftUnaryExpression = castTo(farLeftUnaryExpression.right, Expression.Unary.class);
-            assertThat(leftUnaryExpression.operator).isEqualToComparingFieldByField(bang());
+            var leftUnaryExpression = castTo(farLeftUnaryExpression.right(), Expression.Unary.class);
+            assertThat(leftUnaryExpression.operator()).isEqualToComparingFieldByField(bang());
 
-            var unaryExpression = castTo(leftUnaryExpression.right, Expression.Unary.class);
-            assertThat(unaryExpression.operator).isEqualToComparingFieldByField(bang());
-            assertLiteralExpression(unaryExpression.right, false);
+            var unaryExpression = castTo(leftUnaryExpression.right(), Expression.Unary.class);
+            assertThat(unaryExpression.operator()).isEqualToComparingFieldByField(bang());
+            assertLiteralExpression(unaryExpression.right(), false);
         }
     }
 
@@ -320,13 +320,13 @@ class RecursiveDescentParserTest {
             var statements = parser.parse();
 
             var firstBinaryExpression = castTo(extractOnlyExpressionFrom(statements), Expression.Binary.class);
-            assertThat(firstBinaryExpression.operator).isEqualToComparingFieldByField(plus());
-            assertLiteralExpression(firstBinaryExpression.right, 3.14);
+            assertThat(firstBinaryExpression.operator()).isEqualToComparingFieldByField(plus());
+            assertLiteralExpression(firstBinaryExpression.right(), 3.14);
 
-            var secondBinaryExpression = castTo(firstBinaryExpression.left, Expression.Binary.class);
-            assertLiteralExpression(secondBinaryExpression.left, 1.0);
-            assertThat(secondBinaryExpression.operator).isEqualToComparingFieldByField(star());
-            assertLiteralExpression(secondBinaryExpression.right, 2.0);
+            var secondBinaryExpression = castTo(firstBinaryExpression.left(), Expression.Binary.class);
+            assertLiteralExpression(secondBinaryExpression.left(), 1.0);
+            assertThat(secondBinaryExpression.operator()).isEqualToComparingFieldByField(star());
+            assertLiteralExpression(secondBinaryExpression.right(), 2.0);
         }
     }
 
@@ -361,7 +361,7 @@ class RecursiveDescentParserTest {
 
             var expression = extractOnlyExpressionFrom(parser.parse());
 
-            assertThat(castTo(expression, Expression.This.class).keyword).isEqualToComparingFieldByField(_this());
+            assertThat(castTo(expression, Expression.This.class).keyword()).isEqualToComparingFieldByField(_this());
         }
     }
 
@@ -375,8 +375,8 @@ class RecursiveDescentParserTest {
             var expression = extractOnlyExpressionFrom(parser.parse());
 
             var aSuper = castTo(expression, Expression.Super.class);
-            assertThat(aSuper.keyword).isEqualToComparingFieldByField(_super());
-            assertThat(aSuper.method).isEqualToComparingFieldByField(identifier("method"));
+            assertThat(aSuper.keyword()).isEqualToComparingFieldByField(_super());
+            assertThat(aSuper.method()).isEqualToComparingFieldByField(identifier("method"));
         }
     }
 
@@ -470,8 +470,8 @@ class RecursiveDescentParserTest {
         private void assertAssignedWithValue(Statement statement, Token name, Object expected) {
             var assignExpression = castTo(extractExpressionFrom(statement), Expression.Assign.class);
 
-            assertThat(assignExpression.name).isEqualToComparingFieldByField(name);
-            assertLiteralExpression(assignExpression.value, expected);
+            assertThat(assignExpression.name()).isEqualToComparingFieldByField(name);
+            assertLiteralExpression(assignExpression.value(), expected);
         }
     }
 
@@ -491,7 +491,7 @@ class RecursiveDescentParserTest {
 
             assertThat(statements).hasSize(1);
             var block = castTo(statements.get(0), Statement.Block.class);
-            var innerBlockStatement = extractOnlyStatementFrom(block.statements);
+            var innerBlockStatement = extractOnlyStatementFrom(block.statements());
 
             assertVariableStatement(innerBlockStatement, identifier("a"), 1.0);
         }
@@ -510,9 +510,9 @@ class RecursiveDescentParserTest {
 
             assertThat(statements).hasSize(1);
             var block = castTo(statements.get(0), Statement.Block.class);
-            assertThat(block.statements).hasSize(2);
-            assertVariableStatement(block.statements.get(0), identifier("a"), 1.0);
-            assertPrintStatement(block.statements.get(1), 1.0);
+            assertThat(block.statements()).hasSize(2);
+            assertVariableStatement(block.statements().get(0), identifier("a"), 1.0);
+            assertPrintStatement(block.statements().get(1), 1.0);
         }
     }
 
@@ -565,9 +565,9 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
             var ifStatement = castTo(statements.get(0), Statement.If.class);
 
-            assertLiteralExpression(ifStatement.condition, true);
-            assertIfElseStatementPrints(ifStatement.thenBranch, true, 1.0, 2.0);
-            assertThat(ifStatement.elseBranch).isNull();
+            assertLiteralExpression(ifStatement.condition(), true);
+            assertIfElseStatementPrints(ifStatement.thenBranch(), true, 1.0, 2.0);
+            assertThat(ifStatement.elseBranch()).isNull();
         }
     }
 
@@ -642,14 +642,14 @@ class RecursiveDescentParserTest {
 
             var block = castTo(statements.get(1), Statement.Block.class);
 
-            assertThat(block.statements).hasSize(2).doesNotContainNull();
+            assertThat(block.statements()).hasSize(2).doesNotContainNull();
 
-            var expression = extractExpressionFrom(block.statements.get(0));
+            var expression = extractExpressionFrom(block.statements().get(0));
             var assignment = castTo(expression, Expression.Assign.class);
-            assertThat(assignment.name).isEqualToComparingFieldByField(identifier("i"));
-            assertLiteralExpression(assignment.value, 0.0);
+            assertThat(assignment.name()).isEqualToComparingFieldByField(identifier("i"));
+            assertLiteralExpression(assignment.value(), 0.0);
 
-            assertWhileStatementPrints(block.statements.get(1), true, 1.0);
+            assertWhileStatementPrints(block.statements().get(1), true, 1.0);
         }
 
         @Test
@@ -675,39 +675,39 @@ class RecursiveDescentParserTest {
 
             var block = castTo(statements.get(0), Statement.Block.class);
 
-            assertThat(block.statements).hasSize(2).doesNotContainNull();
+            assertThat(block.statements()).hasSize(2).doesNotContainNull();
 
-            assertVariableStatement(block.statements.get(0), identifier("i"), 0.0);
+            assertVariableStatement(block.statements().get(0), identifier("i"), 0.0);
 
-            var whileStatement = castTo(block.statements.get(1), Statement.While.class);
-            assertWhileCondition(whileStatement.condition, identifier("i"), less(), 10.0);
-            assertWhileBody(whileStatement.body);
+            var whileStatement = castTo(block.statements().get(1), Statement.While.class);
+            assertWhileCondition(whileStatement.condition(), identifier("i"), less(), 10.0);
+            assertWhileBody(whileStatement.body());
         }
 
         private void assertWhileCondition(Expression condition, Token left, Token operator, double right) {
             var binaryCondition = castTo(condition, Expression.Binary.class);
 
-            assertVariableExpression(binaryCondition.left, left);
-            assertThat(binaryCondition.operator).isEqualToComparingFieldByField(operator);
-            assertLiteralExpression(binaryCondition.right, right);
+            assertVariableExpression(binaryCondition.left(), left);
+            assertThat(binaryCondition.operator()).isEqualToComparingFieldByField(operator);
+            assertLiteralExpression(binaryCondition.right(), right);
         }
 
         private void assertWhileBody(Statement body) {
             var block = castTo(body, Statement.Block.class);
 
-            assertThat(block.statements).hasSize(2);
-            assertPrintStatement(block.statements.get(0), 1.0);
-            assertAssignmentStatement(block.statements.get(1), "i");
+            assertThat(block.statements()).hasSize(2);
+            assertPrintStatement(block.statements().get(0), 1.0);
+            assertAssignmentStatement(block.statements().get(1), "i");
         }
 
         private void assertAssignmentStatement(Statement statement, String variableName) {
             var assignment = castTo(extractExpressionFrom(statement), Expression.Assign.class);
-            assertThat(assignment.name).isEqualToComparingFieldByField(identifier(variableName));
+            assertThat(assignment.name()).isEqualToComparingFieldByField(identifier(variableName));
 
-            var binaryExpression = castTo(assignment.value, Expression.Binary.class);
-            assertVariableExpression(binaryExpression.left, identifier(variableName));
-            assertThat(binaryExpression.operator).isEqualToComparingFieldByField(plus());
-            assertLiteralExpression(binaryExpression.right, 1.0);
+            var binaryExpression = castTo(assignment.value(), Expression.Binary.class);
+            assertVariableExpression(binaryExpression.left(), identifier(variableName));
+            assertThat(binaryExpression.operator()).isEqualToComparingFieldByField(plus());
+            assertLiteralExpression(binaryExpression.right(), 1.0);
         }
     }
 
@@ -726,11 +726,11 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var statementExpression = castTo(statements.get(0), Statement.Expression.class);
-            var call = castTo(statementExpression.expression, Expression.Call.class);
+            var call = castTo(statementExpression.expression(), Expression.Call.class);
 
-            assertVariableExpression(call.callee, identifier("get"));
-            assertThat(call.paren).isEqualToComparingFieldByField(rightParen());
-            assertThat(call.arguments).isEmpty();
+            assertVariableExpression(call.callee(), identifier("get"));
+            assertThat(call.paren()).isEqualToComparingFieldByField(rightParen());
+            assertThat(call.arguments()).isEmpty();
         }
 
         @Test
@@ -745,12 +745,12 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var statementExpression = castTo(statements.get(0), Statement.Expression.class);
-            var call = castTo(statementExpression.expression, Expression.Call.class);
+            var call = castTo(statementExpression.expression(), Expression.Call.class);
 
-            assertVariableExpression(call.callee, identifier("set"));
-            assertThat(call.paren).isEqualToComparingFieldByField(rightParen());
-            assertThat(call.arguments).hasSize(1);
-            assertLiteralExpression(call.arguments.get(0), 1.0);
+            assertVariableExpression(call.callee(), identifier("set"));
+            assertThat(call.paren()).isEqualToComparingFieldByField(rightParen());
+            assertThat(call.arguments()).hasSize(1);
+            assertLiteralExpression(call.arguments().get(0), 1.0);
         }
 
         @Test
@@ -765,13 +765,13 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var statementExpression = castTo(statements.get(0), Statement.Expression.class);
-            var call = castTo(statementExpression.expression, Expression.Call.class);
+            var call = castTo(statementExpression.expression(), Expression.Call.class);
 
-            assertVariableExpression(call.callee, identifier("sum"));
-            assertThat(call.paren).isEqualToComparingFieldByField(rightParen());
-            assertThat(call.arguments).hasSize(2);
-            assertLiteralExpression(call.arguments.get(0), 1.0);
-            assertLiteralExpression(call.arguments.get(1), 2.0);
+            assertVariableExpression(call.callee(), identifier("sum"));
+            assertThat(call.paren()).isEqualToComparingFieldByField(rightParen());
+            assertThat(call.arguments()).hasSize(2);
+            assertLiteralExpression(call.arguments().get(0), 1.0);
+            assertLiteralExpression(call.arguments().get(1), 2.0);
         }
     }
 
@@ -790,7 +790,7 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var statementExpression = castTo(statements.get(0), Statement.Expression.class);
-            assertGetExpression(statementExpression.expression, identifier("point"), identifier("x"));
+            assertGetExpression(statementExpression.expression(), identifier("point"), identifier("x"));
         }
 
         @Test
@@ -806,9 +806,9 @@ class RecursiveDescentParserTest {
 
             var statementExpression = castTo(statements.get(0), Statement.Expression.class);
 
-            var nestedProperty = castTo(statementExpression.expression, Expression.Get.class);
-            assertGetExpression(nestedProperty.object, identifier("square"), identifier("point"));
-            assertThat(nestedProperty.name).isEqualToComparingFieldByField(identifier("x"));
+            var nestedProperty = castTo(statementExpression.expression(), Expression.Get.class);
+            assertGetExpression(nestedProperty.object(), identifier("square"), identifier("point"));
+            assertThat(nestedProperty.name()).isEqualToComparingFieldByField(identifier("x"));
         }
 
         @Test
@@ -823,7 +823,7 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var statementExpression = castTo(statements.get(0), Statement.Expression.class);
-            assertSetExpressionToLiteral(statementExpression.expression, identifier("point"), identifier("x"), 1.0);
+            assertSetExpressionToLiteral(statementExpression.expression(), identifier("point"), identifier("x"), 1.0);
         }
 
         @Test
@@ -839,10 +839,10 @@ class RecursiveDescentParserTest {
 
             var statementExpression = castTo(statements.get(0), Statement.Expression.class);
 
-            var nestedProperty = castTo(statementExpression.expression, Expression.Set.class);
-            assertGetExpression(nestedProperty.object, identifier("square"), identifier("point"));
-            assertThat(nestedProperty.name).isEqualToComparingFieldByField(identifier("x"));
-            assertLiteralExpression(nestedProperty.value, 1.0);
+            var nestedProperty = castTo(statementExpression.expression(), Expression.Set.class);
+            assertGetExpression(nestedProperty.object(), identifier("square"), identifier("point"));
+            assertThat(nestedProperty.name()).isEqualToComparingFieldByField(identifier("x"));
+            assertLiteralExpression(nestedProperty.value(), 1.0);
         }
     }
 
@@ -911,8 +911,8 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var returnStatement = castTo(statements.get(0), Statement.Return.class);
-            assertThat(returnStatement.keyword).isEqualToComparingFieldByField(_return());
-            assertThat(returnStatement.value).isNull();
+            assertThat(returnStatement.keyword()).isEqualToComparingFieldByField(_return());
+            assertThat(returnStatement.value()).isNull();
         }
 
         @Test
@@ -924,8 +924,8 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var returnStatement = castTo(statements.get(0), Statement.Return.class);
-            assertThat(returnStatement.keyword).isEqualToComparingFieldByField(_return());
-            assertLiteralExpression(returnStatement.value, 1.0);
+            assertThat(returnStatement.keyword()).isEqualToComparingFieldByField(_return());
+            assertLiteralExpression(returnStatement.value(), 1.0);
         }
     }
 
@@ -941,9 +941,9 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var classStatement = castTo(statements.get(0), Statement.Class.class);
-            assertThat(classStatement.name).isEqualToComparingFieldByField(identifier("EmptyClass"));
-            assertThat(classStatement.superclass).isNull();
-            assertThat(classStatement.methods).isEmpty();
+            assertThat(classStatement.name()).isEqualToComparingFieldByField(identifier("EmptyClass"));
+            assertThat(classStatement.superclass()).isNull();
+            assertThat(classStatement.methods()).isEmpty();
         }
 
         @Test
@@ -958,12 +958,12 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var classStatement = castTo(statements.get(0), Statement.Class.class);
-            assertThat(classStatement.name).isEqualToComparingFieldByField(identifier("Printer"));
-            assertThat(classStatement.superclass).isNull();
-            assertThat(classStatement.methods).hasSize(2);
+            assertThat(classStatement.name()).isEqualToComparingFieldByField(identifier("Printer"));
+            assertThat(classStatement.superclass()).isNull();
+            assertThat(classStatement.methods()).hasSize(2);
 
-            assertFunctionDeclarationWithBodyPrints(classStatement.methods.get(0), "print1", 1.0);
-            assertFunctionDeclarationWithBodyPrints(classStatement.methods.get(1), "print2", 2.0);
+            assertFunctionDeclarationWithBodyPrints(classStatement.methods().get(0), "print1", 1.0);
+            assertFunctionDeclarationWithBodyPrints(classStatement.methods().get(1), "print2", 2.0);
         }
 
         @Test
@@ -976,9 +976,9 @@ class RecursiveDescentParserTest {
             assertThat(statements).hasSize(1).doesNotContainNull();
 
             var classStatement = castTo(statements.get(0), Statement.Class.class);
-            assertThat(classStatement.name).isEqualToComparingFieldByField(identifier("Circle"));
-            assertVariableExpression(classStatement.superclass, identifier("Shape"));
-            assertThat(classStatement.methods).isEmpty();
+            assertThat(classStatement.name()).isEqualToComparingFieldByField(identifier("Circle"));
+            assertVariableExpression(classStatement.superclass(), identifier("Shape"));
+            assertThat(classStatement.methods()).isEmpty();
         }
     }
 
@@ -1331,11 +1331,11 @@ class RecursiveDescentParserTest {
 
             var assignmentStatement = statements.get(2);
             var statementExpression = castTo(assignmentStatement, Statement.Expression.class);
-            var binaryExpression = castTo(statementExpression.expression, Expression.Binary.class);
+            var binaryExpression = castTo(statementExpression.expression(), Expression.Binary.class);
 
-            assertVariableExpression(binaryExpression.left, identifier("a"));
-            assertThat(binaryExpression.operator).isEqualToComparingFieldByField(plus());
-            assertVariableExpression(binaryExpression.right, identifier("b"));
+            assertVariableExpression(binaryExpression.left(), identifier("a"));
+            assertThat(binaryExpression.operator()).isEqualToComparingFieldByField(plus());
+            assertVariableExpression(binaryExpression.right(), identifier("b"));
 
             assertError("[line 1] SyntaxError: at '=' invalid assignment target.");
         }
@@ -2071,8 +2071,8 @@ class RecursiveDescentParserTest {
                 assertErrorAtLexeme("!=");
 
                 var returnStatement = castTo(statements.get(1), Statement.Return.class);
-                assertThat(returnStatement.keyword).isEqualToComparingFieldByField(_return());
-                assertThat(returnStatement.value).isNull();
+                assertThat(returnStatement.keyword()).isEqualToComparingFieldByField(_return());
+                assertThat(returnStatement.value()).isNull();
             }
 
             @Test
@@ -2091,9 +2091,9 @@ class RecursiveDescentParserTest {
                 assertErrorAtLexeme("!=");
 
                 var classStatement = castTo(statements.get(1), Statement.Class.class);
-                assertThat(classStatement.name).isEqualToComparingFieldByField(identifier("EmptyClass"));
-                assertThat(classStatement.superclass).isNull();
-                assertThat(classStatement.methods).isEmpty();
+                assertThat(classStatement.name()).isEqualToComparingFieldByField(identifier("EmptyClass"));
+                assertThat(classStatement.superclass()).isNull();
+                assertThat(classStatement.methods()).isEmpty();
             }
         }
     }
@@ -2120,7 +2120,7 @@ class RecursiveDescentParserTest {
     }
 
     private Expression extractExpressionFrom(Statement statement) {
-        return castTo(statement, Statement.Expression.class).expression;
+        return castTo(statement, Statement.Expression.class).expression();
     }
 
     private Statement extractOnlyStatementFrom(List<Statement> statements) {
@@ -2130,7 +2130,7 @@ class RecursiveDescentParserTest {
     }
 
     private void assertLiteralExpression(Expression expression, Object expected) {
-        assertThat(castTo(expression, Expression.Literal.class).value).isEqualTo(expected);
+        assertThat(castTo(expression, Expression.Literal.class).value()).isEqualTo(expected);
     }
 
     private void assertErrorAtLexeme(String lexeme) {
@@ -2145,62 +2145,62 @@ class RecursiveDescentParserTest {
     private void assertBinaryExpression(Expression expression, Object left, Token operator, Object right) {
         var binaryExpression = castTo(expression, Expression.Binary.class);
 
-        assertLiteralExpression(binaryExpression.left, left);
-        assertThat(binaryExpression.operator).isEqualToComparingFieldByField(operator);
-        assertLiteralExpression(binaryExpression.right, right);
+        assertLiteralExpression(binaryExpression.left(), left);
+        assertThat(binaryExpression.operator()).isEqualToComparingFieldByField(operator);
+        assertLiteralExpression(binaryExpression.right(), right);
     }
 
     private void assertLogicalExpression(Expression expression, Object left, Token operator, Object right) {
         var logicalExpression = castTo(expression, Expression.Logical.class);
 
-        assertLiteralExpression(logicalExpression.left, left);
-        assertThat(logicalExpression.operator).isEqualToComparingFieldByField(operator);
-        assertLiteralExpression(logicalExpression.right, right);
+        assertLiteralExpression(logicalExpression.left(), left);
+        assertThat(logicalExpression.operator()).isEqualToComparingFieldByField(operator);
+        assertLiteralExpression(logicalExpression.right(), right);
     }
 
     private void assertVariableExpression(Expression expression, Token expected) {
-        assertThat(castTo(expression, Expression.Variable.class).name).isEqualToComparingFieldByField(expected);
+        assertThat(castTo(expression, Expression.Variable.class).name()).isEqualToComparingFieldByField(expected);
     }
 
     private void assertUninitializedVariable(Statement statement, Token name) {
         var variableDeclaration = castTo(statement, Statement.Variable.class);
 
-        assertThat(variableDeclaration.name).isEqualToComparingFieldByField(name);
-        assertThat(variableDeclaration.initializer).isNull();
+        assertThat(variableDeclaration.name()).isEqualToComparingFieldByField(name);
+        assertThat(variableDeclaration.initializer()).isNull();
     }
 
     private void assertVariableStatement(Statement statement, Token name, Object expected) {
         var variableDeclaration = castTo(statement, Statement.Variable.class);
 
-        assertThat(variableDeclaration.name).isEqualToComparingFieldByField(name);
-        assertLiteralExpression(variableDeclaration.initializer, expected);
+        assertThat(variableDeclaration.name()).isEqualToComparingFieldByField(name);
+        assertLiteralExpression(variableDeclaration.initializer(), expected);
     }
 
     private void assertPrintStatement(Statement statement, Object expected) {
-        assertLiteralExpression(castTo(statement, Statement.Print.class).expression, expected);
+        assertLiteralExpression(castTo(statement, Statement.Print.class).expression(), expected);
     }
 
     private void assertIfStatementPrints(Statement statement, boolean condition, Object thenPrints) {
         var ifStatement = castTo(statement, Statement.If.class);
 
-        assertLiteralExpression(ifStatement.condition, condition);
-        assertPrintStatement(ifStatement.thenBranch, thenPrints);
-        assertThat(ifStatement.elseBranch).isNull();
+        assertLiteralExpression(ifStatement.condition(), condition);
+        assertPrintStatement(ifStatement.thenBranch(), thenPrints);
+        assertThat(ifStatement.elseBranch()).isNull();
     }
 
     private void assertIfElseStatementPrints(Statement statement, boolean condition, Object thenPrints, Object elsePrints) {
         var ifStatement = castTo(statement, Statement.If.class);
 
-        assertLiteralExpression(ifStatement.condition, condition);
-        assertPrintStatement(ifStatement.thenBranch, thenPrints);
-        assertPrintStatement(ifStatement.elseBranch, elsePrints);
+        assertLiteralExpression(ifStatement.condition(), condition);
+        assertPrintStatement(ifStatement.thenBranch(), thenPrints);
+        assertPrintStatement(ifStatement.elseBranch(), elsePrints);
     }
 
     private void assertWhileStatementPrints(Statement statement, boolean condition, Object prints) {
         var whileStatement = castTo(statement, Statement.While.class);
 
-        assertLiteralExpression(whileStatement.condition, condition);
-        assertPrintStatement(whileStatement.body, prints);
+        assertLiteralExpression(whileStatement.condition(), condition);
+        assertPrintStatement(whileStatement.body(), prints);
     }
 
     private void assertFunctionDeclarationWithBodyPrints(Statement statement, String name, Object prints) {
@@ -2210,29 +2210,29 @@ class RecursiveDescentParserTest {
     private void assertFunctionDeclarationWithBodyPrints(Statement statement, String name, List<String> parameterNames, Object prints) {
         var functionStatement = castTo(statement, Statement.Function.class);
 
-        assertThat(functionStatement.name).isEqualToComparingFieldByField(identifier(name));
+        assertThat(functionStatement.name()).isEqualToComparingFieldByField(identifier(name));
 
-        assertThat(functionStatement.parameters).hasSameSizeAs(parameterNames);
-        for (var i = 0; i < functionStatement.parameters.size(); i++) {
-            assertThat(functionStatement.parameters.get(i)).isEqualToComparingFieldByField(identifier(parameterNames.get(i)));
+        assertThat(functionStatement.parameters()).hasSameSizeAs(parameterNames);
+        for (var i = 0; i < functionStatement.parameters().size(); i++) {
+            assertThat(functionStatement.parameters().get(i)).isEqualToComparingFieldByField(identifier(parameterNames.get(i)));
         }
 
-        assertThat(functionStatement.body).hasSize(1);
-        assertPrintStatement(functionStatement.body.get(0), prints);
+        assertThat(functionStatement.body()).hasSize(1);
+        assertPrintStatement(functionStatement.body().get(0), prints);
     }
 
     private void assertGetExpression(Expression expression, Token object, Token name) {
         var getExpression = castTo(expression, Expression.Get.class);
 
-        assertVariableExpression(getExpression.object, object);
-        assertThat(getExpression.name).isEqualToComparingFieldByField(name);
+        assertVariableExpression(getExpression.object(), object);
+        assertThat(getExpression.name()).isEqualToComparingFieldByField(name);
     }
 
     private void assertSetExpressionToLiteral(Expression expression, Token object, Token name, Object expectedValue) {
         var setExpression = castTo(expression, Expression.Set.class);
 
-        assertVariableExpression(setExpression.object, object);
-        assertThat(setExpression.name).isEqualToComparingFieldByField(name);
-        assertLiteralExpression(setExpression.value, expectedValue);
+        assertVariableExpression(setExpression.object(), object);
+        assertThat(setExpression.name()).isEqualToComparingFieldByField(name);
+        assertLiteralExpression(setExpression.value(), expectedValue);
     }
 }

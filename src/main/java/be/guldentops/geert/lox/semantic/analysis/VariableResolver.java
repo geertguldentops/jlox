@@ -42,23 +42,23 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitAssignExpression(Expression.Assign expression) {
-        resolve(expression.value);
-        resolveLocal(expression, expression.name);
+        resolve(expression.value());
+        resolveLocal(expression, expression.name());
         return null;
     }
 
     @Override
     public Void visitBinaryExpression(Expression.Binary expression) {
-        resolve(expression.left);
-        resolve(expression.right);
+        resolve(expression.left());
+        resolve(expression.right());
         return null;
     }
 
     @Override
     public Void visitCallExpression(Expression.Call expression) {
-        resolve(expression.callee);
+        resolve(expression.callee());
 
-        for (var argument : expression.arguments) {
+        for (var argument : expression.arguments()) {
             resolve(argument);
         }
 
@@ -67,13 +67,13 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitGetExpression(Expression.Get expression) {
-        resolve(expression.object);
+        resolve(expression.object());
         return null;
     }
 
     @Override
     public Void visitGroupingExpression(Expression.Grouping expression) {
-        resolve(expression.expression);
+        resolve(expression.expression());
         return null;
     }
 
@@ -84,15 +84,15 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitLogicalExpression(Expression.Logical expression) {
-        resolve(expression.left);
-        resolve(expression.right);
+        resolve(expression.left());
+        resolve(expression.right());
         return null;
     }
 
     @Override
     public Void visitSetExpression(Expression.Set expression) {
-        resolve(expression.value);
-        resolve(expression.object);
+        resolve(expression.value());
+        resolve(expression.object());
 
         return null;
     }
@@ -100,21 +100,21 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     @Override
     public Void visitSuperExpression(Expression.Super expression) {
         if (currentClass == ClassType.NONE) {
-            reportError(expression.keyword, "cannot use 'super' outside of a class.");
+            reportError(expression.keyword(), "cannot use 'super' outside of a class.");
         } else if (currentClass != ClassType.SUBCLASS) {
-            reportError(expression.keyword, "cannot use 'super' in a class with no superclass.");
+            reportError(expression.keyword(), "cannot use 'super' in a class with no superclass.");
         }
 
-        resolveLocal(expression, expression.keyword);
+        resolveLocal(expression, expression.keyword());
         return null;
     }
 
     @Override
     public Void visitThisExpression(Expression.This expression) {
         if (currentClass == ClassType.NONE) {
-            reportError(expression.keyword, "cannot use 'this' outside of a class.");
+            reportError(expression.keyword(), "cannot use 'this' outside of a class.");
         } else {
-            resolveLocal(expression, expression.keyword);
+            resolveLocal(expression, expression.keyword());
         }
 
         return null;
@@ -122,17 +122,17 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitUnaryExpression(Expression.Unary expression) {
-        resolve(expression.right);
+        resolve(expression.right());
         return null;
     }
 
     @Override
     public Void visitVariableExpression(Expression.Variable expression) {
-        if (!scopes.isEmpty() && scopes.peek().get(expression.name.lexeme) == Boolean.FALSE) {
-            reportError(expression.name, "cannot read local variable in its own initializer.");
+        if (!scopes.isEmpty() && scopes.peek().get(expression.name().lexeme) == Boolean.FALSE) {
+            reportError(expression.name(), "cannot read local variable in its own initializer.");
         }
 
-        resolveLocal(expression, expression.name);
+        resolveLocal(expression, expression.name());
         return null;
     }
 
@@ -156,7 +156,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     @Override
     public Void visitBlockStatement(Statement.Block statement) {
         beginScope();
-        resolve(statement.statements);
+        resolve(statement.statements());
         endScope();
         return null;
     }
@@ -166,16 +166,16 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
         var enclosingClass = currentClass;
         currentClass = ClassType.CLASS;
 
-        declare(statement.name);
+        declare(statement.name());
 
-        if (statement.superclass != null) {
+        if (statement.superclass() != null) {
             currentClass = ClassType.SUBCLASS;
-            resolve(statement.superclass);
+            resolve(statement.superclass());
         }
 
-        define(statement.name);
+        define(statement.name());
 
-        if (statement.superclass != null) {
+        if (statement.superclass() != null) {
             beginScope();
             scopes.peek().put("super", true);
         }
@@ -183,14 +183,14 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
         beginScope();
         scopes.peek().put("this", true);
 
-        for (Statement.Function method : statement.methods) {
+        for (Statement.Function method : statement.methods()) {
             var declaration = analyseDeclaration(method);
             resolveFunction(method, declaration);
         }
 
         endScope();
 
-        if (statement.superclass != null) {
+        if (statement.superclass() != null) {
             endScope();
         }
 
@@ -199,7 +199,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     }
 
     private FunctionType analyseDeclaration(Statement.Function method) {
-        if (method.name.lexeme.equals("init")) {
+        if (method.name().lexeme.equals("init")) {
             return FunctionType.INITIALIZER;
         } else {
             return FunctionType.METHOD;
@@ -220,14 +220,14 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitExpressionStatement(Statement.Expression statement) {
-        resolve(statement.expression);
+        resolve(statement.expression());
         return null;
     }
 
     @Override
     public Void visitFunctionStatement(Statement.Function statement) {
-        declare(statement.name);
-        define(statement.name);
+        declare(statement.name());
+        define(statement.name());
 
         resolveFunction(statement, FunctionType.FUNCTION);
         return null;
@@ -238,11 +238,11 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
         currentFunction = type;
 
         beginScope();
-        for (var parameter : function.parameters) {
+        for (var parameter : function.parameters()) {
             declare(parameter);
             define(parameter);
         }
-        resolve(function.body);
+        resolve(function.body());
         endScope();
 
         currentFunction = enclosingFunction;
@@ -250,29 +250,29 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitIfStatement(Statement.If statement) {
-        resolve(statement.condition);
-        resolve(statement.thenBranch);
-        if (statement.elseBranch != null) resolve(statement.elseBranch);
+        resolve(statement.condition());
+        resolve(statement.thenBranch());
+        if (statement.elseBranch() != null) resolve(statement.elseBranch());
         return null;
     }
 
     @Override
     public Void visitPrintStatement(Statement.Print statement) {
-        resolve(statement.expression);
+        resolve(statement.expression());
         return null;
     }
 
     @Override
     public Void visitReturnStatement(Statement.Return statement) {
         if (currentFunction == FunctionType.NONE) {
-            reportError(statement.keyword, "cannot return from top-level code.");
+            reportError(statement.keyword(), "cannot return from top-level code.");
         }
         if (currentFunction == FunctionType.INITIALIZER) {
-            reportError(statement.keyword, "cannot return a value from an initializer.");
+            reportError(statement.keyword(), "cannot return a value from an initializer.");
         }
 
-        if (statement.value != null) {
-            resolve(statement.value);
+        if (statement.value() != null) {
+            resolve(statement.value());
         }
 
         return null;
@@ -280,11 +280,11 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitVariableStatement(Statement.Variable statement) {
-        declare(statement.name);
-        if (statement.initializer != null) {
-            resolve(statement.initializer);
+        declare(statement.name());
+        if (statement.initializer() != null) {
+            resolve(statement.initializer());
         }
-        define(statement.name);
+        define(statement.name());
         return null;
     }
 
@@ -309,8 +309,8 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitWhileStatement(Statement.While statement) {
-        resolve(statement.condition);
-        resolve(statement.body);
+        resolve(statement.condition());
+        resolve(statement.body());
         return null;
     }
 
