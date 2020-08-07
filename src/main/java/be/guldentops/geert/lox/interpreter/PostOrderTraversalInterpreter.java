@@ -240,12 +240,12 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
                 checkNumberOperands(expression.operator(), left, right);
                 return (double) left - (double) right;
             case PLUS:
-                if (left instanceof Double && right instanceof Double) {
-                    return (double) left + (double) right;
+                if (left instanceof Double l && right instanceof Double r) {
+                    return l + r;
                 }
 
-                if (left instanceof String && right instanceof String) {
-                    return (String) left + (String) right;
+                if (left instanceof String l && right instanceof String r) {
+                    return l + r;
                 }
 
                 throw new RuntimeError(expression.operator(), "operands must be two numbers or two strings.");
@@ -292,8 +292,8 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     @Override
     public Object visitGetExpression(Expression.Get expression) {
         Object object = evaluate(expression.object());
-        if (object instanceof LoxInstance) {
-            return ((LoxInstance) object).get(expression.name());
+        if (object instanceof LoxInstance instance) {
+            return instance.get(expression.name());
         }
 
         throw new RuntimeError(expression.name(), "only instances have properties.");
@@ -326,9 +326,9 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     public Object visitSetExpression(Expression.Set expression) {
         Object object = evaluate(expression.object());
 
-        if (object instanceof LoxInstance) {
+        if (object instanceof LoxInstance instance) {
             Object value = evaluate(expression.value());
-            ((LoxInstance) object).set(expression.name(), value);
+            instance.set(expression.name(), value);
             return value;
         }
 
@@ -394,7 +394,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
 
     private boolean isTruthy(Object object) {
         if (object == null) return false;
-        if (object instanceof Boolean) return (boolean) object;
+        if (object instanceof Boolean bool) return bool;
 
         return true;
     }

@@ -272,11 +272,10 @@ class RecursiveDescentParser implements Parser {
             Token equals = previous();
             Expression value = assignment();
 
-            if (expression instanceof Expression.Variable) {
-                Token name = ((Expression.Variable) expression).name();
+            if (expression instanceof Expression.Variable variable) {
+                Token name = variable.name();
                 return new Expression.Assign(name, value);
-            } else if (expression instanceof Expression.Get) {
-                Expression.Get get = (Expression.Get) expression;
+            } else if (expression instanceof Expression.Get get) {
                 return new Expression.Set(get.object(), get.name(), value);
             }
 
