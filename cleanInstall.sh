@@ -5,7 +5,7 @@ function setMavenOpts() {
 }
 
 function setJavaHome() {
-	export JAVA_HOME=`/usr/libexec/java_home -v 14`
+	export JAVA_HOME=`/usr/libexec/java_home -v 15`
 }
 
 function doCleanInstall() {
