@@ -4,7 +4,7 @@ import be.guldentops.geert.lox.lexer.Token;
 
 import java.util.List;
 
-public interface Expression {
+public sealed interface Expression {
 
     <R> R accept(Visitor<R> visitor);
 

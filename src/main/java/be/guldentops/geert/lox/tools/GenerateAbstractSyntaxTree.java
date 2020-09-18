@@ -67,7 +67,7 @@ class GenerateAbstractSyntaxTree {
         writer.println("import java.util.List;");
         writer.println("import be.guldentops.geert.lox.lexer.Token;");
         writer.println("");
-        writer.printf("public interface %s {", baseClassName);
+        writer.printf("public sealed interface %s {", baseClassName);
         writer.println();
     }
 
