@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class LoxAcceptanceTest {
 
-    private PrintStream originalOut = System.out;
-    private ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    private final PrintStream originalOut = System.out;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
     /**
      * Acceptance tests hook-in on Lox.
@@ -92,16 +92,17 @@ class LoxAcceptanceTest {
         void canRunMultipleNestedBlocksScript() throws Exception {
             lox.runFile(getAbsoluteFilePathOf("lox/src/blocks/MultipleNestedBlocks.lox"));
 
-            assertThat(outContent.toString()).isEqualTo(
-                    "inner a\n" +
-                            "outer b\n" +
-                            "global c\n" +
-                            "outer a\n" +
-                            "outer b\n" +
-                            "global c\n" +
-                            "global a\n" +
-                            "global b\n" +
-                            "global c\n"
+            assertThat(outContent.toString()).isEqualTo("""
+                    inner a
+                    outer b
+                    global c
+                    outer a
+                    outer b
+                    global c
+                    global a
+                    global b
+                    global c
+                    """
             );
         }
 
@@ -172,26 +173,28 @@ class LoxAcceptanceTest {
         void canRunFibonacciScript() throws Exception {
             lox.runFile(getAbsoluteFilePathOf("lox/src/functions/Fibonacci.lox"));
 
-            assertThat(outContent.toString()).isEqualTo("0\n" +
-                    "1\n" +
-                    "1\n" +
-                    "2\n" +
-                    "3\n" +
-                    "5\n" +
-                    "8\n" +
-                    "13\n" +
-                    "21\n" +
-                    "34\n" +
-                    "55\n" +
-                    "89\n" +
-                    "144\n" +
-                    "233\n" +
-                    "377\n" +
-                    "610\n" +
-                    "987\n" +
-                    "1597\n" +
-                    "2584\n" +
-                    "4181\n");
+            assertThat(outContent.toString()).isEqualTo("""
+                    0
+                    1
+                    1
+                    2
+                    3
+                    5
+                    8
+                    13
+                    21
+                    34
+                    55
+                    89
+                    144
+                    233
+                    377
+                    610
+                    987
+                    1597
+                    2584
+                    4181
+                    """);
         }
 
         @Test
