@@ -269,24 +269,22 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     public Object visitCallExpression(Expression.Call expression) {
         var callee = evaluate(expression.callee());
 
-        if (!(callee instanceof LoxCallable)) {
+        if (callee instanceof LoxCallable function) {
+            var arguments = expression.arguments().stream()
+                    .map(this::evaluate)
+                    .collect(toList());
+
+            if (arguments.size() != function.arity()) {
+                throw new RuntimeError(
+                        expression.paren(),
+                        String.format("expected %d argument(s) but got %d.", function.arity(), arguments.size())
+                );
+            }
+
+            return function.call(this, arguments);
+        } else {
             throw new RuntimeError(expression.paren(), "can only call functions and classes.");
         }
-
-        var arguments = expression.arguments().stream()
-                .map(this::evaluate)
-                .collect(toList());
-
-        LoxCallable function = (LoxCallable) callee;
-
-        if (arguments.size() != function.arity()) {
-            throw new RuntimeError(
-                    expression.paren(),
-                    String.format("expected %d argument(s) but got %d.", function.arity(), arguments.size())
-            );
-        }
-
-        return function.call(this, arguments);
     }
 
     @Override
