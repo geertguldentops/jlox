@@ -15,6 +15,6 @@ class RuntimeError extends RuntimeException implements Error {
 
     @Override
     public String toString() {
-        return String.format("[line %d] RuntimeError: at '%s' %s", token.line, token.lexeme, getMessage());
+        return String.format("[line %d] RuntimeError: at '%s' %s", token.line(), token.lexeme(), getMessage());
     }
 }

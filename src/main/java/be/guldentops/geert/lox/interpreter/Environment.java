@@ -24,10 +24,10 @@ class Environment {
     }
 
     void define(Token name, Object value) {
-        if (values.containsKey(name.lexeme))
+        if (values.containsKey(name.lexeme()))
             throw new RuntimeError(name, "variable is already defined.");
 
-        define(name.lexeme, value);
+        define(name.lexeme(), value);
     }
 
     void define(String name, Object value) {
@@ -39,15 +39,15 @@ class Environment {
     }
 
     void assign(Token name, Object value) {
-        if (values.containsKey(name.lexeme)) {
-            values.put(name.lexeme, value);
+        if (values.containsKey(name.lexeme())) {
+            values.put(name.lexeme(), value);
         } else {
             throw new RuntimeError(name, "undefined variable.");
         }
     }
 
     Object get(Token name) {
-        if (values.containsKey(name.lexeme)) return values.get(name.lexeme);
+        if (values.containsKey(name.lexeme())) return values.get(name.lexeme());
         if (enclosing != null) return enclosing.get(name);
 
         throw new RuntimeError(name, "undefined variable.");
@@ -67,6 +67,6 @@ class Environment {
     }
 
     void assignAt(Integer distance, Token name, Object value) {
-        ancestor(distance).values.put(name.lexeme, value);
+        ancestor(distance).values.put(name.lexeme(), value);
     }
 }

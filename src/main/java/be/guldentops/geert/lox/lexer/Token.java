@@ -1,22 +1,20 @@
 package be.guldentops.geert.lox.lexer;
 
-public class Token {
+public record Token(Type type, String lexeme, Object literal, int line) {
 
-    public final Type type;
-    public final String lexeme;
-    public final Object literal;
-    public final int line;
+    @Override
+    public boolean equals(Object o) {
+        return this == o;
+    }
 
-    public Token(Type type, String lexeme, Object literal, int line) {
-        this.type = type;
-        this.lexeme = lexeme;
-        this.literal = literal;
-        this.line = line;
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
     }
 
     @Override
     public String toString() {
-        return type + " " + lexeme + " " + literal;
+        return type() + " " + lexeme() + " " + literal();
     }
 
     public enum Type {

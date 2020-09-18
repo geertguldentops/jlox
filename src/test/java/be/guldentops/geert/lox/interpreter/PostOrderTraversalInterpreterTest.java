@@ -532,11 +532,11 @@ class PostOrderTraversalInterpreterTest {
         }
 
         private void assertBinaryExpressionCanOnlyOperateOnNumbersOrStrings(Expression expression1, Token operator, Expression expression2) {
-            assertBinaryExpressionThrowsRuntimeErrorWithMessage(expression1, operator, expression2, "[line 1] RuntimeError: at '" + operator.lexeme + "' operands must be two numbers or two strings.");
+            assertBinaryExpressionThrowsRuntimeErrorWithMessage(expression1, operator, expression2, "[line 1] RuntimeError: at '" + operator.lexeme() + "' operands must be two numbers or two strings.");
         }
 
         private void assertBinaryExpressionCanOnlyOperateOnNumbers(Expression expression1, Token operator, Expression expression2) {
-            assertBinaryExpressionThrowsRuntimeErrorWithMessage(expression1, operator, expression2, "[line 1] RuntimeError: at '" + operator.lexeme + "' operands must be numbers.");
+            assertBinaryExpressionThrowsRuntimeErrorWithMessage(expression1, operator, expression2, "[line 1] RuntimeError: at '" + operator.lexeme() + "' operands must be numbers.");
         }
 
         private void assertBinaryExpressionThrowsRuntimeErrorWithMessage(Expression expression1, Token operator, Expression expression2, String message) {

@@ -128,7 +128,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     @Override
     public Void visitVariableExpression(Expression.Variable expression) {
-        if (!scopes.isEmpty() && scopes.peek().get(expression.name().lexeme) == Boolean.FALSE) {
+        if (!scopes.isEmpty() && scopes.peek().get(expression.name().lexeme()) == Boolean.FALSE) {
             reportError(expression.name(), "cannot read local variable in its own initializer.");
         }
 
@@ -144,7 +144,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     private void resolveLocal(Expression expression, Token name) {
         for (var i = scopes.size() - 1; i >= 0; i--) {
-            if (scopes.get(i).containsKey(name.lexeme)) {
+            if (scopes.get(i).containsKey(name.lexeme())) {
                 resolutionAnalyzer.resolve(expression, scopes.size() - 1 - i);
                 return;
             }
@@ -199,7 +199,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
     }
 
     private FunctionType analyseDeclaration(Statement.Function method) {
-        if (method.name().lexeme.equals("init")) {
+        if (method.name().lexeme().equals("init")) {
             return FunctionType.INITIALIZER;
         } else {
             return FunctionType.METHOD;
@@ -292,10 +292,10 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
         if (scopes.isEmpty()) return;
 
         Map<String, Boolean> scope = scopes.peek();
-        if (scope.containsKey(name.lexeme)) {
+        if (scope.containsKey(name.lexeme())) {
             reportError(name, "variable with this name already declared in this scope.");
         }
-        scope.put(name.lexeme, false);
+        scope.put(name.lexeme(), false);
     }
 
     private void resolve(Expression expression) {
@@ -304,7 +304,7 @@ class VariableResolver implements Resolver, Expression.Visitor<Void>, Statement.
 
     private void define(Token name) {
         if (scopes.isEmpty()) return;
-        scopes.peek().put(name.lexeme, true);
+        scopes.peek().put(name.lexeme(), true);
     }
 
     @Override

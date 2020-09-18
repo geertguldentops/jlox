@@ -374,7 +374,7 @@ class RecursiveDescentParser implements Parser {
         if (match(FALSE)) return new Expression.Literal(false);
         if (match(NIL)) return new Expression.Literal(null);
 
-        if (match(NUMBER, STRING)) return new Expression.Literal(previous().literal);
+        if (match(NUMBER, STRING)) return new Expression.Literal(previous().literal());
 
         if (match(LEFT_PAREN)) {
             var expression = expression();
@@ -409,10 +409,10 @@ class RecursiveDescentParser implements Parser {
 
     private void reportError(Token token, String message) {
         for (var errorReporter : errorReporters) {
-            if (token.type == EOF) {
-                errorReporter.handle(new SyntaxError(token.line, "end", message));
+            if (token.type() == EOF) {
+                errorReporter.handle(new SyntaxError(token.line(), "end", message));
             } else {
-                errorReporter.handle(new SyntaxError(token.line, token.lexeme, message));
+                errorReporter.handle(new SyntaxError(token.line(), token.lexeme(), message));
             }
         }
     }
@@ -421,9 +421,9 @@ class RecursiveDescentParser implements Parser {
         advance();
 
         while (!isAtEnd()) {
-            if (previous().type == SEMICOLON) return;
+            if (previous().type() == SEMICOLON) return;
 
-            switch (peek().type) {
+            switch (peek().type()) {
                 case CLASS:
                 case FUN:
                 case VAR:
@@ -464,7 +464,7 @@ class RecursiveDescentParser implements Parser {
 
     private boolean check(Type type) {
         if (isAtEnd()) return false;
-        return peek().type == type;
+        return peek().type() == type;
     }
 
     private Token peek() {
@@ -472,7 +472,7 @@ class RecursiveDescentParser implements Parser {
     }
 
     private boolean isAtEnd() {
-        return peek().type == EOF;
+        return peek().type() == EOF;
     }
 
     private Token advance() {

@@ -15,18 +15,18 @@ class LoxInstance {
     }
 
     public Object get(Token name) {
-        if (fields.containsKey(name.lexeme)) {
-            return fields.get(name.lexeme);
+        if (fields.containsKey(name.lexeme())) {
+            return fields.get(name.lexeme());
         }
 
-        var method = clazz.findMethod(this, name.lexeme);
+        var method = clazz.findMethod(this, name.lexeme());
         if (method != null) return method;
 
         throw new RuntimeError(name, "undefined property.");
     }
 
     public void set(Token name, Object value) {
-        fields.put(name.lexeme, value);
+        fields.put(name.lexeme(), value);
     }
 
     @Override

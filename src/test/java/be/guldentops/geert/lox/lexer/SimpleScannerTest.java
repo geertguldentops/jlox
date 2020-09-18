@@ -204,10 +204,10 @@ class SimpleScannerTest {
             var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(1);
-            assertThat(tokens.get(0).type).isEqualTo(EOF);
-            assertThat(tokens.get(0).lexeme).isEqualTo("");
-            assertThat(tokens.get(0).literal).isNull();
-            assertThat(tokens.get(0).line).isEqualTo(2);
+            assertThat(tokens.get(0).type()).isEqualTo(EOF);
+            assertThat(tokens.get(0).lexeme()).isEqualTo("");
+            assertThat(tokens.get(0).literal()).isNull();
+            assertThat(tokens.get(0).line()).isEqualTo(2);
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
@@ -234,10 +234,10 @@ class SimpleScannerTest {
             var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(STRING);
-            assertThat(tokens.get(0).lexeme).isEqualTo("\"A\"");
-            assertThat(tokens.get(0).literal).isEqualTo("A");
-            assertThat(tokens.get(0).line).isEqualTo(1);
+            assertThat(tokens.get(0).type()).isEqualTo(STRING);
+            assertThat(tokens.get(0).lexeme()).isEqualTo("\"A\"");
+            assertThat(tokens.get(0).literal()).isEqualTo("A");
+            assertThat(tokens.get(0).line()).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
@@ -250,10 +250,10 @@ class SimpleScannerTest {
             var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(STRING);
-            assertThat(tokens.get(0).lexeme).isEqualTo("\"Hello\"");
-            assertThat(tokens.get(0).literal).isEqualTo("Hello");
-            assertThat(tokens.get(0).line).isEqualTo(1);
+            assertThat(tokens.get(0).type()).isEqualTo(STRING);
+            assertThat(tokens.get(0).lexeme()).isEqualTo("\"Hello\"");
+            assertThat(tokens.get(0).literal()).isEqualTo("Hello");
+            assertThat(tokens.get(0).line()).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
@@ -266,14 +266,14 @@ class SimpleScannerTest {
             var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(STRING);
-            assertThat(tokens.get(0).lexeme).isEqualTo("\"Hello\nWorld\"");
-            assertThat(tokens.get(0).literal).isEqualTo("Hello\nWorld");
-            assertThat(tokens.get(0).line).isEqualTo(2);
-            assertThat(tokens.get(1).type).isEqualTo(EOF);
-            assertThat(tokens.get(1).lexeme).isEqualTo("");
-            assertThat(tokens.get(1).literal).isNull();
-            assertThat(tokens.get(1).line).isEqualTo(2);
+            assertThat(tokens.get(0).type()).isEqualTo(STRING);
+            assertThat(tokens.get(0).lexeme()).isEqualTo("\"Hello\nWorld\"");
+            assertThat(tokens.get(0).literal()).isEqualTo("Hello\nWorld");
+            assertThat(tokens.get(0).line()).isEqualTo(2);
+            assertThat(tokens.get(1).type()).isEqualTo(EOF);
+            assertThat(tokens.get(1).lexeme()).isEqualTo("");
+            assertThat(tokens.get(1).literal()).isNull();
+            assertThat(tokens.get(1).line()).isEqualTo(2);
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
         }
@@ -289,10 +289,10 @@ class SimpleScannerTest {
             var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(NUMBER);
-            assertThat(tokens.get(0).lexeme).isEqualTo("9");
-            assertThat(tokens.get(0).literal).isEqualTo(9.0);
-            assertThat(tokens.get(0).line).isEqualTo(1);
+            assertThat(tokens.get(0).type()).isEqualTo(NUMBER);
+            assertThat(tokens.get(0).lexeme()).isEqualTo("9");
+            assertThat(tokens.get(0).literal()).isEqualTo(9.0);
+            assertThat(tokens.get(0).line()).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
@@ -305,10 +305,10 @@ class SimpleScannerTest {
             var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(NUMBER);
-            assertThat(tokens.get(0).lexeme).isEqualTo("12");
-            assertThat(tokens.get(0).literal).isEqualTo(12.0);
-            assertThat(tokens.get(0).line).isEqualTo(1);
+            assertThat(tokens.get(0).type()).isEqualTo(NUMBER);
+            assertThat(tokens.get(0).lexeme()).isEqualTo("12");
+            assertThat(tokens.get(0).literal()).isEqualTo(12.0);
+            assertThat(tokens.get(0).line()).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
@@ -321,10 +321,10 @@ class SimpleScannerTest {
             var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(NUMBER);
-            assertThat(tokens.get(0).lexeme).isEqualTo("1.2");
-            assertThat(tokens.get(0).literal).isEqualTo(1.2);
-            assertThat(tokens.get(0).line).isEqualTo(1);
+            assertThat(tokens.get(0).type()).isEqualTo(NUMBER);
+            assertThat(tokens.get(0).lexeme()).isEqualTo("1.2");
+            assertThat(tokens.get(0).literal()).isEqualTo(1.2);
+            assertThat(tokens.get(0).line()).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
@@ -345,10 +345,10 @@ class SimpleScannerTest {
             var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(IDENTIFIER);
-            assertThat(tokens.get(0).lexeme).isEqualTo(identifier);
-            assertThat(tokens.get(0).literal).isNull();
-            assertThat(tokens.get(0).line).isEqualTo(1);
+            assertThat(tokens.get(0).type()).isEqualTo(IDENTIFIER);
+            assertThat(tokens.get(0).lexeme()).isEqualTo(identifier);
+            assertThat(tokens.get(0).literal()).isNull();
+            assertThat(tokens.get(0).line()).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
@@ -361,10 +361,10 @@ class SimpleScannerTest {
             var tokens = scanner.scanTokens();
 
             assertThat(tokens).hasSize(2);
-            assertThat(tokens.get(0).type).isEqualTo(IDENTIFIER);
-            assertThat(tokens.get(0).lexeme).isEqualTo("myIdentifier");
-            assertThat(tokens.get(0).literal).isNull();
-            assertThat(tokens.get(0).line).isEqualTo(1);
+            assertThat(tokens.get(0).type()).isEqualTo(IDENTIFIER);
+            assertThat(tokens.get(0).lexeme()).isEqualTo("myIdentifier");
+            assertThat(tokens.get(0).literal()).isNull();
+            assertThat(tokens.get(0).line()).isEqualTo(1);
             assertTokenIsEndOfLine(tokens.get(1));
 
             assertThat(fakeErrorReporter.receivedError()).isFalse();
@@ -506,16 +506,16 @@ class SimpleScannerTest {
     }
 
     private void assertTokenHasTypeAndLexeme(Token token, Type type, String lexeme) {
-        assertThat(token.type).isEqualTo(type);
-        assertThat(token.lexeme).isEqualTo(lexeme);
-        assertThat(token.literal).isNull();
-        assertThat(token.line).isEqualTo(1);
+        assertThat(token.type()).isEqualTo(type);
+        assertThat(token.lexeme()).isEqualTo(lexeme);
+        assertThat(token.literal()).isNull();
+        assertThat(token.line()).isEqualTo(1);
     }
 
     private void assertTokenIsEndOfLine(Token token) {
-        assertThat(token.type).isEqualTo(EOF);
-        assertThat(token.lexeme).isEqualTo("");
-        assertThat(token.literal).isNull();
-        assertThat(token.line).isEqualTo(1);
+        assertThat(token.type()).isEqualTo(EOF);
+        assertThat(token.lexeme()).isEqualTo("");
+        assertThat(token.literal()).isNull();
+        assertThat(token.line()).isEqualTo(1);
     }
 }

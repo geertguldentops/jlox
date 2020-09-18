@@ -20,12 +20,12 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
 
     @Override
     public String visitAssignExpression(Expression.Assign expression) {
-        return parenthesize(" = " + expression.name().lexeme, expression.value());
+        return parenthesize(" = " + expression.name().lexeme(), expression.value());
     }
 
     @Override
     public String visitBinaryExpression(Expression.Binary expression) {
-        return parenthesize(expression.operator().lexeme, expression.left(), expression.right());
+        return parenthesize(expression.operator().lexeme(), expression.left(), expression.right());
     }
 
     @Override
@@ -35,7 +35,7 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
 
     @Override
     public String visitGetExpression(Expression.Get expression) {
-        return "(. " + print(expression.object()) + " " + expression.name().lexeme + ")";
+        return "(. " + print(expression.object()) + " " + expression.name().lexeme() + ")";
     }
 
     @Override
@@ -51,32 +51,32 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
 
     @Override
     public String visitLogicalExpression(Expression.Logical expression) {
-        return parenthesize(expression.operator().lexeme, expression.left(), expression.right());
+        return parenthesize(expression.operator().lexeme(), expression.left(), expression.right());
     }
 
     @Override
     public String visitSetExpression(Expression.Set expression) {
-        return "(. " + print(expression.object()) + " " + expression.name().lexeme + " " + print(expression.value()) + ")";
+        return "(. " + print(expression.object()) + " " + expression.name().lexeme() + " " + print(expression.value()) + ")";
     }
 
     @Override
     public String visitSuperExpression(Expression.Super expression) {
-        return "(" + expression.keyword().lexeme + " " + expression.method().lexeme + ")";
+        return "(" + expression.keyword().lexeme() + " " + expression.method().lexeme() + ")";
     }
 
     @Override
     public String visitThisExpression(Expression.This expression) {
-        return expression.keyword().lexeme;
+        return expression.keyword().lexeme();
     }
 
     @Override
     public String visitUnaryExpression(Expression.Unary expression) {
-        return parenthesize(expression.operator().lexeme, expression.right());
+        return parenthesize(expression.operator().lexeme(), expression.right());
     }
 
     @Override
     public String visitVariableExpression(Expression.Variable expression) {
-        return expression.name().lexeme;
+        return expression.name().lexeme();
     }
 
     @Override
@@ -95,7 +95,7 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
     @Override
     public String visitClassStatement(Statement.Class statement) {
         var sb = new StringBuilder();
-        sb.append("(class ").append(statement.name().lexeme);
+        sb.append("(class ").append(statement.name().lexeme());
         appendSuperClass(sb, statement);
 
         for (Statement.Function method : statement.methods()) {
@@ -118,7 +118,7 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
 
     @Override
     public String visitFunctionStatement(Statement.Function statement) {
-        return "(fun " + statement.name().lexeme + " (" + toSpaceSeparatedText(statement.parameters().toArray(new Token[]{})) + ") "
+        return "(fun " + statement.name().lexeme() + " (" + toSpaceSeparatedText(statement.parameters().toArray(new Token[]{})) + ") "
                 + toSpaceSeparatedText(statement.body().toArray(new Statement[]{}))
                 + ")";
     }
@@ -145,9 +145,9 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
 
     @Override
     public String visitVariableStatement(Statement.Variable statement) {
-        if (statement.initializer() == null) return "var " + statement.name().lexeme;
+        if (statement.initializer() == null) return "var " + statement.name().lexeme();
 
-        return "var " + statement.name().lexeme + " = " + statement.initializer().accept(this);
+        return "var " + statement.name().lexeme() + " = " + statement.initializer().accept(this);
     }
 
     @Override
@@ -161,7 +161,7 @@ class AbstractSyntaxTreePrinter implements Expression.Visitor<String>, Statement
 
     private String toSpaceSeparatedText(Token... tokens) {
         return Stream.of(tokens)
-                .map(token -> token.lexeme)
+                .map(token -> token.lexeme())
                 .collect(joining(" "));
     }
 

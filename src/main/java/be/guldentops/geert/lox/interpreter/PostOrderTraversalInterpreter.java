@@ -88,10 +88,10 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         var methods = new HashMap<String, LoxFunction>();
         for (var method : statement.methods()) {
             var function = createFunction(method);
-            methods.put(method.name().lexeme, function);
+            methods.put(method.name().lexeme(), function);
         }
 
-        LoxClass clazz = new LoxClass(statement.name().lexeme, (LoxClass) superclass, methods);
+        LoxClass clazz = new LoxClass(statement.name().lexeme(), (LoxClass) superclass, methods);
 
         if (superclass != null) {
             environment = environment.enclosing;
@@ -103,7 +103,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     }
 
     private LoxFunction createFunction(Statement.Function method) {
-        if (method.name().lexeme.equals("init")) {
+        if (method.name().lexeme().equals("init")) {
             return LoxFunction.createInitFunction(method, environment);
         } else {
             return LoxFunction.createFunction(method, environment);
@@ -223,7 +223,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         var left = evaluate(expression.left());
         var right = evaluate(expression.right());
 
-        switch (expression.operator().type) {
+        switch (expression.operator().type()) {
             case GREATER:
                 checkNumberOperands(expression.operator(), left, right);
                 return (double) left > (double) right;
@@ -313,7 +313,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     public Object visitLogicalExpression(Expression.Logical expression) {
         var left = evaluate(expression.left());
 
-        if (expression.operator().type == OR) {
+        if (expression.operator().type() == OR) {
             if (isTruthy(left)) return left;
         } else {
             if (!isTruthy(left)) return left;
@@ -344,7 +344,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         // "this" is always one level nearer than "super"'s environment.
         var object = (LoxInstance) environment.getAt(distance - 1, "this");
 
-        LoxFunction method = superclass.findMethod(object, expression.method().lexeme);
+        LoxFunction method = superclass.findMethod(object, expression.method().lexeme());
 
         if (method == null) {
             throw new RuntimeError(expression.method(), "undefined property.");
@@ -362,7 +362,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
     public Object visitUnaryExpression(Expression.Unary expression) {
         var right = evaluate(expression.right());
 
-        switch (expression.operator().type) {
+        switch (expression.operator().type()) {
             case BANG:
                 return !isTruthy(right);
             case MINUS:
@@ -382,7 +382,7 @@ class PostOrderTraversalInterpreter implements Interpreter, Expression.Visitor<O
         var distance = locals.get(expression);
 
         if (distance != null) {
-            return environment.getAt(distance, name.lexeme);
+            return environment.getAt(distance, name.lexeme());
         } else {
             return globals.get(name);
         }
